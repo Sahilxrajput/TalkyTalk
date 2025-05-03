@@ -1,0 +1,81 @@
+const mongoose = require("mongoose");
+const passportLocalMongoose = require("passport-local-mongoose");
+const jwt = require("jsonwebtoken");
+
+const userSchema = new mongoose.Schema(
+  {
+    firstName: {
+      type: String,
+      required: [true, "First name is required"],
+      trim: true,
+      minLength: [3, "first name must be at least 3 char long"],
+    },
+    lastName: {
+      type: String,
+      required: [true, "Last name is required"],
+      trim: true,
+      minLength: [3, "last name must be at least 3 char long"],
+    },
+    username: {
+      type: String,
+      required: true,
+      minLength: [3, "username must be at least 3 char long"],
+    },
+    email: {
+      type: String,
+      required: [true, "Email is required"],
+      trim: true,
+      lowercase: true,
+      unique: true,
+      match: [/^\S+@\S+\.\S+$/, "Please enter a valid email address"],
+    },
+    age: {
+      type: Number,
+      required: [true, "Age is required"],
+      min: [16, "age should be more than 16"],
+    },
+    gender: {
+      type: String,
+      enum: ["male", "female", "other", "prefer not to say"],
+      required: [true, "Gender is required"],
+    },
+    bio: {
+      type: String,
+      default: "Available",
+      max: [100, "Bio should be less than 100 char"],
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+// phoneNumber: {
+//     type: String,
+//     required: true,
+//     min: 10,
+//     max: 10,
+// },
+// profilePicture: {
+//     type: String,
+//     default:
+//         "https://res.cloudinary.com/dqj0xgk8h/image/upload/v1698236482/DefaultProfilePicture.png",
+// },
+// isOnline: {
+//     type: Boolean,
+//     default: false,
+// },
+
+
+userSchema.plugin(passportLocalMongoose, { usernameField: "email" });
+
+
+userSchema.methods.getAuthToken = function()  {
+  const token = jwt.sign({ _id: this.id },  process.env.JWT_SECRET, {
+    expiresIn: "24h",
+  });
+  return token;
+};
+
+const User = mongoose.model("User", userSchema);
+module.exports = User;
