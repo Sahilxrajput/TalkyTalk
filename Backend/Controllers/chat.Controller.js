@@ -43,7 +43,6 @@ module.exports.personalChat = async (req, res) => {
   }
 };
 
-
 module.exports.accessChats = async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -200,5 +199,29 @@ module.exports.renameGroup = async (req, res) => {
     return res
       .status(403)
       .json({ message: "Only admins can rename the chat group" });
+  }
+};
+
+module.exports.getChatIds = async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
+    }
+    let chats = await Chat.find({
+      members: { $elemMatch: { $eq: req.user._id } },
+    })
+      //.populate("members", "-password")
+      .sort({ updatedAt: -1 });
+
+    if (chats.length > 0) {
+      const chatId = chats.map(chat => chat._id)
+      res.json(chatId);
+    } else {
+      res.status(404).json({ message: "No chats found" });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };

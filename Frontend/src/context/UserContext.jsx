@@ -7,6 +7,7 @@ export const UserDataContext = createContext();
 // Create a provider component
 const UserContext = ({ children }) => {
   const [user, setUser] = useState({
+    _id:'',
     firstName: '',
     lastName: '',
     username: '',   

@@ -12,7 +12,7 @@ module.exports.sendMessage = async (req, res) => {
       return res.status(422).json({ errors: errors.array() });
     }
 
-    if (!content || !chatId ) {
+    if (!content || !chatId) {
       return res.status(400).json({ message: "Invalid data passed" });
     }
 
@@ -25,14 +25,17 @@ module.exports.sendMessage = async (req, res) => {
 
     let message = await Message.create(newMessage);
 
-    message = await message.populate("sender", "firstName lastName username gender age");
+    message = await message.populate(
+      "sender",
+      "firstName lastName username gender age"
+    );
 
     message = await message.populate("chatId");
     message = await User.populate(message, {
       path: "chat.members",
       select: "firstName lastName gender",
     });
-    
+
     message = await User.populate(message, {
       path: "replyTo.sender",
       select: "firstName lastName gender",
@@ -42,6 +45,7 @@ module.exports.sendMessage = async (req, res) => {
       latestMessage: message,
     });
     res.json(message);
+    //res.json({ message: req.user });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });
@@ -50,18 +54,25 @@ module.exports.sendMessage = async (req, res) => {
 
 module.exports.getAllMessages = async (req, res) => {
   try {
-    const { chatId } = req.params;
+    const { chatId } = req.body;
     if (!chatId) {
       return res.status(400).json({ message: "Invalid data passed" });
     }
 
-    const messages = await Message.find({ chat: chatId })
+    const messages = await Message.find({ chatId: chatId })
       .populate("sender", "firstName lastName")
-      .populate("chat")
+      .populate("chatId")
       .populate("replyTo.sender", "firstName lastname");
-    res.json(messages);
+    res.status(200).json({
+      success: true,
+      message: "Messages retrieved successfully",
+      data: messages,
+    });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({
+      success: false,
+      message: "Failed to retrieve messages",
+      error: error.message,
+    });
   }
 };

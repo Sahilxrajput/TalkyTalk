@@ -2,7 +2,7 @@ const router = require("express").Router();
 const User = require("../Models/user.Model.js");
 const {body} = require("express-validator");
 const userController = require("../Controllers/user.controller.js");
-const   authMiddleware = require("../Middlewares/userAuth.js")  
+const authMiddleware = require("../Middlewares/userAuth.js")  
 
 router.get("/",   userController.getAllUsers);
 
@@ -30,6 +30,6 @@ router.get('/profile', authMiddleware.userAuth, userController.getUserProfile)
 
 router.get('/logout', userController.logoutUser)
 
-router.post('/update/:id', authMiddleware.userAuth, userController.updateUserInfo)
+router.put('/update/:id', authMiddleware.userAuth, userController.updateUserInfo)
 
 module.exports = router;

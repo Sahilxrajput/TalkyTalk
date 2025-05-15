@@ -1,12 +1,5 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import io  from "socket.io-client";
-
-const socket = io("http://localhost:5000", {
-  transports: ["websocket"],
-  withCredentials: true,
-});
-
 const CreatePersonalChatPanel = ({ setSearchNewMembelPanel }) => {
 
   const [searchUser, setSearchUser] = useState("");
@@ -54,9 +47,6 @@ const CreatePersonalChatPanel = ({ setSearchNewMembelPanel }) => {
     }
   };
 
-  
-
-
 const selectedUserHandler = (userId) => {
     setSelectedUserId((prevId) => (prevId === userId ? null : userId));
 };
@@ -66,7 +56,7 @@ const selectedUserHandler = (userId) => {
     <div className="px-2 h-screen pt-[15%]">
       <div className="flex w-full flex-col justify-center p-2">
         <div
-          className="fixed flex flex-col items-center w-full bg-red-400 z-50 h-[15%] left-0 top-0"
+          className="fixed flex flex-col items-center rounded-4xl w-full bg-red-400 z-50 h-[15%] left-0 top-0"
         >
           <i
             onClick={() => setSearchNewMembelPanel(false)}

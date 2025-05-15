@@ -1,49 +1,74 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useContext, useState } from "react";
 import io from "socket.io-client";
 import axios from "axios";
 import ChatShowArea from "../components/ChatShowArea";
+import { data } from "react-router-dom";
+// import socket from '../socket/Socket'
+import { UserDataContext } from "../context/UserContext";
 
 const socket = io("http://localhost:5000", {
   transports: ["websocket"],
   withCredentials: true,
 });
 
-const MessageBox = () => {
+const MessageBox = ({ chatTitle }) => {
+  // const [savedMessages, setSavedMessages] = useState([]);
+  const [socketMessages, setSocketMessages] = useState([]);
   const [latestMessage, setLatestMessage] = useState("");
-  const [messages, setMessages] = useState([]);
   const latestMessageRef = useRef(null);
+
+  const { user } = useContext(UserDataContext);
 
   const sendMessageHandler = async (e) => {
     e.preventDefault();
     if (latestMessage.trim()) {
-      socket.emit("chat", latestMessage);
-      // socket.emit("groupChat", latestMessage); // Emit the new group chat to the server
-      const response = await axios.post(
-        `${import.meta.env.VITE_BASE_URL}/message/send`,
-        { content: latestMessage, chatId: "6815605571a2dea2fe28685a" },
-        { withCredentials: true }
-      );
-      console.log(response.data);
+      socket.emit("chat", {
+        roomId: chatTitle.chatId,
+        message: latestMessage,
+        sender: user.user._id,
+      });
       setLatestMessage("");
     }
   };
 
+  // //join -> room
+  useEffect(() => {
+    (async function () {
+      const response = await axios.get(
+        `${import.meta.env.VITE_BASE_URL}/chat`,
+        { withCredentials: true }
+      );
+      const responseArray = response.data;
+      const chatIds = responseArray.map((response) => response._id);
+      const roomIds = chatIds || [];
+      socket.emit("joinRoom", roomIds); // Join the new group room
+    })();
+  }, []);
+
   useEffect(() => {
     socket.on("connect", () => {
-      console.log("User connected!", socket.id);
+      console.log("Connected to socket:", socket.id);
     });
-    socket.on("chat", (payload) => {
-      setMessages((prevMessages) => [...prevMessages, payload]);
-    });
+
+    const handleChat = (payload) => {
+      if (chatTitle.chatId === payload.roomId)
+        setSocketMessages((prevMessages) => [...prevMessages, payload]);
+    };
+    socket.on("chat", handleChat);
+
     return () => {
-      socket.off("chat");
+      socket.off("chat", handleChat);
       socket.off("connect");
     };
-  });
+  }, [chatTitle]);
 
   return (
     <>
-      <ChatShowArea messages={messages} />
+      <ChatShowArea
+        setSocketMessages={setSocketMessages}
+        socketMessages={socketMessages}
+        chatTitle={chatTitle}
+      />
       <form
         onSubmit={sendMessageHandler}
         className=" w-[90%] mt-4  bg-[#DAD1BE] flex items-center justify-start  gap-2 px-2 py-2 rounded-lg"

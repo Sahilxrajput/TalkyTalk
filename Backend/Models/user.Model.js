@@ -20,6 +20,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       minLength: [3, "username must be at least 3 char long"],
+      match: [/^[^*@#]+$/, 'Username cannot contain *, @, or #'],
     },
     email: {
       type: String,
@@ -38,6 +39,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ["male", "female", "other", "prefer not to say"],
       required: [true, "Gender is required"],
+    },
+    chats:{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Chat",
     },
     bio: {
       type: String,

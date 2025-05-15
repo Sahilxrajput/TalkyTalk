@@ -1,13 +1,8 @@
 import React from "react";
 import "remixicon/fonts/remixicon.css";
-import io from "socket.io-client";
 
 
 
-const socket = io("http://localhost:5000", {
-  transports: ["websocket"],
-  withCredentials: true,
-});
 
 
 
@@ -35,7 +30,7 @@ const AddMembers = ({ setSearchNewMembelPanel, setCreateGroupPanel, setAddMember
         className="flex flex-col "
       >
         <div className="bg-blue-500 aspect-square  text-white text-3xl flex items-center justify-center rounded-full h-[50px]">
-          <i class="ri-team-line"></i>
+          <i className="ri-team-line"></i>
         </div>
         <h4>Create Group</h4>
       </button>
@@ -48,7 +43,7 @@ const AddMembers = ({ setSearchNewMembelPanel, setCreateGroupPanel, setAddMember
         className="flex flex-col"
       >
         <div className="bg-blue-500 aspect-square  text-white text-3xl flex items-center justify-center rounded-full h-[50px]">
-          <i class="ri-user-add-line"></i>
+          <i className="ri-user-add-line"></i>
         </div>
         <h4>Add Friends</h4>
       </button>

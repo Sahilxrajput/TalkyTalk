@@ -10,7 +10,9 @@ const path = require('path');
 const cors = require("cors");
 const session = require("express-session");
 const {sendEmail} = require("./sendEmail.js");
-
+const Message = require("./Models/message.Model.js");
+// const {storage, cloudinary} = require("./cloudConfig.js");
+// const upload = multer({ storage});
 const connectToDb = require("./Db/db.js");
 
 //routes
@@ -56,35 +58,6 @@ passport.use(
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
-//////////////Routes/////////////////////////////
-// app.get("/users", async (req, res) => {
-//   try {
-//     const users = await User.find();
-//     res.json(users); // send to frontend
-//   } catch (err) {
-//     res.status(500).json({ error: "Server error" });
-//   }
-// });
-
-///////////////////multer,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-// const storage = multer.diskStorage({
-//   destination: (req, file, cb) => {
-//     cb(null, 'uploads/'); // save files in the 'uploads' folder
-//   },
-//   filename: (req, file, cb) => {
-//     cb(null, Date.now() + path.extname(file.originalname)); // save with unique filename
-//   },
-// });
-
-// const upload = multer({ storage: storage });
-// // Route to upload single file
-// app.post('/upload', upload.single('file'), (req, res) => {
-//   if (!req.file) {
-//     return res.status(400).send('No file uploaded.');
-//   }
-//   res.send(`File uploaded successfully: ${req.file.filename}`);
-// });
-
 
 
 app.use('/message', messageRouter)
@@ -97,6 +70,8 @@ app.post("/getotp", (req, res) => {
     to: req.body.to
   })
 });
+
+
 
 ///////////////////////////////////////////////////////////////////
 

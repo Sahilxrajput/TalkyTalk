@@ -14,8 +14,10 @@ const { userAuth } = require("../Middlewares/userAuth.js");
 //   chatController.accessChat
 // );
 
+
 router.get("/", userAuth, chatController.accessChats);
 
+router.get("/chatIds", userAuth, chatController.getChatIds)
 
 router.post(
   "/group",

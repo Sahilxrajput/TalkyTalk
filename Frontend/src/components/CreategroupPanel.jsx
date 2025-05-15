@@ -1,11 +1,5 @@
 import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
-import io from "socket.io-client";
-
-const socket = io("http://localhost:5000", {
-  transports: ["websocket"],
-  withCredentials: true,
-});
 
 const CreategroupPanel = (props) => {
   const [searchUser, setSearchUser] = useState("");
@@ -78,10 +72,6 @@ const CreategroupPanel = (props) => {
         { chatName, members: addMembers },
         { withCredentials: true }
       );
-      socket.emit("joinRoom", response.data._id); // Join the new group room
-      //socket.emit("groupChat", response.data); // Emit the new group chat to the server
-
-      //socket.emit("newGroup", response.data); // Emit the new group event to the server
       setChatName(""); // Reset chat name
       setAddMembers([]); // Reset added members
       console.log("Group created:", response.data);
@@ -90,18 +80,6 @@ const CreategroupPanel = (props) => {
     }
   };
 
-  useEffect(() => {
-    socket.on("connect", () => {
-      console.log("User connected!", socket.id);
-    });
-    socket.on("chat", (payload) => {
-      setMessages((prevMessages) => [...prevMessages, payload]);
-    });
-    return () => {
-      socket.off("chat");
-      socket.off("connect");
-    };
-  });
 
   //   useEffect(() => {
   //     console.log("Updated members:", addMembers);

@@ -17,10 +17,8 @@ module.exports.userAuth = async (req, res, next) => {
     if (!user) return res.status(401).json({ error: "User not found" });
 
     req.user = user;
-
-    // console.log(req.user);
-
     next();
+
   } catch (error) {
     console.error("JWT Verification Error:", error.message);
     return res.status(403).json({ error: "Invalid or expired token" });
