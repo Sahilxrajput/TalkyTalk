@@ -81,10 +81,6 @@ const CreategroupPanel = (props) => {
   };
 
 
-  //   useEffect(() => {
-  //     console.log("Updated members:", addMembers);
-  //   }, [addMembers]);
-
   return (
     <div
       className="flex flex-col fixed w-full  h-full overflow-x-hidden  justify-start gap-4  bg-red-300 rounded-4xl"

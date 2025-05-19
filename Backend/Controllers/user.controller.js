@@ -80,11 +80,9 @@ module.exports.signUpUser = async (req, res) => {
       req.login(user, (LoginErr) => {
         if (LoginErr) {
           console.log("login after signin err", LoginErr);
-          return res
-            .status(500)
-            .json({
-              error: "Registration successful but automatic login failed",
-            });
+          return res.status(500).json({
+            error: "Registration successful but automatic login failed",
+          });
         }
         return res.status(201).json({
           success: true,
@@ -195,4 +193,30 @@ module.exports.updateUserInfo = async (req, res) => {
     console.error("Error updating user:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
+};
+
+module.exports.blockUser = async (req, res) => {
+  const { blockerId, blockedId } = req.body;
+
+  if (blockerId && blockedId) {
+    return res.status(404).json({ message: "data invaid" });
+  }
+
+  await User.findByIdAndUpdate(blockerId, {
+    $addToSet: { blockedUsers: blockedId },
+  });
+  res.status(200).json({ message: "User blocked successfully." });
+};
+
+module.exports.unblockUser = async (req, res) => {
+  const { blockerId, blockedId } = req.body;
+
+  if (blockerId && blockedId) {
+    return res.status(404).json({ message: "data invaid" });
+  }
+
+  await User.findByIdAndUpdate(blockerId, {
+    $pull: { blockedUsers: blockedId },
+  });
+  res.status(200).json({ message: "User unblocked successfully." });
 };

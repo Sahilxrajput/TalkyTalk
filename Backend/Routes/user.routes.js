@@ -4,7 +4,7 @@ const {body} = require("express-validator");
 const userController = require("../Controllers/user.controller.js");
 const authMiddleware = require("../Middlewares/userAuth.js")  
 
-router.get("/",   userController.getAllUsers);
+router.get("/", userController.getAllUsers);
 
 router.post('/signup', [
     body("firstName").isLength({min: 3}).withMessage("First name must be at least 3 characters long"),
@@ -19,17 +19,21 @@ router.post('/signup', [
     .exists({ checkFalsy: true }).withMessage('Age is required')
     .isInt({ min: 16 }).withMessage('Age must be at least 16'),
     body("gender").notEmpty().withMessage("gender is required"),
-], userController.signUpUser);
+], authMiddleware.userAuth, userController.signUpUser);
 
 router.post('/login',[
     body("email").isEmail().withMessage("Email is required"),
     body("password").isLength({min: 4}).withMessage("password should be atleast 4 char long"),
-], userController.loginUser)
+], authMiddleware.userAuth, userController.loginUser)
 
 router.get('/profile', authMiddleware.userAuth, userController.getUserProfile)
 
-router.get('/logout', userController.logoutUser)
+router.get('/logout', authMiddleware.userAuth, userController.logoutUser)
 
 router.put('/update/:id', authMiddleware.userAuth, userController.updateUserInfo)
+
+router.put('/block', authMiddleware.userAuth, userController.blockUser)
+
+router.put('/unblock', authMiddleware.userAuth, userController.unblockUser)
 
 module.exports = router;

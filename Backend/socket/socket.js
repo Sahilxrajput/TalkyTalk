@@ -4,6 +4,7 @@ import express from "express";
 const app = express();
 const server = createServer(app);
 import Message from "../Models/message.Model.js";
+import { v4 as uuidv4 } from 'uuid'
 
 const io = new Server(server, {
   cors: {
@@ -49,26 +50,85 @@ io.on("connection", (socket) => {
   });
 
   // Send message to the room
-  socket.on("chat", async ({ roomId, message, sender }) => {
-    if (roomId && message) {
-      io.to(roomId).emit("chat", {
-        message,
-        roomId,
-        sender,
-        time: new Date(),
-      });
-      // Save the message to the database
-      const newMessage = await Message.create({
-        chatId: roomId,
-        content: message,
-        sender: sender,
-      });
-      // io.to(roomId).emit("chat", newMessage); // Send saved message to clients
-      // console.log(`Message sent to room ${roomId}: ${message}`);
-    } else {
-      console.error("Missing roomId or message");
+  // socket.on("chat", async ({ roomId, message, sender, replyTo }) => {
+  //   if (roomId && message) {
+  //     io.to(roomId).emit("chat", {
+  //       message,
+  //       roomId,
+  //       sender,
+  //       time: new Date(),
+  //     });
+  //     if(replyTo){
+
+  //     }
+
+  //     // Save the message to the database
+  //     const newMessage = await Message.create({
+  //       chatId: roomId,
+  //       content: message,
+  //       sender: sender,
+  //       replyTo: replyTo 
+  //     });
+  //     // io.to(roomId).emit("chat", newMessage); // Send saved message to clients
+  //     // console.log(`Message sent to room ${roomId}: ${message}`);
+  //   } else {
+  //     console.error("Missing roomId or message");
+  //   }
+  // });
+
+  socket.on("chat", async ({ roomId, message, sender, replyTo }) => {
+  if (roomId && message) {
+    let repliedMessage = null;
+
+    if (replyTo) {
+      try {
+        repliedMessage = await Message.findById(replyTo).lean();
+      } catch (err) {
+        console.error("Error fetching replied message:", err);
+      }
     }
-  });
+
+
+     io.to(roomId).emit("chat", {
+      message,
+      roomId,
+      sender,
+      time: new Date(),
+      _id: uuidv4(),
+      replyTo: repliedMessage, // Include full replied message if exists
+    });
+
+    const newMessage = await Message.create({
+      chatId: roomId,
+      content: message,
+      sender: sender,
+      replyTo: replyTo || null,
+      time: new Date(),
+    });
+// console.log('====================================');
+// console.log(newMessage);
+// console.log('====================================');
+  } else {
+    console.error("Missing roomId or message");
+  }
+});
+
+
+  //   socket.on('offer', ({ roomId, offer }) => {
+  //   socket.to(roomId).emit('offer', offer);
+  // });
+
+  // socket.on('answer', ({ roomId, answer }) => {
+  //   socket.to(roomId).emit('answer', answer);
+  // });
+
+  // socket.on('candidate', ({ roomId, candidate }) => {
+  //   socket.to(roomId).emit('candidate', candidate);
+  // });
+
+  socket.on('offer', data => socket.broadcast.emit('offer', data));
+  socket.on('answer', data => socket.broadcast.emit('answer', data));
+  socket.on('candidate', data => socket.broadcast.emit('candidate', data));
 
   //Handle disconnection
   socket.on("disconnect", () => {

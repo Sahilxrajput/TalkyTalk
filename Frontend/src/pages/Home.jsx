@@ -1,7 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import io from "socket.io-client";
 import "remixicon/fonts/remixicon.css";
+import "../assets/style/Chats.css";
 import Chats from "../components/Chats";
+import BgImage from "../assets/craft.jpg";
 import MessageBox from "../components/MessageBox";
 import gsap from "gsap";
 import axios from "axios";
@@ -11,11 +13,10 @@ import CreatePersonalChatPanel from "../components/CreatePersonalChatPanel";
 import { useNavigate } from "react-router-dom";
 import CreategroupPanel from "../components/CreateGroupPanel";
 import ProfilePanel from "../components/ProfilePanel";
-
-
+import VideoReqPanel from "../components/VideoReqPanel";
+import AboutPanel from "../components/AboutPanel";
 const socket = io();
 
- 
 const Home = () => {
   const [searchChats, setSearchChats] = useState("");
   const [foundChats, setFoundChats] = useState([]);
@@ -28,89 +29,119 @@ const Home = () => {
   const profileRef = useRef(null);
   const [profilePanel, setProfilePanel] = useState(false);
   const [selectedChatId, setSelectedChatId] = useState(null);
-  const [chatTitle, setChatTitle] = useState({
-    chatName: "BHU",
-    chatId: "",
-    members: "20",
-  });
+  const [chatTitle, setChatTitle] = useState({});
   const [welcomeTag, setWelcomeTag] = useState(true);
   const [onlineUsers, setOnlineUsers] = useState(0);
-  
+  const videoReqRef = useRef(false);
+  const [videoReqPanel, setVideoReqPanel] = useState(false);
+  const aboutRef = useRef(null);
+  const [aboutPanel, setAboutPanel] = useState(false);
+  const [replyPopup, setReplyPopup] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
+  const replyRef = useRef(null);
+  const [isFocused, setIsFocused] = useState(false);
 
   const navigate = useNavigate();
 
-
-  useEffect(() => {
-    const fetchChats = async () => {
-      try {
-        const response = await axios.get(
-          `${import.meta.env.VITE_BASE_URL}/chat`,
-          { withCredentials: true }
-        );
-        const responseArray = response.data;
-        const filtered = responseArray.filter((chat) =>
-          ` ${chat.chatName}`.toLowerCase().includes(searchChats.toLowerCase())
-        );
-        setFoundChats(filtered);
-      } catch (error) {
-        console.error("Error fetching chats:", error);
-      }
-    };
-
-    fetchChats(); //  call the async function
-  }, [searchChats]);
-
   useGSAP(() => {
-    if (addMemberpanel) {
+    if (!addMemberpanel) {
       gsap.to(addMemberRef.current, {
         transform: "translateY(0.7%)",
+        opacity: 0,
       });
     } else {
       gsap.to(addMemberRef.current, {
-        transform: "translateY(110%)",
+        transform: "translateY(-115%)",
+        opacity: 1,
       });
     }
   }, [addMemberpanel]);
 
   useGSAP(() => {
-    if (searchNewMembelPanel) {
+    if (!searchNewMembelPanel) {
       gsap.to(searchNewMemberRef.current, {
         transform: "translateY(0%)",
+        opacity: 0,
       });
     } else {
       gsap.to(searchNewMemberRef.current, {
-        transform: "translateY(110%)",
+        transform: "translateY(-104.7%)",
+        opacity: 1,
       });
     }
   }, [searchNewMembelPanel]);
 
   useGSAP(() => {
-    if (profilePanel) {
+    if (!profilePanel) {
       gsap.to(profileRef.current, {
         transform: "translateY(0%)",
+        opacity: 0,
       });
     } else {
       gsap.to(profileRef.current, {
-        transform: "translateY(110%)",
+        transform: "translateY(-104.7%)",
+        opacity: 1,
       });
     }
   }, [profilePanel]);
 
   useGSAP(() => {
-    if (createGroupPanel) {
+    if (!createGroupPanel) {
       gsap.to(createGroupRef.current, {
-        // opacity:1,
         transform: "translateY(0%)",
+        opacity: 0,
       });
     } else {
       gsap.to(createGroupRef.current, {
-        //opacity:0,
-        transform: "translateY(110%)",
+        transform: "translateY(-104.7%)",
+        opacity: 1,
       });
     }
   }, [createGroupPanel]);
 
-const logouthandler = async () => {
+  useGSAP(() => {
+    if (!videoReqPanel) {
+      gsap.to(videoReqRef.current, {
+        transform: "translateX(0%)",
+        duration: 0.3,
+      });
+    } else {
+      gsap.to(videoReqRef.current, {
+        transform: "translateX(-110%)",
+        duration: 0.3,
+      });
+    }
+  }, [videoReqPanel]);
+
+  useGSAP(() => {
+    if (!aboutPanel) {
+      gsap.to(aboutRef.current, {
+        transform: "translateX(0%)",
+        duration: 0.3,
+      });
+    } else {
+      gsap.to(aboutRef.current, {
+        transform: "translateX(-124%)",
+        duration: 0.3,
+      });
+    }
+  }, [aboutPanel]);
+
+  useGSAP(() => {
+    if (replyPopup) {
+      gsap.to(replyRef.current, {
+        transform: "translateY(-108%)",
+        duration: 0.1,
+      });
+    } else {
+      gsap.to(replyRef.current, {
+        transform: "translateY(0%)",
+        duration: 0.1,
+      });
+    }
+  }, [replyPopup]);
+
+  const logouthandler = async () => {
     try {
       const response = await axios.get(
         `${import.meta.env.VITE_BASE_URL}/users/logout`,
@@ -134,6 +165,9 @@ const logouthandler = async () => {
   };
 
   const chatTitleHandler = async (chat) => {
+    console.log('====================================');
+    console.log(chat);
+    console.log('====================================');
     setChatTitle({
       chatId: chat._id || "68155fb02f9917d8976c9944",
       chatName: chat.chatName || "talkyTalk",
@@ -145,6 +179,13 @@ const logouthandler = async () => {
     setProfilePanel(true);
   };
 
+  const videoReqHandler = () => {
+    setVideoReqPanel(true);
+  };
+
+  const aboutHandler = () => {
+    setAboutPanel(true);
+  };
 
   // useEffect(() => {
   //   socket.on("userCount", (roomId, count) => {
@@ -158,8 +199,6 @@ const logouthandler = async () => {
   //     socket.off("roomUserCount");
   //   };
   // }, [chatTitle.chatId]);
-  
-
 
   useEffect(() => {
     socket.on("userCount", (count) => {
@@ -172,6 +211,45 @@ const logouthandler = async () => {
     };
   }, [onlineUsers]);
 
+  useEffect(() => {
+    const fetchChats = async () => {
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_BASE_URL}/chat`,
+          { withCredentials: true }
+        );
+        const responseArray = response.data;
+        const filtered = responseArray.filter((chat) =>
+          ` ${chat.chatName}`.toLowerCase().includes(searchChats.toLowerCase())
+        );
+        setFoundChats(filtered);
+      } catch (error) {
+        console.error("Error fetching chats:", error);
+      }
+    };
+
+    fetchChats(); //  call the async function
+  }, [searchChats]);
+
+  //   useEffect(() => {
+  //   if (chatUserId) {
+  //     // Notify server that messages from chatUserId have been seen
+  //     socket.emit('message_seen', {
+  //       senderId: chatUserId,
+  //       receiverId: currentUserId
+  //     });
+  //   }
+  // }, [chatUserId]);
+
+  // Listen for real-time seen confirmation
+  // useEffect(() => {
+  //   socket.on('messages_marked_seen', ({ receiverId }) => {
+  //     console.log(`Messages seen by ${receiverId}`);
+  //     // Optional: update UI to show "Seen"
+  //   });
+
+  //   return () => socket.off('messages_marked_seen');
+  // }, []);
 
   return (
     <div className=" h-screen w-screen flex items-center overflow-hidden bg-[#030018] ">
@@ -208,15 +286,29 @@ const logouthandler = async () => {
           <i className="ri-logout-box-line"></i>
         </button>
       </div>
-      <div className="basis-1/1 flex rounded-4xl mr-2 bg-[#F1F5F2] h-[98%]">
+      <div
+        className="basis-1/1 flex rounded-4xl mr-2 bg-cover bg-center h-[98%]"
+        style={{ backgroundImage: `url(${BgImage})` }}
+      >
         <div
-          className="w-[25%] relative flex flex-col overflow-x-hidden gap-2 justify-between h-full"
+          className="w-[24.4%] relative flex flex-col overflow-x-hidden gap-2 justify-between h-full"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
-          <div className=" fixed w-[23.70%] flex items-center justify-center h-16 rounded-t-4xl bg-[#F1F5F2] ">
-            <div className="border-2 border-yellow-500  bg-gray-400 w-9/10  flex items-center justify-between gap-2 px-3 py-2 rounded-lg">
+          <div className=" fixed w-[23.15%] flex items-center justify-between px-4 h-16 rounded-t-4xl border-r-2 border-[#4E6766] bg-[#FFDBDB] ">
+            {!isFocused && (
+              <h4 className=" ml-20 font-semibold text-pink-500 text-2xl ">
+                TalkyTalk
+              </h4>
+            )}
+            <div
+              className={`border-2 border-yellow-500 bg-gray-200 transition-[width] duration-300 ease-in-out hover:w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg ${
+                isFocused ? "w-full" : "w-[12%]"
+              }`}
+            >
               <i className="ri-find-replace-line"></i>
               <input
+                onFocus={() => setIsFocused(true)}
+                onBlur={() => setIsFocused(false)}
                 className="appearance-none border-none w-full bg-transparent p-0 m-0 focus:outline-none"
                 type="text"
                 value={searchChats}
@@ -227,7 +319,7 @@ const logouthandler = async () => {
           </div>
           <div
             ref={addMemberRef}
-            className="flex fixed w-[23%] z-20  bottom-2  items-center justify-center  bg-yellow-300 rounded-4xl"
+            className="flex fixed w-[23%] z-20  top-180 items-center justify-center  bg-yellow-300 rounded-4xl"
           >
             <AddMembers
               setSearchNewMembelPanel={setSearchNewMembelPanel}
@@ -237,7 +329,8 @@ const logouthandler = async () => {
           </div>
           <div
             ref={searchNewMemberRef}
-            className=" w-[23%] fixed h-[682px] rounded-4xl  z-20  bg-red-400"
+            className=" w-[23%] fixed h-[682px] rounded-4xl top-180 px-2 pt-[3%] z-20 overflow-x-hidden bg-red-400"
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
             <CreatePersonalChatPanel
               setSearchNewMembelPanel={setSearchNewMembelPanel}
@@ -245,15 +338,29 @@ const logouthandler = async () => {
           </div>
           <div
             ref={profileRef}
-            className=" w-[23%] fixed h-[682px] rounded-4xl  z-20  bg-red-400"
+            className=" w-[23%] fixed h-[682px] top-180 rounded-4xl z-20  bg-red-400"
           >
             <ProfilePanel setProfilePanel={setProfilePanel} />
           </div>
           <div
             ref={createGroupRef}
-            className="fixed bottom-[7px] z-20 w-[23%]  h-[98%]"
+            className="fixed top-180 z-20 w-[23%]  h-[98%]"
           >
             <CreategroupPanel setCreateGroupPanel={setCreateGroupPanel} />
+          </div>
+
+          <div
+            ref={videoReqRef}
+            className="h-40 w-60 rounded-2xl bg-green-400 fixed -right-60 top-26"
+          >
+            <VideoReqPanel setVideoReqPanel={setVideoReqPanel} />
+          </div>
+
+          <div
+            ref={aboutRef}
+            className="h-60 w-42 rounded-2xl  border-2 bg-green-400 border-gray-500 fixed -right-50 top-26"
+          >
+            <AboutPanel chatTitle={chatTitle} setAboutPanel={setAboutPanel} />
           </div>
 
           <button
@@ -267,7 +374,7 @@ const logouthandler = async () => {
           </button>
 
           <div
-            className="flex items-start justify-start mt-16 pt-4 gap-2 h-full flex-col w-full rounded-b-4xl bg-[#F1F5F2] overflow-x-hidden px-4 "
+            className="flex items-start justify-start mt-16 pt-4 gap-4 h-full flex-col w-full rounded-b-4xl  bg-[#FFDBDB] border-r-2 border-[#4E6766] overflow-x-hidden px-4 "
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
             {foundChats.map((chat, idx) => {
@@ -276,12 +383,14 @@ const logouthandler = async () => {
               return (
                 <button
                   onClick={() => {
+                    setShowPopup(false);
+                    setReplyPopup(false);
                     chatTitleHandler(chat);
                     selectedChatHandler(chat._id);
                   }}
                   key={idx}
-                  className={`flex justify-start gap-4 w-full rounded-2xl  p-2 ${
-                    isSelected ? "bg-red-500 border-2 " : " "
+                  className={`flex chats justify-start gap-4 border-2 border-[#4E6766]  w-full rounded-2xl  p-2 ${
+                    isSelected ? "bg-red-500!" : " "
                   } `}
                 >
                   <div className="w-14 rounded-full aspect-square">
@@ -292,7 +401,7 @@ const logouthandler = async () => {
                     />
                   </div>
                   <div>
-                    <h2>{chat.chatName}</h2>
+                    <h2 className=" font-semibold ">{chat.chatName}</h2>
                   </div>
                 </button>
               );
@@ -305,16 +414,16 @@ const logouthandler = async () => {
         <div className="w-[75%] rounded-r-4xl py-2 pr-6 ">
           {welcomeTag ? (
             <div className="flex flex-col items-center gap-4 justify-center ">
-              <h1 className="text-6xl font-semibold text-pink-700 ">
+              {/* <h1 className="text-6xl font-semibold text-pink-700 ">
                 WELCOME to
               </h1>
               <h1 className="text-8xl font-black text-pink-700 tracking-wider ">
                 {" "}
                 TalkyTalk
-              </h1>
+              </h1> */}
             </div>
           ) : (
-            <div className="flex justify-between h-1/10 border-b-2 items-center w-full ">
+            <div className="flex justify-between bg-red-400 pl-4 h-1/10 border-b-2 items-center w-full ">
               <div>
                 <h1 className="text-3xl font-semibold">{chatTitle.chatName}</h1>
                 <h4>
@@ -323,13 +432,21 @@ const logouthandler = async () => {
               </div>
               <div className="flex justify-end gap-6 items-center w-1/10 text-2xl">
                 <i className="ri-find-replace-line"></i>
-                <i className="ri-video-on-fill"></i>
-                <i className="ri-phone-fill"></i>
-                <i className="ri-menu-3-line"></i>
+                <i onClick={videoReqHandler} className="ri-video-on-fill"></i>
+                <i onClick={videoReqHandler} className="ri-phone-fill"></i>
+                <i onClick={aboutHandler} className="ri-menu-3-line"></i>
               </div>
             </div>
           )}
-        <MessageBox  chatTitle={chatTitle} />
+          { selectedChatId && 
+          <MessageBox
+            setShowPopup={setShowPopup}
+            showPopup={showPopup}
+            replyRef={replyRef}
+            replyPopup={replyPopup}
+            setReplyPopup={setReplyPopup}
+            chatTitle={chatTitle}
+          /> }
         </div>
       </div>
     </div>

@@ -52,8 +52,7 @@ const selectedUserHandler = (userId) => {
 };
   
   return (
-  
-    <div className="px-2 h-screen pt-[15%]">
+  <>
       <div className="flex w-full flex-col justify-center p-2">
         <div
           className="fixed flex flex-col items-center rounded-4xl w-full bg-red-400 z-50 h-[15%] left-0 top-0"
@@ -76,7 +75,7 @@ const selectedUserHandler = (userId) => {
       </div>
 
       <div
-        className="flex h-screen w-full mt-12 overflow-y-auto overflow-x-hidden flex-col gap-4 scrollbar-hide"
+        className="flex h-full w-full mt-12 overflow-x-hidden flex-col gap-4"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {foundUsers.map((user, idx) => {
@@ -118,7 +117,7 @@ const selectedUserHandler = (userId) => {
           );
         })}
       </div>
-    </div>
+    </>
   );
 };
 

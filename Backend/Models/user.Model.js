@@ -49,6 +49,10 @@ const userSchema = new mongoose.Schema(
       default: "Available",
       max: [100, "Bio should be less than 100 char"],
     },
+    blockedUsers:{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User"
+    }
   },
   {
     timestamps: true,

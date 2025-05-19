@@ -76,3 +76,76 @@ module.exports.getAllMessages = async (req, res) => {
     });
   }
 };
+
+module.exports.markSeenMessage = async (req, res) => {
+  try {
+    const { senderId, receiverId } = req.body;
+
+    const seenMessages = await Message.updateMany(
+      {
+        sender: senderId,
+        "seenBy.user": { $ne: receiverId }, // Only update if not already seen
+      },
+      {
+        $addToSet: { seenBy: { user: receiverId, seenAt: new Date() } },
+      }
+    );
+    res
+      .status(200)
+      .json({ message: "Messages marked as seen", result: seenMessages });
+  } catch (error) {
+    console.error("Mark seen error:", error);
+    res.status(500).json({ message: "Error marking messages as seen", error });
+  }
+};
+
+module.exports.deleteMessage = async (req, res) => {
+  try {
+    const { messageId } = req.body;
+
+    if (!messageId) {
+      return res.status(400).json({ message: "Invalid data passed" });
+    }
+
+    await Message.findByIdAndDelete(messageId);
+    res.status(200).json({ message: "Message deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting message:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete message",
+      error: error.message,
+    });
+  }
+};
+// module.exports.replyMessage = async (req, res) => {
+//   try {
+//     const { messageId, replyTo } = req.body;
+
+//     if (!messageId || !replyTo) {
+//       return res.status(400).json({ message: "Invalid data passed" });
+//     }
+
+//     const updatedMessage = await Message.findByIdAndUpdate(
+//       messageId,
+//       { replyTo: replyTo },
+//       { new: true }
+//     )
+//       .populate("sender", "firstName lastName")
+//       .populate("chatId")
+//       .populate("replyTo.sender", "firstName lastName");
+
+//     res.status(200).json({
+//       success: true,
+//       message: "Message replied successfully",
+//       data: updatedMessage,
+//     });
+//   } catch (error) {
+//     console.error("Error replying to message:", error);
+//     res.status(500).json({
+//       success: false,
+//       message: "Failed to reply to message",
+//       error: error.message,
+//     });
+//   }
+// };
