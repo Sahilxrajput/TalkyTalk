@@ -1,15 +1,16 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import backgroundImage from "../assets/city.jpg";
 import "remixicon/fonts/remixicon.css";
 import { UserDataContext } from "../context/UserContext";
 import axios from "axios";
-import { useEffect } from "react";
+import { toast } from "react-toastify";
 
 const Login = () => {
   const navigate = useNavigate();
   const { user, setUser } = useContext(UserDataContext);
-
+  const [showPassword, setShowPassword] = useState(false);
+  
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -28,19 +29,23 @@ const Login = () => {
   const submitHandler = async (e) => {
     e.preventDefault();
 
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/users/login`,
+        formData,
+        { withCredentials: true }
+      );
 
-    const response = await axios.post(
-      `${import.meta.env.VITE_BASE_URL}/users/login`,
-      formData, { withCredentials: true } 
-    );
-
-    if (response.status === 200) {
-      const data = response.data;
-      setUser(response.data); // Save user data to context
-      localStorage.setItem("token", data.token);
-      navigate("/home");
-    } else {
-      console.error("Error Login :", response.data);
+      if (response.status === 200) {
+        const data = response.data;
+        setUser(data); // Save user data to context
+        localStorage.setItem("token", data.token);
+        toast.success("User logged in successfully");
+        navigate("/home");
+      }
+    } catch (error) {
+      console.error("Error Login:", error.response?.data || error.message);
+      toast.error("Login failed. Please check your credentials.");
     }
   };
 
@@ -73,14 +78,16 @@ const Login = () => {
           <input
             name="password"
             className="appearance-none border-none w-[90%] bg-transparent p-0 m-0 focus:outline-none"
-            id="password"
-            type="password"
+            type={showPassword ? "text" : "password"}
             value={formData.password}
             placeholder="Password"
             onChange={(e) => changeHandler(e)}
           />
-          <button type="button">
-            <i className="ri-eye-line"></i>
+          <button
+            type="button"
+            onClick={() => setShowPassword((prev) => !prev)}
+          >
+            <i className={showPassword ? "ri-eye-off-line" : "ri-eye-line"}></i>{" "}
           </button>
         </div>
 
@@ -103,9 +110,7 @@ const Login = () => {
         </h4>
       </form>
     </div>
-    
   );
-}
+};
 
-
-export default Login
+export default Login;

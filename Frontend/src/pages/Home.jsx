@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useContext } from "react";
+import { UserDataContext } from "../context/UserContext";
 import io from "socket.io-client";
 import "remixicon/fonts/remixicon.css";
 import "../assets/style/Chats.css";
@@ -12,9 +13,11 @@ import AddMembers from "../components/AddMembers";
 import CreatePersonalChatPanel from "../components/CreatePersonalChatPanel";
 import { useNavigate } from "react-router-dom";
 import CreategroupPanel from "../components/CreateGroupPanel";
-import ProfilePanel from "../components/ProfilePanel";
+import AddTOGroup from "../components/AddToGroup";
 import VideoReqPanel from "../components/VideoReqPanel";
 import AboutPanel from "../components/AboutPanel";
+import ChatRename from "../components/ChatRename";
+import RemoveFromGroup from "../components/RemoveFromGroup";
 const socket = io();
 
 const Home = () => {
@@ -26,8 +29,8 @@ const Home = () => {
   const [searchNewMembelPanel, setSearchNewMembelPanel] = useState(false);
   const [createGroupPanel, setCreateGroupPanel] = useState(false);
   const createGroupRef = useRef(null);
-  const profileRef = useRef(null);
-  const [profilePanel, setProfilePanel] = useState(false);
+  const addToGroupRef = useRef(null);
+  const [addToGroupPanel, setAddToGroupPanel] = useState(false);
   const [selectedChatId, setSelectedChatId] = useState(null);
   const [chatTitle, setChatTitle] = useState({});
   const [welcomeTag, setWelcomeTag] = useState(true);
@@ -36,10 +39,15 @@ const Home = () => {
   const [videoReqPanel, setVideoReqPanel] = useState(false);
   const aboutRef = useRef(null);
   const [aboutPanel, setAboutPanel] = useState(false);
-  const [replyPopup, setReplyPopup] = useState(false);
+  const [replyPopup, setReplyPopup] = useState(true);
   const [showPopup, setShowPopup] = useState(false);
   const replyRef = useRef(null);
   const [isFocused, setIsFocused] = useState(false);
+  const { user } = useContext(UserDataContext);
+  const [chatRenamePanel, setChatRenamePanel] = useState(false);
+  const chatRenameRef = useRef(null);
+  const [removeFromGroupPanel, setRemoveFromGroupPanel] = useState(false)
+  const removeFromGroupRef = useRef(null)
 
   const navigate = useNavigate();
 
@@ -72,18 +80,32 @@ const Home = () => {
   }, [searchNewMembelPanel]);
 
   useGSAP(() => {
-    if (!profilePanel) {
-      gsap.to(profileRef.current, {
+    if (!addToGroupPanel) {
+      gsap.to(addToGroupRef.current, {
         transform: "translateY(0%)",
         opacity: 0,
       });
     } else {
-      gsap.to(profileRef.current, {
+      gsap.to(addToGroupRef.current, {
         transform: "translateY(-104.7%)",
         opacity: 1,
       });
     }
-  }, [profilePanel]);
+  }, [addToGroupPanel]);
+
+   useGSAP(() => {
+    if (!removeFromGroupPanel) {
+      gsap.to(removeFromGroupRef.current, {
+        transform: "translateY(0%)",
+        opacity: 0,
+      });
+    } else {
+      gsap.to(removeFromGroupRef.current, {
+        transform: "translateY(-104.7%)",
+        opacity: 1,
+      });
+    }
+  }, [removeFromGroupPanel]);
 
   useGSAP(() => {
     if (!createGroupPanel) {
@@ -116,12 +138,12 @@ const Home = () => {
   useGSAP(() => {
     if (!aboutPanel) {
       gsap.to(aboutRef.current, {
-        transform: "translateX(0%)",
+        transform: "translateX(150%)",
         duration: 0.3,
       });
     } else {
       gsap.to(aboutRef.current, {
-        transform: "translateX(-124%)",
+        transform: "translateX(-100%)",
         duration: 0.3,
       });
     }
@@ -140,6 +162,22 @@ const Home = () => {
       });
     }
   }, [replyPopup]);
+
+  useGSAP(() => {
+    if (!chatRenamePanel) {
+      gsap.to(chatRenameRef.current, {
+        transform: "translateY(0%)",
+        duration: 0.3,
+        scale: 0,
+      });
+    } else {
+      gsap.to(chatRenameRef.current, {
+        transform: "translateY(350%)",
+        duration: 0.3,
+        scale: 1,
+      });
+    }
+  }, [chatRenamePanel]);
 
   const logouthandler = async () => {
     try {
@@ -164,32 +202,38 @@ const Home = () => {
     setWelcomeTag(false);
   };
 
-  const chatTitleHandler = async (chat) => {
-    console.log('====================================');
-    console.log(chat);
-    console.log('====================================');
-    setChatTitle({
-      chatId: chat._id || "68155fb02f9917d8976c9944",
-      chatName: chat.chatName || "talkyTalk",
-      members: chat.members.length || 0,
-    });
-  };
-
-  const profileOpenHandler = async () => {
-    setProfilePanel(true);
-  };
-
   const videoReqHandler = () => {
-    setVideoReqPanel(true);
+    setVideoReqPanel(!videoReqPanel);
+    setAboutPanel(false);
   };
 
   const aboutHandler = () => {
-    setAboutPanel(true);
+    setAboutPanel(!aboutPanel);
+    setVideoReqPanel(false);
   };
+
+  const getChatData = (chat = chatTitle) => {
+    ///personal Chat
+    if (chat.members && user && user.user && chat.members.length == 2) {
+      const otherMember = chat.members.find(
+        (member) => member._id !== user.user._id
+      );
+      return otherMember ? otherMember : "";
+    }
+    /////group Chat
+    if (chat.members && user && user.user && chat.members.length > 2) {
+      const admin = chat.members.find((member) => member._id === user.user._id);
+      return chat;
+    }
+  };
+
+  useEffect(() => {
+    getChatData();
+  }, [chatTitle]);
 
   // useEffect(() => {
   //   socket.on("userCount", (roomId, count) => {
-  //      if (roomId === chatTitle.chatId) {
+  //      if (roomId === chatTitle._id) {
   //     setOnlineUsers(count);
   //     console.log(`Users online: ${onlineUsers}`);
   //      }
@@ -198,7 +242,7 @@ const Home = () => {
   //   return () => {
   //     socket.off("roomUserCount");
   //   };
-  // }, [chatTitle.chatId]);
+  // }, [chatTitle._id]);
 
   useEffect(() => {
     socket.on("userCount", (count) => {
@@ -212,7 +256,7 @@ const Home = () => {
   }, [onlineUsers]);
 
   useEffect(() => {
-    const fetchChats = async () => {
+    (async () => {
       try {
         const response = await axios.get(
           `${import.meta.env.VITE_BASE_URL}/chat`,
@@ -222,14 +266,21 @@ const Home = () => {
         const filtered = responseArray.filter((chat) =>
           ` ${chat.chatName}`.toLowerCase().includes(searchChats.toLowerCase())
         );
-        setFoundChats(filtered);
+
+        const isOneToOne = filtered.some((chat) => chat.members.length === 2);
+        if (isOneToOne) {
+          const unblockedChats = filtered.filter((chat) =>
+            chat.members.every(
+              (member) => !user.user.blockedUsers.includes(member._id)
+            )
+          );
+          setFoundChats(unblockedChats);
+        }
       } catch (error) {
         console.error("Error fetching chats:", error);
       }
-    };
-
-    fetchChats(); //  call the async function
-  }, [searchChats]);
+    })();
+  }, [searchChats, foundChats]);
 
   //   useEffect(() => {
   //   if (chatUserId) {
@@ -250,15 +301,14 @@ const Home = () => {
 
   //   return () => socket.off('messages_marked_seen');
   // }, []);
-
   return (
     <div className=" h-screen w-screen flex items-center overflow-hidden bg-[#030018] ">
       <div className="h-full w-1/20 py-3  bg-[#030018] text-xl flex flex-col items-center justify-between">
-        <button className="mb-4  aspect-square w-[80%]  bg-gray-300 rounded-xl">
+        <button className="mb-4  aspect-square w-[80%]  rounded-xl">
           <img
-            onClick={profileOpenHandler}
-            className="object-cover w-full h-full"
-            src="https://e7.pngegg.com/pngimages/799/987/png-clipart-computer-icons-avatar-icon-design-avatar-heroes-computer-wallpaper.png"
+            onClick={() => navigate("/profile")}
+            className="object-cover border-white border-2 w-full rounded-xl h-full"
+            src={user.user.image.url}
             alt="boy"
           />
         </button>
@@ -287,7 +337,7 @@ const Home = () => {
         </button>
       </div>
       <div
-        className="basis-1/1 flex rounded-4xl mr-2 bg-cover bg-center h-[98%]"
+        className="basis-1/1 flex rounded-4xl mr-1 bg-cover bg-center h-[98%]"
         style={{ backgroundImage: `url(${BgImage})` }}
       >
         <div
@@ -300,6 +350,7 @@ const Home = () => {
                 TalkyTalk
               </h4>
             )}
+
             <div
               className={`border-2 border-yellow-500 bg-gray-200 transition-[width] duration-300 ease-in-out hover:w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg ${
                 isFocused ? "w-full" : "w-[12%]"
@@ -317,9 +368,10 @@ const Home = () => {
               />
             </div>
           </div>
+
           <div
             ref={addMemberRef}
-            className="flex fixed w-[23%] z-20  top-180 items-center justify-center  bg-yellow-300 rounded-4xl"
+            className="flex fixed w-[23%] z-30  top-180 items-center justify-center  bg-yellow-300 rounded-4xl"
           >
             <AddMembers
               setSearchNewMembelPanel={setSearchNewMembelPanel}
@@ -329,38 +381,70 @@ const Home = () => {
           </div>
           <div
             ref={searchNewMemberRef}
-            className=" w-[23%] fixed h-[682px] rounded-4xl top-180 px-2 pt-[3%] z-20 overflow-x-hidden bg-red-400"
+            className=" w-[23%] fixed h-[682px] rounded-4xl top-180 px-2 pt-[3%] z-30 overflow-x-hidden bg-red-400"
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
             <CreatePersonalChatPanel
+              user={user}
+              setFoundChats={setFoundChats}
               setSearchNewMembelPanel={setSearchNewMembelPanel}
             />
           </div>
+
           <div
-            ref={profileRef}
-            className=" w-[23%] fixed h-[682px] top-180 rounded-4xl z-20  bg-red-400"
+            ref={addToGroupRef}
+            className=" w-[23%] fixed h-[682px] top-180 rounded-4xl z-30  bg-red-400"
           >
-            <ProfilePanel setProfilePanel={setProfilePanel} />
+            <AddTOGroup chatTitle={chatTitle}  setAddToGroupPanel={setAddToGroupPanel} />
           </div>
+
+          <div
+            ref={removeFromGroupRef}
+            className=" w-[23%] fixed h-[98.5%] top-180 rounded-4xl z-30  bg-red-400"
+          >
+            <RemoveFromGroup chatTitle={chatTitle} setRemoveFromGroupPanel={setRemoveFromGroupPanel} />
+          </div>
+
           <div
             ref={createGroupRef}
-            className="fixed top-180 z-20 w-[23%]  h-[98%]"
+            className="fixed top-180 z-30 w-[23%]  h-[98%]"
           >
-            <CreategroupPanel setCreateGroupPanel={setCreateGroupPanel} />
+            <CreategroupPanel
+              user={user}
+              setCreateGroupPanel={setCreateGroupPanel}
+              setFoundChats={setFoundChats}
+            />
           </div>
 
           <div
             ref={videoReqRef}
-            className="h-40 w-60 rounded-2xl bg-green-400 fixed -right-60 top-26"
+            className="h-40 w-60 rounded-2xl bg-green-400 fixed border-2 border-gray-500 -right-60 top-20"
           >
             <VideoReqPanel setVideoReqPanel={setVideoReqPanel} />
           </div>
 
           <div
             ref={aboutRef}
-            className="h-60 w-42 rounded-2xl  border-2 bg-green-400 border-gray-500 fixed -right-50 top-26"
+            className=" rounded-2xl  border-2 bg-green-400 border-gray-500 fixed -right-50 top-20"
           >
-            <AboutPanel chatTitle={chatTitle} setAboutPanel={setAboutPanel} />
+            <AboutPanel
+              foundChats={foundChats}
+              setFoundChats={setFoundChats}
+              user={user}
+              setAddToGroupPanel={setAddToGroupPanel}
+              setRemoveFromGroupPanel={setRemoveFromGroupPanel}
+              chatTitle={chatTitle}
+              setChatRenamePanel={setChatRenamePanel}
+              setAboutPanel={setAboutPanel}
+            />
+          </div>
+
+          <div className="w-[70%] px-2 -top-18 right-5 fixed">
+            <ChatRename
+              chatTitle={chatTitle}
+              setChatRenamePanel={setChatRenamePanel}
+              chatRenameRef={chatRenameRef}
+            />
           </div>
 
           <button
@@ -368,7 +452,7 @@ const Home = () => {
             onClick={() => {
               setAddMemberpanel(true);
             }}
-            className="bg-blue-700 aspect-square z-10 fixed text-black text-3xl bottom-16 left-90 flex items-center justify-center rounded-full h-[50px]"
+            className="bg-blue-700 aspect-square z-20 absolute text-black text-3xl bottom-2 left-72 flex items-center justify-center rounded-full h-[50px]"
           >
             <i className="ri-add-line"></i>
           </button>
@@ -378,14 +462,16 @@ const Home = () => {
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
             {foundChats.map((chat, idx) => {
-              const isSelected = selectedChatId === chat._id;
+              const isSelected = selectedChatId === chat?._id;
+
+              let chatData = getChatData(chat);
 
               return (
                 <button
                   onClick={() => {
                     setShowPopup(false);
                     setReplyPopup(false);
-                    chatTitleHandler(chat);
+                    setChatTitle({ ...chat });
                     selectedChatHandler(chat._id);
                   }}
                   key={idx}
@@ -396,12 +482,14 @@ const Home = () => {
                   <div className="w-14 rounded-full aspect-square">
                     <img
                       className="object-cover rounded-full w-full h-full"
-                      src="https://i.guim.co.uk/img/media/53e33368ee15c494000585b83fbeefc16e6de41e/0_197_3500_2100/master/3500.jpg?width=465&dpr=1&s=none&crop=none"
+                      src={chatData?.image?.url || user?.user?.image?.url}
                       alt="profil"
                     />
                   </div>
                   <div>
-                    <h2 className=" font-semibold ">{chat.chatName}</h2>
+                    <h2 className=" font-semibold ">
+                      {chatData?.username || chatData?.chatName}
+                    </h2>
                   </div>
                 </button>
               );
@@ -411,42 +499,25 @@ const Home = () => {
 
         {/* ////////////////huge chat part////////////// */}
 
-        <div className="w-[75%] rounded-r-4xl py-2 pr-6 ">
-          {welcomeTag ? (
-            <div className="flex flex-col items-center gap-4 justify-center ">
-              {/* <h1 className="text-6xl font-semibold text-pink-700 ">
-                WELCOME to
-              </h1>
-              <h1 className="text-8xl font-black text-pink-700 tracking-wider ">
-                {" "}
-                TalkyTalk
-              </h1> */}
-            </div>
-          ) : (
-            <div className="flex justify-between bg-red-400 pl-4 h-1/10 border-b-2 items-center w-full ">
-              <div>
-                <h1 className="text-3xl font-semibold">{chatTitle.chatName}</h1>
-                <h4>
-                  {chatTitle.members} members, &nbsp; {onlineUsers} online
-                </h4>
-              </div>
-              <div className="flex justify-end gap-6 items-center w-1/10 text-2xl">
-                <i className="ri-find-replace-line"></i>
-                <i onClick={videoReqHandler} className="ri-video-on-fill"></i>
-                <i onClick={videoReqHandler} className="ri-phone-fill"></i>
-                <i onClick={aboutHandler} className="ri-menu-3-line"></i>
-              </div>
-            </div>
+        <div
+          className="w-[75%] rounded-r-4xl py-2 pr-6 "
+          // onClick={() => setShowPopup(false)}
+        >
+          {selectedChatId && (
+            <MessageBox
+            foundChats={foundChats}
+              replyRef={replyRef}
+              videoReqHandler={videoReqHandler}
+              aboutHandler={aboutHandler}
+              getChatData={getChatData}
+              user={user}
+              setShowPopup={setShowPopup}
+              showPopup={showPopup}
+              replyPopup={replyPopup}
+              setReplyPopup={setReplyPopup}
+              chatTitle={chatTitle}
+            />
           )}
-          { selectedChatId && 
-          <MessageBox
-            setShowPopup={setShowPopup}
-            showPopup={showPopup}
-            replyRef={replyRef}
-            replyPopup={replyPopup}
-            setReplyPopup={setReplyPopup}
-            chatTitle={chatTitle}
-          /> }
         </div>
       </div>
     </div>

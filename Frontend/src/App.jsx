@@ -2,8 +2,11 @@ import React, { lazy, useState, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import UserProtectedWrapper from "./protectedWrapper/UserProtectedWrapper";
 import axios from "axios";
-import Call from "./pages/Call";
+const VideoComponent = lazy(() => import ("./pages/VideoComponent"));
+const  Call = lazy(() => import("./pages/Call")) ;
+const  PageNotFound = lazy(() => import("./pages/PageNotFound")) ;
 const Home = lazy(() => import("./pages/Home"));
+const Profile = lazy(() => import("./pages/Profile"));
 const Signup = lazy(() => import("./pages/Signup"));
 const Login = lazy(() => import("./pages/Login"));
 
@@ -24,10 +27,15 @@ const App = () => {
         <Home />
         </UserProtectedWrapper>
         } />
+      <Route path="/profile" element={
+        <UserProtectedWrapper>
+        <Profile />
+        </UserProtectedWrapper>
+        } />
       <Route path="/signup" element={<Signup />} />
       <Route path="/login" element={<Login />} />
-      <Route path="/call" element={<Call />} />
-      <Route path="*" element={<h1>404 Not Found</h1>} />
+      <Route path="/call" element={<VideoComponent />} />
+      <Route path="*" element={<PageNotFound/> } />
     </Routes>
   );
 };

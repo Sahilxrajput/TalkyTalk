@@ -12,29 +12,28 @@ const UserProtectedWrapper = ({ children }) => {
 
   useEffect(() => {
     if (!token) {
-      console.log("token doesn't exist");
       navigate("/login");
       return;
     }
-
     axios
-      .get(`${import.meta.env.VITE_BASE_URL}/users/profile`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
+      .get(
+        `${import.meta.env.VITE_BASE_URL}/users/profile`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         },
-      }, { withCredentials: true } )
+        { withCredentials: true }
+      )
       .then((response) => {
         if (response.status === 200) {
-         console.log("token then exist");
-        //  console.log(response.data);
           setUser(response.data);
           setIsLoading(false);
         }
       })
       .catch((err) => {
-        console.log("token catch exist");
         console.log(err);
-        //localStorage.removeItem("token");
+        localStorage.removeItem("token");
         navigate("/login");
       });
   }, [token]);

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useContext, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import io from "socket.io-client";
 import axios from "axios";
 import gsap from "gsap";
@@ -6,7 +6,6 @@ import { useGSAP } from "@gsap/react";
 import ChatWindow from "./ChatWindow";
 import { data } from "react-router-dom";
 // import socket from '../socket/Socket'
-import { UserDataContext } from "../context/UserContext";
 
 const socket = io("http://localhost:5000", {
   transports: ["websocket"],
@@ -14,6 +13,12 @@ const socket = io("http://localhost:5000", {
 });
 
 const MessageBox = ({
+  user,
+  foundChats,
+  aboutHandler,
+  videoReqHandler,
+  getChatData,
+  setFoundChats,
   chatTitle,
   replyRef,
   setShowPopup,
@@ -26,24 +31,21 @@ const MessageBox = ({
   const latestMessageRef = useRef(null);
   const [msgId, setMsgId] = useState(0);
 
-  const { user } = useContext(UserDataContext);
-
   const sendMessageHandler = async (e) => {
     e.preventDefault();
     if (latestMessage.trim()) {
       const messageData = {
-        roomId: chatTitle.chatId,
+        roomId: chatTitle._id,
         message: latestMessage,
-        sender: user.user._id,
+        sender: user.user,
       };
-
       if (replyPopup && msgId) {
         messageData.replyTo = msgId; // assuming msgId is the ID you're replying to
       }
 
       socket.emit("chat", messageData);
       setLatestMessage("");
-      setReplyPopup(false)
+      setReplyPopup(false);
     }
   };
 
@@ -61,15 +63,19 @@ const MessageBox = ({
     })();
   }, []);
 
+  // emit a message
   useEffect(() => {
     socket.on("connect", () => {
       console.log("Connected to socket:", socket.id);
     });
 
     const handleChat = (payload) => {
-      if (chatTitle.chatId === payload.roomId)
+      if (chatTitle._id === payload.roomId)
         setSocketMessages((prevMessages) => [...prevMessages, payload]);
+      // const result = msgSenderUser(payload);
+      // setMsgSender(result);
     };
+
     socket.on("chat", handleChat);
 
     return () => {
@@ -77,10 +83,19 @@ const MessageBox = ({
       socket.off("connect");
     };
   }, [chatTitle]);
+  //finding socketid == senderid
+  // const msgSenderUser = (payload) => {
+  //   return chatTitle.members.find((member) => member._id === payload.sender);
+  // };
 
   return (
     <>
       <ChatWindow
+      foundChats={foundChats}
+        videoReqHandler={videoReqHandler}
+        aboutHandler={aboutHandler}
+        getChatData={getChatData}
+        user={user}
         showPopup={showPopup}
         setShowPopup={setShowPopup}
         replyRef={replyRef}

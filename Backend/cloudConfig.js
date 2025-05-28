@@ -10,7 +10,7 @@ cloudinary.config({
 
 const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
-    params: {
+    params: { 
       folder: 'TalkyTalk_DEV',
       allowedFormat: ["png", "jpg", "jpeg"],
       },

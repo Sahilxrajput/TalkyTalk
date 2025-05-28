@@ -27,7 +27,7 @@ module.exports.sendMessage = async (req, res) => {
 
     message = await message.populate(
       "sender",
-      "firstName lastName username gender age"
+      "firstName lastName username "
     );
 
     message = await message.populate("chatId");
@@ -60,9 +60,9 @@ module.exports.getAllMessages = async (req, res) => {
     }
 
     const messages = await Message.find({ chatId: chatId })
-      .populate("sender", "firstName lastName")
+      .populate("sender")
       .populate("chatId")
-      .populate("replyTo.sender", "firstName lastname");
+      .populate("replyTo");
     res.status(200).json({
       success: true,
       message: "Messages retrieved successfully",

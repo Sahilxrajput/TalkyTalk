@@ -14,10 +14,9 @@ const { userAuth } = require("../Middlewares/userAuth.js");
 //   chatController.accessChat
 // );
 
-
 router.get("/", userAuth, chatController.accessChats);
 
-router.get("/chatIds", userAuth, chatController.getChatIds)
+router.get("/chatIds", userAuth, chatController.getChatIds);
 
 router.post(
   "/group",
@@ -27,7 +26,7 @@ router.post(
       .withMessage("group name should be minimum 3 letter long"),
     body("members")
       .isArray({ min: 2 })
-      .withMessage("At least two people are needed to create a group chat"),
+      .withMessage("At least three people are needed to create a group chat"),
   ],
   userAuth,
   chatController.createGroupChat
@@ -40,13 +39,12 @@ router.post(
       .isLength({ min: 3 })
       .withMessage("group name should be minimum 3 letter long"),
     body("members")
-      .isArray({ min: 1 },{max: 1})
+      .isArray({ min: 1 }, { max: 1 })
       .withMessage("Only two people are needed to create a group chat"),
   ],
   userAuth,
-  chatController.personalChat
+  chatController.createPersonalChat
 );
-
 
 router.put(
   "/groupadd",
@@ -54,7 +52,7 @@ router.put(
     body("chatId")
       .exists({ checkFalsy: true })
       .withMessage("chatId is required"),
-    body("userId")
+    body("userIds")
       .exists({ checkFalsy: true })
       .withMessage("userId is required"),
   ],
@@ -68,7 +66,7 @@ router.put(
     body("chatId")
       .exists({ checkFalsy: true })
       .withMessage("chatId is required"),
-    body("userId")
+    body("userIds")
       .exists({ checkFalsy: true })
       .withMessage("userId is required"),
   ],

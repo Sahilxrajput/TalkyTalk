@@ -1,57 +1,45 @@
 import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
+import { toast } from "react-toastify";
 
-const CreategroupPanel = (props) => {
+const CreategroupPanel = ({ setCreateGroupPanel, user, setFoundChats }) => {
   const [searchUser, setSearchUser] = useState("");
   const [foundUsers, setFoundUsers] = useState([]);
   const [addMembers, setAddMembers] = useState([]);
   const [chatName, setChatName] = useState("");
   const [selectedUsers, setSelectedUsers] = useState([]);
-  const [messages, setMessages] = useState("");
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await axios.get(
-          `${import.meta.env.VITE_BASE_URL}/users`,
-          { withCredentials: true }
-        );
-        const responseArray = response.data.users;
-
-        const filtered = responseArray.filter((user) =>
-          `${user.firstName} ${user.lastName} ${user.username}`
-            .toLowerCase()
-            .includes(searchUser.toLowerCase())
-        );
-
-        setFoundUsers(filtered); //  update state correctly
-      } catch (error) {
-        console.error("Error fetching users:", error);
-      }
-    };
-
     if (searchUser.trim() !== "") {
-      fetchUsers(); //  call the async function
-    } else {
-    }
+      (async () => {
+        try {
+          const response = await axios.get(
+            `${import.meta.env.VITE_BASE_URL}/users`,
+            { withCredentials: true }
+          );
+          const responseArray = response.data.users;
 
-    return () => {
-      // Cleanup logic if needed
-    };
+          const otherUsers = responseArray.filter(
+            (mem) => mem._id !== user.user._id
+          );
+
+          const filtered = otherUsers.filter((user) =>
+            `${user.firstName} ${user.lastName} ${user.username}`
+              .toLowerCase()
+              .includes(searchUser.toLowerCase())
+          );
+
+          setFoundUsers(filtered); //  update state correctly
+        } catch (error) {
+          console.error("Error fetching users:", error);
+        }
+      })();
+    } else {
+      setFoundUsers([]);
+    }
   }, [searchUser]);
 
-  const addMembersHandler = async (user) => {
-    setAddMembers((prev) => {
-      if (!prev.includes(user._id)) {
-        return [...prev, user._id];
-      } else {
-        console.log("User already added.");
-        return prev; // Return unchanged array
-      }
-    });
-  };
-
-  const selectedUsersHandler = (user) => {
+  const selectUsersHandler = (user) => {
     setSelectedUsers((prevSelectedUsers) => {
       // Check if user is already selected
       if (!prevSelectedUsers.includes(user._id)) {
@@ -60,6 +48,14 @@ const CreategroupPanel = (props) => {
       } else {
         // Remove user from selected list (unselect)
         return prevSelectedUsers.filter((id) => id !== user._id);
+      }
+    });
+
+    setAddMembers((prev) => {
+      if (!prev.includes(user._id)) {
+        return [...prev, user._id];
+      } else {
+        return prev.filter((id) => id !== user._id); // Return unchanged array
       }
     });
   };
@@ -72,14 +68,17 @@ const CreategroupPanel = (props) => {
         { chatName, members: addMembers },
         { withCredentials: true }
       );
+      const newChat = response.data.chat;
       setChatName(""); // Reset chat name
       setAddMembers([]); // Reset added members
-      console.log("Group created:", response.data);
+      toast.success("New Group Created Successfully");
+      setCreateGroupPanel(false);
+      setFoundChats((prev) => [...prev, newChat]);
     } catch (error) {
+      toast.error(" Something went wrong");
       console.error("Error creating group:", error);
     }
   };
-
 
   return (
     <div
@@ -92,8 +91,11 @@ const CreategroupPanel = (props) => {
       >
         <i
           onClick={() => {
-            props.setCreateGroupPanel(false);
-            console.log(props);
+            setCreateGroupPanel(false);
+            setChatName("");
+            setSearchUser("");
+            setSelectedUsers([]);
+            setAddMembers([]);
           }}
           className="text-2xl -mb-4 text-center text-gray-700 font-semibold  ri-arrow-down-wide-fill"
         ></i>
@@ -133,26 +135,34 @@ const CreategroupPanel = (props) => {
           return (
             <div
               onClick={() => {
-                addMembersHandler(user);
-                selectedUsersHandler(user);
+                selectUsersHandler(user);
               }}
               key={idx}
               className={`${
                 isSelected ? "bg-red-500" : "bg-green-600"
-              } border-2 h-16 py-2 cursor-pointer w-full flex justify-between items-center px-6 rounded-2xl`}
+              } border-2 h-16 py-2 cursor-pointer w-full flex justify-between items-center px-2 rounded-2xl`}
             >
-              <div className="flex flex-col">
-                <div className="flex justify-start items-center gap-2">
-                  <h2>
-                    {user.firstName} {user.lastName}{" "}
+              <div className="h-full w-full flex gap-4">
+                <div className="h-full rounded-full aspect-square">
+                  <img
+                    className="object-cover rounded-full w-full h-full"
+                    src={user.image.url}
+                    alt=""
+                  />
+                </div>
+                <div className="flex flex-col items-start ">
+                  <div className="flex justify-start items-center gap-2">
+                    <h2>
+                      {user.firstName} {user.lastName}
+                    </h2>
                     {user.gender === "male" ? (
-                      <i className="text-[#2986cc]  ri-men-fill"></i>
+                      <i className="text-[#2986cc] ri-men-fill"></i>
                     ) : (
                       <i className="text-[#c90076] ri-women-fill"></i>
                     )}
-                  </h2>
+                  </div>
+                  <h4>{user.username}</h4>
                 </div>
-                <h4>{user.username}</h4>
               </div>
               {isSelected ? (
                 <i className="text-xl ri-close-circle-fill"></i>

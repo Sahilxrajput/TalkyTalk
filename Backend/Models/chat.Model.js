@@ -16,6 +16,10 @@ const chatSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+     image: {
+      url: String,
+      filename: String,
+    },
     groupAdmin: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

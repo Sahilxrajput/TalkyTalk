@@ -8,7 +8,7 @@ module.exports.userAuth = async (req, res, next) => {
   if (!token) {
     return res.status(401).json({ error: "Not authenticated" });
   }
-
+ 
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -18,16 +18,8 @@ module.exports.userAuth = async (req, res, next) => {
 
     req.user = user;
     next();
-
   } catch (error) {
     console.error("JWT Verification Error:", error.message);
     return res.status(403).json({ error: "Invalid or expired token" });
   }
 };
-
-// const passport = require('passport');
-
-// module.exports.userAuth = (req, res, next) => {
-//     if (req.isAuthenticated()) return next();
-//     res.status(401).json({ error: "Not authenticated" });
-// }

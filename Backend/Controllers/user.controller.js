@@ -2,6 +2,7 @@ const User = require("../Models/user.Model.js");
 const passport = require("passport");
 const { validationResult } = require("express-validator");
 const { serverOtp } = require("../sendEmail.js");
+const { application } = require("express");
 
 module.exports.getAllUsers = async (req, res) => {
   try {
@@ -29,6 +30,10 @@ module.exports.signUpUser = async (req, res) => {
       return res.status(400).json({ error: err.array() });
     }
 
+    if (!req.file) {
+      return res.status(400).json({ message: "No image file uploaded" });
+    }
+
     const {
       username,
       firstName,
@@ -41,6 +46,10 @@ module.exports.signUpUser = async (req, res) => {
       password,
       gender,
     } = req.body;
+
+    let url = req.file.path;
+    let filename = req.file.filename;
+
     console.log(`${otp} = is otp`);
     console.log(`${serverOtp} = is serverOtp`);
     // if(otp !== serverOtp){
@@ -52,7 +61,7 @@ module.exports.signUpUser = async (req, res) => {
         .status(400)
         .json({ error: "Password and Confirm Password do not match" });
     }
-    const newuser = new User({
+    const newUser = new User({
       email,
       gender,
       age,
@@ -62,7 +71,9 @@ module.exports.signUpUser = async (req, res) => {
       username,
     });
 
-    User.register(newuser, password, async (err, user) => {
+    newUser.image = { url, filename };
+
+    User.register(newUser, password, async (err, user) => {
       if (err) {
         console.log("Registration error:", err);
         return res.status(500).json({ error: err.message });
@@ -168,7 +179,7 @@ module.exports.updateUserInfo = async (req, res) => {
   try {
     const loggedInUser = req.user;
     const { id } = req.params;
-    const { bio, username } = req.body;
+    const { bio, username, firstName, lastName } = req.body;
 
     if (!loggedInUser._id.equals(id)) {
       return res.status(403).json({
@@ -176,10 +187,18 @@ module.exports.updateUserInfo = async (req, res) => {
         error: "You are not authorized to update this user's information.",
       });
     }
-    // Use await to ensure the query completes before proceeding
+
+    if (!bio && !username && !firstName && !lastName) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "At least one field (bio, username, firstName, or lastName) must be provided.",
+      });
+    }
+
     const updatedUser = await User.findByIdAndUpdate(
       id,
-      { username, bio },
+      { username, bio, firstName, lastName },
       { new: true }
     ); // `new: true` returns the updated document
 
@@ -198,8 +217,8 @@ module.exports.updateUserInfo = async (req, res) => {
 module.exports.blockUser = async (req, res) => {
   const { blockerId, blockedId } = req.body;
 
-  if (blockerId && blockedId) {
-    return res.status(404).json({ message: "data invaid" });
+  if (!blockerId || !blockedId) {
+    return res.status(404).json({ message: "data invalid" });
   }
 
   await User.findByIdAndUpdate(blockerId, {
@@ -211,7 +230,7 @@ module.exports.blockUser = async (req, res) => {
 module.exports.unblockUser = async (req, res) => {
   const { blockerId, blockedId } = req.body;
 
-  if (blockerId && blockedId) {
+  if (!blockerId || !blockedId) {
     return res.status(404).json({ message: "data invaid" });
   }
 

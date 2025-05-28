@@ -20,7 +20,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       minLength: [3, "username must be at least 3 char long"],
-      match: [/^[^*@#]+$/, 'Username cannot contain *, @, or #'],
+      match: [/^[^*@#]+$/, "Username cannot contain *, @, or #"],
     },
     email: {
       type: String,
@@ -40,7 +40,7 @@ const userSchema = new mongoose.Schema(
       enum: ["male", "female", "other", "prefer not to say"],
       required: [true, "Gender is required"],
     },
-    chats:{
+    chats: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Chat",
     },
@@ -49,10 +49,16 @@ const userSchema = new mongoose.Schema(
       default: "Available",
       max: [100, "Bio should be less than 100 char"],
     },
-    blockedUsers:{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User"
-    }
+    image: {
+      url: String,
+      filename: String,
+    },
+    blockedUsers: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
   },
   {
     timestamps: true,
@@ -75,12 +81,10 @@ const userSchema = new mongoose.Schema(
 //     default: false,
 // },
 
-
 userSchema.plugin(passportLocalMongoose, { usernameField: "email" });
 
-
-userSchema.methods.getAuthToken = function()  {
-  const token = jwt.sign({ _id: this.id },  process.env.JWT_SECRET, {
+userSchema.methods.getAuthToken = function () {
+  const token = jwt.sign({ _id: this.id }, process.env.JWT_SECRET, {
     expiresIn: "24h",
   });
   return token;

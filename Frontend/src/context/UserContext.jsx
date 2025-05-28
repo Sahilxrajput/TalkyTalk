@@ -10,6 +10,8 @@ const UserContext = ({ children }) => {
     _id:'',
     firstName: '',
     lastName: '',
+    url:'',
+    filename:'',
     username: '',   
     email: '',
     age: null,

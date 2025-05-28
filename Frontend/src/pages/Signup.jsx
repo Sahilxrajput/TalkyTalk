@@ -10,17 +10,34 @@ const Signup = () => {
   const navigate = useNavigate();
 
   const { user, setUser } = useContext(UserDataContext);
-  const [otp, setOtp] = useState('');
+  const [otp, setOtp] = useState("");
+  const [file, setFile] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
     username: "",
     email: "",
+    url: "",
+    filename: "",
     age: "",
     gender: "male", // default
     bio: "Available",
   });
+
+  // useEffect(() => {
+  //   console.log(formData);
+  // }, [formData]);
+
+  const [imagePreview, setImagePreview] = useState(null);
+
+  const handleImageChange = (e) => {
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      setFile(selectedFile);
+    }
+  };
 
   const changeHandler = (e) => {
     const { name, value } = e.target;
@@ -29,32 +46,65 @@ const Signup = () => {
 
   const submitHandler = async (e) => {
     e.preventDefault();
-   
-    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/users/signup`,  { withCredentials: true } , { ...formData, otp: otp });
-   console.log(`laude ${otp}`)
-    if (response.status === 201) {
-      const data = response.data;
-      setUser(data); // Save user data to context
-      localStorage.setItem('token', data.token)
-      navigate("/home"); 
-    } else {
-      console.error("Error signing up:", response.data);
+
+    const formDataToSend = new FormData();
+    formDataToSend.append("image", file); //  real file
+
+    // Append all fields from formData
+    Object.entries(formData).forEach(([key, value]) => {
+      formDataToSend.append(key, value);
+    });
+
+    formDataToSend.append("otp", otp); // append OTP separately
+
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/users/signup`,
+        formDataToSend,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          withCredentials: true,
+        }
+      );
+
+      console.log(`laude ${otp}`);
+      console.log("Signup successful:", response.data);
+
+      if (response.status === 201) {
+        const data = response.data;
+        setUser(data); // Save user data to context
+        localStorage.setItem("token", data.token);
+        navigate("/home");
+      } else {
+        console.error("Error signing up:", response.data);
+      }
+
+      // Reset form state
+      setOtp("");
+      setFile(null);
+      setFormData({
+        firstName: "",
+        lastName: "",
+        username: "",
+        email: "",
+        age: "",
+        gender: "male",
+        bio: "Available",
+      });
+    } catch (error) {
+      console.error("Signup failed:", error.response?.data || error.message);
     }
-    setOtp('')
-    setFormData({
-      firstName: "",
-      lastName: "",
-      username: "",
-      email: "",
-      age: "",
-      gender: "male", 
-      bio: "Available",
-    })
   };
 
-  const getOtpHandler = async ()=> {
-    await axios.post(`${import.meta.env.VITE_BASE_URL}/getotp`,  { withCredentials: true } , {to:formData.email})
-  }
+  const getOtpHandler = async () => {
+    await axios.post(
+      `${import.meta.env.VITE_BASE_URL}/getotp`,
+      { withCredentials: true },
+      { to: formData.email }
+    );
+  };
 
   return (
     <div
@@ -93,7 +143,7 @@ const Signup = () => {
           </div>
         </div>
         <div className="border-2 w-full border-yellow-500 flex items-center  justify-start  gap-2 px-3 p-2 rounded-lg">
-          <i className="ri-user-received-line text-[#D30C7B]"></i>
+          <i className="ri-user-line text-[#D30C7B]"></i>
           <input
             name="username"
             className="appearance-none border-none w-[90%] bg-transparent p-0 m-0 focus:outline-none"
@@ -104,29 +154,35 @@ const Signup = () => {
           />
         </div>
         <div className=" flex items-center justify-between  w-full">
-        <div className="border-2 w-2/4 border-yellow-500 flex items-center justify-start  gap-2 px-3 p-2 rounded-lg">
-          <i className="ri-mail-ai-line text-[#D30C7B]"></i>
-          <input
-            name="email"
-            className="appearance-none border-none w-[90%] bg-transparent p-0 m-0 focus:outline-none"
-            type="email"
-            value={formData.email}
-            placeholder="Email"
-            onChange={(e) => changeHandler(e)}
-          />
-        </div>
-        <div className="border-2 w-1/4  border-yellow-500 flex items-center justify-start  gap-2 px-3 p-2 rounded-lg">
-          {/* <i className="ri-mail-ai-line text-[#D30C7B]"></i> */}
-          <input
-            name="email"
-            className="appearance-none border-none w-full bg-transparent p-0 m-0 focus:outline-none"
-            type="text"
-            value={otp}
-            placeholder="OTP"
-            onChange={(e) => setOtp(e.target.value)}
-          />
-        </div>
-        <button type="button" onClick={getOtpHandler} className="bg-blue-800 rounded-lg text-sm p-2">Get OTP</button>
+          <div className="border-2 w-2/4 border-yellow-500 flex items-center justify-start  gap-2 px-3 p-2 rounded-lg">
+            <i className="ri-mail-ai-line text-[#D30C7B]"></i>
+            <input
+              name="email"
+              className="appearance-none border-none w-[90%] bg-transparent p-0 m-0 focus:outline-none"
+              type="email"
+              value={formData.email}
+              placeholder="Email"
+              onChange={(e) => changeHandler(e)}
+            />
+          </div>
+          <div className="border-2 w-1/4  border-yellow-500 flex items-center justify-start  gap-2 px-3 p-2 rounded-lg">
+            {/* <i className="ri-mail-ai-line text-[#D30C7B]"></i> */}
+            <input
+              name="email"
+              className="appearance-none border-none w-full bg-transparent p-0 m-0 focus:outline-none"
+              type="text"
+              value={otp}
+              placeholder="OTP"
+              onChange={(e) => setOtp(e.target.value)}
+            />
+          </div>
+          <button
+            type="button"
+            onClick={getOtpHandler}
+            className="bg-blue-800 rounded-lg text-sm p-2"
+          >
+            Get OTP
+          </button>
         </div>
         <div className=" flex items-center justify-between gap-12">
           <div className="border-2 w-1/2 border-yellow-500 flex items-center justify-start gap-2 px-3 p-2 rounded-lg">
@@ -134,14 +190,18 @@ const Signup = () => {
             <input
               name="password"
               className="appearance-none border-none w-[90%] bg-transparent p-0 m-0 focus:outline-none"
-              id="password"
-              type="password"
+              type={showPassword ? "text" : "password"}
               value={formData.password}
               placeholder="Password"
               onChange={(e) => changeHandler(e)}
             />
-            <button type="button">
-              <i className="ri-eye-line"></i>
+            <button
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+            >
+              <i
+                className={showPassword ? "ri-eye-off-line" : "ri-eye-line"}
+              ></i>{" "}
             </button>
           </div>
           <div className="border-2 w-1/2 border-yellow-500 flex items-center justify-start gap-2 px-3 p-2 rounded-lg">
@@ -149,14 +209,18 @@ const Signup = () => {
             <input
               name="confirmPassword"
               className="appearance-none border-none w-[90%] bg-transparent p-0 m-0 focus:outline-none"
-              id="confirmPassword"
               value={formData.confirmpassword}
-              type="password"
+              type={showPassword ? "text" : "password"}
               placeholder="Confirm Password"
               onChange={(e) => changeHandler(e)}
             />
-            <button type="button">
-              <i className="ri-eye-line"></i>
+            <button
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+            >
+              <i
+                className={showPassword ? "ri-eye-off-line" : "ri-eye-line"}
+              ></i>{" "}
             </button>
           </div>
         </div>
@@ -215,6 +279,10 @@ const Signup = () => {
             placeholder="Bio"
             onChange={(e) => changeHandler(e)}
           />
+        </div>
+        <div className="flex">
+          <input type="file" accept="image/*" onChange={handleImageChange} />
+          {imagePreview && <img src={imagePreview} alt="Preview" width="50" />}
         </div>
         <button
           className="bg-[#D30C7B] py-2 px-4 rounded-lg -mt-4"

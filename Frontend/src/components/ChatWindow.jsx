@@ -1,21 +1,23 @@
 import React, { useEffect, useState, useRef, useContext } from "react";
 import axios from "axios";
 import "remixicon/fonts/remixicon.css";
-import { UserDataContext } from "../context/UserContext";
 
 const ChatWindow = ({
+  foundChats,
   socketMessages,
+  videoReqHandler,
+  aboutHandler,
+  getChatData,
   setSocketMessages,
   msgId,
   setMsgId,
+  replyRef,
+  user,
   showPopup,
   setShowPopup,
-  replyRef,
   setReplyPopup,
   chatTitle,
 }) => {
-  const { user } = useContext(UserDataContext);
-
   const messagesEndRef = useRef(null);
   const [savedMessages, setSavedMessages] = useState([]);
   const [pos, setPos] = useState({ x: 0, y: 0 });
@@ -23,6 +25,7 @@ const ChatWindow = ({
   const [msgToReply2, setMsgToReply2] = useState("");
   const majorRef = useRef(null);
   const [copied, setCopied] = useState(false);
+  const [matchedChat, setMatchedChat] = useState()
 
   const getAllMessages = async (chatId) => {
     const response = await axios.post(
@@ -33,12 +36,17 @@ const ChatWindow = ({
     return response.data.data;
   };
 
+  const otherMember = chatTitle.members.find(
+    (member) => member._id !== user.user._id
+  );
+
   const ContextMenuhandler = (e, msg) => {
     e.preventDefault();
     setPos({ x: e.pageX, y: e.pageY });
     setShowPopup(true);
     setMsgId(msg._id);
-    setMsgToReply(msg.content);
+    console.log(msg);
+    setMsgToReply(msg.content || msg.message);
   };
 
   const deleteMessage = async () => {
@@ -65,34 +73,34 @@ const ChatWindow = ({
     try {
       await navigator.clipboard.writeText(msgToReply);
       setCopied(true);
+      console.log(msgToReply);
       setTimeout(() => {
         setCopied(false);
         setShowPopup(false);
-      }, 1500); // Reset after 2s
+      }, 1500);
     } catch (err) {
       console.error("Failed to copy: ", err);
     }
   };
 
   useEffect(() => {
-    console.log(msgToReply);
-  }, [msgToReply]);
+  const matchedChat = foundChats.find(
+    (chat) => chat._id === chatTitle._id
+  );
+  setMatchedChat(matchedChat)
+}, [chatTitle, foundChats]);
+
+useEffect(()=>{
+  console.log(matchedChat)
+},[chatTitle])
 
   useEffect(() => {
-  (async function () {
-    const chatAllMessages = await getAllMessages(chatTitle.chatId);
-    setSavedMessages(chatAllMessages);
-    setSocketMessages([]); // reset on chat change
-  })();
-}, [chatTitle.chatId]);
-
-// useEffect(() => {
-//   if (socketMessages.length > 0) {
-//     setSavedMessages((prev) => [...prev, ...socketMessages]);
-//     setSocketMessages([]); // clear once merged
-//   }
-// }, [socketMessages]);
-
+    (async function () {
+      const chatAllMessages = await getAllMessages(chatTitle._id);
+      setSavedMessages(chatAllMessages);
+      setSocketMessages([]); // reset on chat change
+    })();
+  }, [chatTitle._id]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -108,35 +116,42 @@ const ChatWindow = ({
     }
   }, [showPopup]);
 
-  // useEffect(() => {
-  //   socketMessages.map((msg, index) => {
-  //     console.log("====================================");
-  //     console.log(msg);
-  //     console.log("====================================");
-  //   });
-  // }, [socketMessages]);
-
-  // useEffect(() => {
-  //   savedMessages.map((msg, index) => {
-  //     console.log("`````````````````````````````");
-  //     console.log(msg);
-  //     console.log("`````````````````````````````");
-  //   });
-  // }, [savedMessages]);
   return (
     <>
+      <div className="flex justify-between ml-4 bg-red-400 pl-4 h-1/10 border-b-2 items-center w-full ">
+        <div className="flex gap-4">
+          <div className="w-14 rounded-full aspect-square">
+            <img
+              className="object-cover rounded-full w-full h-full"
+              src={user.user.image.url}
+              alt="profil"
+            />
+          </div>
+          <div>
+            <h1 className="text-3xl font-semibold">
+              {getChatData().username || matchedChat?.chatName}
+            </h1>
+            <h4>
+              {matchedChat?.members?.length} members, &nbsp; {} online
+            </h4>
+          </div>
+        </div>
+        <div className="flex justify-end gap-6 items-center w-1/10 text-2xl">
+          <i className="ri-find-replace-line"></i>
+          <i onClick={videoReqHandler} className="ri-video-on-fill"></i>
+          <i onClick={videoReqHandler} className="ri-phone-fill"></i>
+          <i onClick={aboutHandler} className="ri-menu-3-line"></i>
+        </div>
+      </div>
       <div
         ref={majorRef}
         className="p-2 overflow-x-hidden flex flex-col  h-8/10"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
-        <div
-        // className="flex flex-col items-end"
-        // style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-        >
+        <div>
           {savedMessages.map((msg, index) => {
             const isMine = msg.sender._id === user.user._id;
-            const isReplied = msg?.replyTo || false;
+            const isReplied = msg?.replyTo?._id || false;
             const date = new Date(msg.updatedAt);
             const timePart = date.toLocaleTimeString("en-US", {
               hour: "2-digit",
@@ -146,34 +161,54 @@ const ChatWindow = ({
             return (
               <div
                 key={index}
-                className={`flex ${
-                  isMine ? "justify-end" : "justify-start"
+                className={`flex items-end justify-end gap-2 ${
+                  isMine ? "flex-row" : "flex-row-reverse"
                 } mb-2 w-full`}
               >
                 <div
                   onContextMenu={(e) => ContextMenuhandler(e, msg)}
                   onClick={clickhandler}
-                  className={` flex justify-end gap-2 items-end  p-2  ${
-                    isMine ? "bg-[#0b93f6]" : "bg-[#f47230] "
-                  }
-                 ${isReplied ? "border-2" : ""} 
-                  max-w-[450px] rounded-[10px] `}
+                  className={`flex justify-end gap-2 min-w-28 items-end p-1 max-w-[450px] rounded-[10px] ${
+                    isMine ? "bg-[#0b93f6]" : "bg-[#E57A44]"
+                  }`}
                   ref={
                     index === savedMessages.length - 1 ? messagesEndRef : null
                   }
                 >
-                  <div className="text-text text-lg break-words whitespace-pre-wrap overflow-hidden">
-                    {msg.content}
+                  <div className="text-lg w-full">
+                    {chatTitle.members.length > 2 && (
+                      <h6 className="text-xs p-1 font-semibold">
+                        {msg.sender.username}
+                      </h6>
+                    )}
+                    {isReplied && (
+                      <div className="bg-gray-500 border-l-4 rounded-sm border-green-700 break-words px-2 overflow-ellipsis whitespace-nowrap overflow-hidden">
+                        {msg.replyTo.content}
+                      </div>
+                    )}
+                    <div className="flex flex-col break-words whitespace-pre-wrap overflow-hidden p-1 w-full">
+                      <h4 className="text-white break-words whitespace-pre-wrap">
+                        {msg.content}
+                      </h4>
+                      <div className="text-gray-200 text-xs flex items-center justify-end mt-1">
+                        {timePart}
+                        &nbsp;
+                        <i className="text-lg ri-check-double-line"></i>
+                      </div>
+                    </div>
                   </div>
-                  <div className=" text-gray-800 text-xs block h-[20px] ">
-                    {timePart}
-                    &nbsp;
-                    <i className=" text-lg ri-check-double-line"></i>
-                  </div>
+                </div>
+                <div className="h-8 rounded-full aspect-square">
+                  <img
+                    className="w-full h-full rounded-full object-cover"
+                    src={msg?.sender?.image?.url}
+                    alt=""
+                  />
                 </div>
               </div>
             );
           })}
+
           {showPopup && (
             <div
               style={{ top: pos.y, left: pos.x }}
@@ -185,7 +220,7 @@ const ChatWindow = ({
                   setReplyPopup(true);
                   setShowPopup(false);
                 }}
-                className="flex text-white popupOptions items-center py-1 px-3 gap-4 rounded-[5px]"
+                className="flex text-white popupOptions bg-green-500 items-center py-1 px-3 gap-4 rounded-[5px]"
               >
                 <i className="ri-reply-line"></i>
                 <p>Reply</p>
@@ -212,12 +247,9 @@ const ChatWindow = ({
             </div>
           )}
         </div>
-        <div
-        // className=" flex flex-col items-end"
-        // style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-        >
+        <div>
           {socketMessages.map((msg, index) => {
-            const isMine = msg.sender == user.user._id;
+            const isMine = msg.sender._id == user.user._id;
             const date = new Date(msg.time);
             const isReplied = msg.replyTo?._id || false;
             const timePart = date.toLocaleTimeString("en-US", {
@@ -228,56 +260,76 @@ const ChatWindow = ({
             return (
               <div
                 key={index}
-                className={`flex ${
-                  isMine ? "justify-end " : "justify-start"
+                className={`flex items-end justify-end gap-2 ${
+                  isMine ? " flex-row " : "flex-row-reverse "
                 } mb-2 w-full`}
               >
                 <div
                   onContextMenu={(e) => ContextMenuhandler(e, msg)}
                   onClick={clickhandler}
-                  className={` flex justify-end gap-2 items-end p-2  ${
-                    isMine ? "bg-[#0b93f6]" : "bg-[#E57A44] "
-                  }
-                  ${isReplied ? "border-2" : ""}    
-                  max-w-[450px] rounded-[10px]`}
+                 className={`flex justify-end gap-2 min-w-28 items-end p-1 max-w-[450px] rounded-[10px] ${
+                    isMine ? "bg-[#0b93f6]" : "bg-[#E57A44]"
+                  }`}
                   ref={
                     index === savedMessages.length - 1 ? messagesEndRef : null
                   }
                 >
                   <div
-                    className={
-                      "break-words whitespace-pre-wrap overflow-hidden text-lg "
-                    }
+                    className={"text-lg w-full"}
                     ref={
                       index === socketMessages.length - 1
                         ? messagesEndRef
                         : null
                     }
                   >
-                    {msg.message}
+                    {chatTitle.members.length > 2 && (
+                      <h6 className="text-xs  font-semibold">
+                        {" "}
+                        {msg.sender.username}{" "}
+                      </h6>
+                    )}
+                    {isReplied && (
+                      <div className="bg-gray-500 border-l-4 rounded-sm border-green-700 break-words overflow-ellipsis px-2 whitespace-nowrap overflow-hidden">
+                        {msgToReply2}\{" "}
+                      </div>
+                    )}
+                    <div className="flex flex-col break-words whitespace-pre-wrap overflow-hidden w-full">
+                      <h4 className="text-white break-words whitespace-pre-wrap">
+                        {msg.message}
+                      </h4>
+                      <div className="text-gray-200 text-xs flex items-center justify-end mt-1">
+                        {timePart}
+                        &nbsp;
+                        <i className="text-lg ri-check-double-line"></i>
+                      </div>
+                    </div>
                   </div>
-
-                  <div className=" text-gray-800 text-xs h-[20px]">
-                    {timePart}
-                    &nbsp;
-                    <i className=" text-lg ri-check-double-line"></i>
-                  </div>
+                </div>
+                <div className="h-8 rounded-full aspect-square ">
+                  <img
+                    className="w-full h-full  rounded-full object-cover"
+                    src={msg?.sender?.image?.url}
+                    alt=""
+                  />
                 </div>
               </div>
             );
           })}
         </div>
       </div>
+      {/* ..replyPopUp */}
       <div
         ref={replyRef}
-        className={` flex absolute w-[35%] ml-[265px] bg-[#DAD1BE]  h-12 mt-1 rounded-t-lg p-2 justify-between items-center`}
+        className={
+          " flex absolute w-[35%] ml-[265px] bg-[#DAD1BE]  h-12 mt-1 rounded-t-lg p-2 justify-between items-center"
+        }
       >
         <i className="ri-reply-fill text-xl "></i>
         <div className="flex flex-col w-[85%] break-words whitespace-normal overflow-hidden items-start">
           <h1 className="text-[#0b93f6] font-semibold">
             Reply to {chatTitle.chatName}
           </h1>
-          <h3>{msgToReply2}</h3>
+          <h3>{msgToReply}</h3>
         </div>
         <i
           onClick={() => {

@@ -1,64 +1,82 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-const CreatePersonalChatPanel = ({ setSearchNewMembelPanel }) => {
-
+import { toast } from "react-toastify";
+const CreatePersonalChatPanel = ({
+  setSearchNewMembelPanel,
+  user,
+  setFoundChats,
+}) => {
   const [searchUser, setSearchUser] = useState("");
   const [foundUsers, setFoundUsers] = useState([]);
   const [selectedUserId, setSelectedUserId] = useState(null);
-  const [addFriend, setAddFriend] = useState([])
+  const [addFriend, setAddFriend] = useState("");
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await axios.get(
-          `${import.meta.env.VITE_BASE_URL}/users`
-      , { withCredentials: true }   );
-        const responseArray = response.data.users;
-
-        const filtered = responseArray.filter((user) =>
-          `${user.firstName} ${user.lastName} ${user.username}`
-            .toLowerCase()
-            .includes(searchUser.toLowerCase())
-        );
-
-        setFoundUsers(filtered); //  update state correctly
-      } catch (error) {
-        console.error("Error fetching users:", error);
-      }
-    };
-
     if (searchUser.trim() !== "") {
-      fetchUsers(); //  call the async function
-    } 
+      (async () => {
+        try {
+          const response = await axios.get(
+            `${import.meta.env.VITE_BASE_URL}/users`,
+            { withCredentials: true }
+          );
+
+          const responseArray = response.data.users;
+
+          const otherUsers = responseArray.filter(
+            (mem) => mem._id !== user.user._id
+          );
+          console.log(responseArray);
+
+          const filtered = otherUsers.filter((user) =>
+            `${user.firstName} ${user.lastName} ${user.username}`
+              .toLowerCase()
+              .includes(searchUser.toLowerCase())
+          );
+          // console.log(filtered);
+
+          setFoundUsers(filtered); //  update state correctly
+        } catch (error) {
+          console.error("Error fetching users:", error);
+        }
+      })();
+    }
     return () => {
-      // Cleanup logic if needed
+      setFoundUsers([]);
     };
   }, [searchUser]);
 
-  const submitHandler = async (user) => {    
+  const submitHandler = async (user) => {
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_BASE_URL}/chat/personal`,
-        { chatName:user.username, members: [user._id] }, { withCredentials: true } 
+        { chatName: user.username, members: [user._id] },
+        { withCredentials: true }
       );
-      console.log("Group created:", response.data);
+      const newChat = response.data.chat;
+      console.log("Personal Chat Created:", response.data);
+      toast.success("Personal chat Created Successfully");
+      setSearchNewMembelPanel(false);
+      setAddFriend("");
+      setFoundChats((prev) => [...prev, newChat]);
     } catch (error) {
       console.error("Error creating group:", error);
     }
   };
 
-const selectedUserHandler = (userId) => {
+  const selectedUserHandler = (userId) => {
     setSelectedUserId((prevId) => (prevId === userId ? null : userId));
-};
-  
+  };
+
   return (
-  <>
+    <>
       <div className="flex w-full flex-col justify-center p-2">
-        <div
-          className="fixed flex flex-col items-center rounded-4xl w-full bg-red-400 z-50 h-[15%] left-0 top-0"
-        >
+        <div className="fixed flex flex-col items-center rounded-4xl w-full bg-red-400 z-50 h-[15%] left-0 top-0">
           <i
-            onClick={() => setSearchNewMembelPanel(false)}
+            onClick={() => {
+              setSearchNewMembelPanel(false);
+              setSearchUser("");
+              setSelectedUserId(null);
+            }}
             className="text-2xl  text-gray-700 font-semibold ri-arrow-down-wide-fill"
           ></i>
           <div className="border-2 border-red-500 w-9/10 bg-gray-400 flex items-center justify-between gap-2 px-3 p-2 rounded-lg">
@@ -83,35 +101,48 @@ const selectedUserHandler = (userId) => {
 
           return (
             <div
-            onClick={() => selectedUserHandler(user._id)}    
+              onClick={() => selectedUserHandler(user._id)}
               key={idx}
-              className={` h-16 py-2 w-full px-6 flex justify-between items-center rounded-2xl ${
+              className={` h-16 py-2 w-full px-2 flex justify-between items-center rounded-2xl ${
                 isSelected ? "bg-red-500 " : "bg-yellow-400"
               }`}
             >
-              <div className="flex flex-col items-start ">
-                <div className="flex justify-start items-center gap-2">
-                  <h2>
-                    {user.firstName} {user.lastName}
-                  </h2>
-                  {user.gender === "male" ? (
-                    <i className="text-[#2986cc] ri-men-fill"></i>
-                  ) : (
-                    <i className="text-[#c90076] ri-women-fill"></i>
-                  )}
+              <div className="h-full w-full flex gap-4">
+                <div className="h-full rounded-full aspect-square">
+                  <img
+                    className="object-cover rounded-full w-full h-full"
+                    src={user.image.url}
+                    alt=""
+                  />
                 </div>
-                <h4>{user.username}</h4>
+                <div className="flex flex-col items-start ">
+                  <div className="flex justify-start items-center gap-2">
+                    <h2>
+                      {user.firstName} {user.lastName}
+                    </h2>
+                    {user.gender === "male" ? (
+                      <i className="text-[#2986cc] ri-men-fill"></i>
+                    ) : (
+                      <i className="text-[#c90076] ri-women-fill"></i>
+                    )}
+                  </div>
+                  <h4>{user.username}</h4>
+                </div>
               </div>
               {isSelected ? (
-                 <button 
-                 type="submit"
-                 onClick={(e)=>{
-                  e.stopPropagation();
-                  setAddFriend(prev => [...prev, user._id]);
-                  submitHandler(user)}}
-                 className="bg-blue-700 flex justify-between text-sm -mr-2 items-center p-2 rounded-lg">Chat<i class="ri-sparkling-fill"></i></button>       
-                 ) : (
-                <i class="ri-user-add-fill"></i>
+                <button
+                  type="submit"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setAddFriend(user._id);
+                    submitHandler(user);
+                  }}
+                  className="bg-blue-700 flex justify-between text-sm items-center p-2 rounded-lg"
+                >
+                  Chat<i class="ri-sparkling-fill"></i>
+                </button>
+              ) : (
+                <i className="ri-user-add-fill"></i>
               )}
             </div>
           );

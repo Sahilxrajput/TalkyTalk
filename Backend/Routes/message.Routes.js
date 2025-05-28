@@ -12,6 +12,4 @@ router.post('/mark-seen', userAuth,  markSeenMessage)
 
 router.post("/delete", userAuth, deleteMessage )
 
-// router.put('/replyTo', userAuth, replyMessage)
-
 module.exports = router;

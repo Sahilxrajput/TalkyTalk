@@ -1,15 +1,15 @@
 require("dotenv").config();
 
-const {app, server, express} = require("./socket/socket.js")
+const { app, server, express } = require("./socket/socket.js");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
 const passportLocalMongoose = require("passport-local-mongoose");
 const cookieParser = require("cookie-parser");
-const multer = require('multer');
-const path = require('path');
+const multer = require("multer");
+const path = require("path");
 const cors = require("cors");
 const session = require("express-session");
-const {sendEmail} = require("./sendEmail.js");
+const { sendEmail } = require("./sendEmail.js");
 const Message = require("./Models/message.Model.js");
 // const {storage, cloudinary} = require("./cloudConfig.js");
 // const upload = multer({ storage});
@@ -18,7 +18,7 @@ const connectToDb = require("./Db/db.js");
 //routes
 const User = require("./Models/user.Model.js");
 const userRouter = require("./Routes/user.routes.js");
-const messageRouter = require('./Routes/message.Routes.js')
+const messageRouter = require("./Routes/message.Routes.js");
 const chatRouter = require("./Routes/chat.Routes.js");
 
 const PORT = process.env.PORT || 8000;
@@ -32,7 +32,7 @@ app.use(cookieParser());
 app.use(
   cors({
     origin: "http://localhost:5173",
-    methods: ["GET", "POST"],
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     credentials: true,
   })
 );
@@ -58,20 +58,15 @@ passport.use(
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
-
-
-app.use('/message', messageRouter)
-
+app.use("/message", messageRouter);
 
 app.use("/users", userRouter);
 app.use("/chat", chatRouter);
 app.post("/getotp", (req, res) => {
   sendEmail({
-    to: req.body.to
-  })
+    to: req.body.to,
+  });
 });
-
-
 
 ///////////////////////////////////////////////////////////////////
 

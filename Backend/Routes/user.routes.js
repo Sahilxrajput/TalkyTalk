@@ -3,10 +3,11 @@ const User = require("../Models/user.Model.js");
 const {body} = require("express-validator");
 const userController = require("../Controllers/user.controller.js");
 const authMiddleware = require("../Middlewares/userAuth.js")  
+const multer = require("multer")
+const {storage, cloudinary} = require("../cloudConfig.js")
+const upload = multer({ storage })
 
-router.get("/", userController.getAllUsers);
-
-router.post('/signup', [
+ const signupValidation = [
     body("firstName").isLength({min: 3}).withMessage("First name must be at least 3 characters long"),
     body("lastName").isLength({min: 3}).withMessage("Last name must be at least 3 characters long"),
     body("username").isLength({min: 3}).withMessage("Username must be at least 3 characters long"),
@@ -19,12 +20,17 @@ router.post('/signup', [
     .exists({ checkFalsy: true }).withMessage('Age is required')
     .isInt({ min: 16 }).withMessage('Age must be at least 16'),
     body("gender").notEmpty().withMessage("gender is required"),
-], authMiddleware.userAuth, userController.signUpUser);
+]
+
+
+router.get("/", userController.getAllUsers);
+
+router.post('/signup', upload.single("image"), signupValidation, userController.signUpUser);
 
 router.post('/login',[
     body("email").isEmail().withMessage("Email is required"),
     body("password").isLength({min: 4}).withMessage("password should be atleast 4 char long"),
-], authMiddleware.userAuth, userController.loginUser)
+], userController.loginUser)
 
 router.get('/profile', authMiddleware.userAuth, userController.getUserProfile)
 
