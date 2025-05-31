@@ -70,6 +70,13 @@ passport.use(
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
+app.get('/', (req, res)=>{
+  res.send({
+    activeStatus: true,
+    error:false,
+  })
+})
+
 app.use("/message", messageRouter);
 
 app.use("/users", userRouter);
