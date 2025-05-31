@@ -4,7 +4,6 @@ import express from "express";
 const app = express();
 const server = createServer(app);
 import Message from "../Models/message.Model.js";
-import { v4 as uuidv4 } from "uuid";
 
 const io = new Server(server, {
   cors: {
@@ -20,7 +19,6 @@ let onlineUsers = 0;
 
 console.log("Socket.io initialized");
 
-// const users = new Set();
 
 io.on("connection", (socket) => {
   onlineUsers++;
@@ -93,7 +91,6 @@ io.on("connection", (socket) => {
         roomId,
         sender,
         time: new Date(),
-        // _id: uuidv4(),
         replyTo: repliedMessage, // Include full replied message if exists
       });
 
