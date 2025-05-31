@@ -4,6 +4,8 @@ import { useEffect } from "react";
 import { useState } from "react";
 
 const VideoComponent = () => {
+    var socketRef = useRef();
+    let socketIdRef = useRef();
   const [videoAvailable, setVideoAvailable] = useState(false);
   const [audioAvailable, setAudioAvailable] = useState(false);
   const [screenAvailable, setScreenAvailable] = useState(false);
@@ -11,6 +13,11 @@ const VideoComponent = () => {
   let [audio, setAudio] = useState();
   let [screen, setScreen] = useState();
   const localVideoRef = useRef(null);
+  const [messages, setMessages] = useState([]);
+  const [message, setMessage] = useState();
+  const [newMessage, setNewMessage] = useState(0);
+  const videoRef = useRef([]);
+  let [videos, setVideos] = useState([]);
 
   const getPermission = async () => {
     try {
@@ -21,7 +28,7 @@ const VideoComponent = () => {
         setVideoAvailable(true);
         console.log("Video permission granted");
       } else {
-        setVideoAvailable(true);
+        setVideoAvailable(false);
         console.log("Video permission denied");
       }
 
@@ -32,7 +39,7 @@ const VideoComponent = () => {
         setAudioAvailable(true);
         console.log("Audio permission granted");
       } else {
-        setAudioAvailable(true);
+        setAudioAvailable(false);
         console.log("Audio permission denied");
       }
 
@@ -63,10 +70,44 @@ const VideoComponent = () => {
     getPermission();
   });
 
-  const getMedia = () => {};
-    setAudio(audioAvailable)
-    setVideo(videoAvailable)
-     
+  const getUserMediaSuccess = (stream) => {
+
+  }
+
+  const getUserMedia = () => {
+    if ((video && videoAvailable) || (audio && audioAvailable)) {
+      navigator.mediaDevices
+        .getUserMedia({ video: video, audio: audio })
+        .then(() => {getUserMediaSuccess})
+        .then((stream) => {})
+        .catch((e) => console.log(e));
+    } else {
+      try {
+      } catch (error) {
+        let tracks = localVideoRef.current.srcObject.getTracks();
+        tracks.forEach((track) => track.stop());
+        console.log(error);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (video !== undefined && audio !== undefined) {
+      getUserMedia();
+    }
+  }, [audio, video]);
+
+  const connectToSocketServer = () => {
+    socketRef.current = io.connect(server_url, {secure: false})
+    
+  }
+
+  const getMedia = () => {
+    setAudio(audioAvailable);
+    setVideo(videoAvailable);
+    connectToSocketServer()
+  };
+
   return (
     <div>
       VideoComponent

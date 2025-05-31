@@ -9,6 +9,7 @@ const Home = lazy(() => import("./pages/Home"));
 const Profile = lazy(() => import("./pages/Profile"));
 const Signup = lazy(() => import("./pages/Signup"));
 const Login = lazy(() => import("./pages/Login"));
+const Landing = lazy(() => import("./pages/LandingPage"));
 
 const App = () => {
 
@@ -33,6 +34,7 @@ const App = () => {
         </UserProtectedWrapper>
         } />
       <Route path="/signup" element={<Signup />} />
+      <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Login />} />
       <Route path="/call" element={<VideoComponent />} />
       <Route path="*" element={<PageNotFound/> } />

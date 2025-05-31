@@ -27,7 +27,7 @@ const AddMembers = ({ setSearchNewMembelPanel, setCreateGroupPanel, setAddMember
           setCreateGroupPanel(true);
           setAddMemberpanel(false);
         }}
-        className="flex flex-col "
+        className="flex flex-col hover:cursor-pointer "
       >
         <div className="bg-blue-500 aspect-square  text-white text-3xl flex items-center justify-center rounded-full h-[50px]">
           <i className="ri-team-line"></i>
@@ -40,7 +40,7 @@ const AddMembers = ({ setSearchNewMembelPanel, setCreateGroupPanel, setAddMember
           setAddMemberpanel(false);
         }}
         type="button"
-        className="flex flex-col"
+        className="flex flex-col hover:cursor-pointer "
       >
         <div className="bg-blue-500 aspect-square  text-white text-3xl flex items-center justify-center rounded-full h-[50px]">
           <i className="ri-user-add-line"></i>

@@ -77,7 +77,7 @@ const CreatePersonalChatPanel = ({
               setSearchUser("");
               setSelectedUserId(null);
             }}
-            className="text-2xl  text-gray-700 font-semibold ri-arrow-down-wide-fill"
+            className="text-2xl hover:cursor-pointer  text-gray-700 font-semibold ri-arrow-down-wide-fill"
           ></i>
           <div className="border-2 border-red-500 w-9/10 bg-gray-400 flex items-center justify-between gap-2 px-3 p-2 rounded-lg">
             <i className="ri-find-replace-line"></i>
@@ -103,7 +103,7 @@ const CreatePersonalChatPanel = ({
             <div
               onClick={() => selectedUserHandler(user._id)}
               key={idx}
-              className={` h-16 py-2 w-full px-2 flex justify-between items-center rounded-2xl ${
+              className={` h-16 py-2 w-full px-2 hover:cursor-pointer flex justify-between items-center rounded-2xl ${
                 isSelected ? "bg-red-500 " : "bg-yellow-400"
               }`}
             >
@@ -137,7 +137,7 @@ const CreatePersonalChatPanel = ({
                     setAddFriend(user._id);
                     submitHandler(user);
                   }}
-                  className="bg-blue-700 flex justify-between text-sm items-center p-2 rounded-lg"
+                  className="bg-blue-700 flex justify-between hover:cursor-pointer  text-sm items-center p-2 rounded-lg"
                 >
                   Chat<i class="ri-sparkling-fill"></i>
                 </button>

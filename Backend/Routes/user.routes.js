@@ -18,7 +18,7 @@ const upload = multer({ storage })
     body("confirmPassword").isLength({min: 4}).withMessage("password should be atleast 4 char long"),
     body('age')
     .exists({ checkFalsy: true }).withMessage('Age is required')
-    .isInt({ min: 16 }).withMessage('Age must be at least 16'),
+    .isInt({ min: 10 }).withMessage('Age must be at least 10'),
     body("gender").notEmpty().withMessage("gender is required"),
 ]
 

@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
-      "dev": "nodemon server.js",
-      "start": "node server.js"
+    "dev": "nodemon server.js",
+    "start": "node server.js"
   },
   "keywords": [],
   "author": "",
@@ -12,6 +12,7 @@
   "description": "",
   "dependencies": {
     "cloudinary": "^2.6.1",
+    "connect-mongo": "^5.1.0",
     "cookie-parser": "^1.4.7",
     "dotenv": "^16.5.0",
     "expres": "^0.0.5",

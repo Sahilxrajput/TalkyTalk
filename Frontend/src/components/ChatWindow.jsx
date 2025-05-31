@@ -25,7 +25,7 @@ const ChatWindow = ({
   const [msgToReply2, setMsgToReply2] = useState("");
   const majorRef = useRef(null);
   const [copied, setCopied] = useState(false);
-  const [matchedChat, setMatchedChat] = useState()
+  const [matchedChat, setMatchedChat] = useState();
 
   const getAllMessages = async (chatId) => {
     const response = await axios.post(
@@ -35,7 +35,7 @@ const ChatWindow = ({
     );
     return response.data.data;
   };
-
+  
   const otherMember = chatTitle.members.find(
     (member) => member._id !== user.user._id
   );
@@ -45,7 +45,6 @@ const ChatWindow = ({
     setPos({ x: e.pageX, y: e.pageY });
     setShowPopup(true);
     setMsgId(msg._id);
-    console.log(msg);
     setMsgToReply(msg.content || msg.message);
   };
 
@@ -84,15 +83,9 @@ const ChatWindow = ({
   };
 
   useEffect(() => {
-  const matchedChat = foundChats.find(
-    (chat) => chat._id === chatTitle._id
-  );
-  setMatchedChat(matchedChat)
-}, [chatTitle, foundChats]);
-
-useEffect(()=>{
-  console.log(matchedChat)
-},[chatTitle])
+    const matchedChat = foundChats.find((chat) => chat._id === chatTitle._id);
+    setMatchedChat(matchedChat);
+  }, [chatTitle, foundChats]);
 
   useEffect(() => {
     (async function () {
@@ -100,7 +93,7 @@ useEffect(()=>{
       setSavedMessages(chatAllMessages);
       setSocketMessages([]); // reset on chat change
     })();
-  }, [chatTitle._id]);
+  }, [chatTitle._id, savedMessages, socketMessages]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -116,6 +109,10 @@ useEffect(()=>{
     }
   }, [showPopup]);
 
+  useEffect(()=>{
+    // console.log(getChatData())
+  })
+
   return (
     <>
       <div className="flex justify-between ml-4 bg-red-400 pl-4 h-1/10 border-b-2 items-center w-full ">
@@ -123,7 +120,7 @@ useEffect(()=>{
           <div className="w-14 rounded-full aspect-square">
             <img
               className="object-cover rounded-full w-full h-full"
-              src={user.user.image.url}
+              src={getChatData()?.image?.url || user.user.image.url }
               alt="profil"
             />
           </div>
@@ -168,29 +165,29 @@ useEffect(()=>{
                 <div
                   onContextMenu={(e) => ContextMenuhandler(e, msg)}
                   onClick={clickhandler}
-                  className={`flex justify-end gap-2 min-w-28 items-end p-1 max-w-[450px] rounded-[10px] ${
+                  className={`flex justify-end gap-2 min-w-28 items-end p-t-1 px-1 max-w-[450px] rounded-[10px] ${
                     isMine ? "bg-[#0b93f6]" : "bg-[#E57A44]"
                   }`}
                   ref={
                     index === savedMessages.length - 1 ? messagesEndRef : null
                   }
                 >
-                  <div className="text-lg w-full">
+                  <div className="text-lg flex flex-col w-full">
                     {chatTitle.members.length > 2 && (
-                      <h6 className="text-xs p-1 font-semibold">
-                        {msg.sender.username}
+                      <h6 className="text-xs font-semibold">
+                        @{msg.sender.username}
                       </h6>
                     )}
                     {isReplied && (
-                      <div className="bg-gray-500 border-l-4 rounded-sm border-green-700 break-words px-2 overflow-ellipsis whitespace-nowrap overflow-hidden">
+                      <div className="bg-gray-500 border-l-4 rounded-sm border-green-700 break-words overflow-ellipsis whitespace-nowrap overflow-hidden">
                         {msg.replyTo.content}
                       </div>
                     )}
-                    <div className="flex flex-col break-words whitespace-pre-wrap overflow-hidden p-1 w-full">
-                      <h4 className="text-white break-words whitespace-pre-wrap">
+                    <div className="flex flex-col break-words whitespace-pre-wrap overflow-hidden w-full">
+                      <h4 className="text-white break-words px-1 whitespace-pre-wrap">
                         {msg.content}
                       </h4>
-                      <div className="text-gray-200 text-xs flex items-center justify-end mt-1">
+                      <div className="text-gray-200 text-xs flex items-center justify-end">
                         {timePart}
                         &nbsp;
                         <i className="text-lg ri-check-double-line"></i>
@@ -267,7 +264,7 @@ useEffect(()=>{
                 <div
                   onContextMenu={(e) => ContextMenuhandler(e, msg)}
                   onClick={clickhandler}
-                 className={`flex justify-end gap-2 min-w-28 items-end p-1 max-w-[450px] rounded-[10px] ${
+                  className={`flex justify-end gap-2 min-w-28 items-end px-1 p-t-1 max-w-[450px] rounded-[10px] ${
                     isMine ? "bg-[#0b93f6]" : "bg-[#E57A44]"
                   }`}
                   ref={
@@ -275,7 +272,7 @@ useEffect(()=>{
                   }
                 >
                   <div
-                    className={"text-lg w-full"}
+                    className={"text-lg flex flex-col w-full"}
                     ref={
                       index === socketMessages.length - 1
                         ? messagesEndRef
@@ -285,19 +282,19 @@ useEffect(()=>{
                     {chatTitle.members.length > 2 && (
                       <h6 className="text-xs  font-semibold">
                         {" "}
-                        {msg.sender.username}{" "}
+                        @{msg.sender.username}{" "}
                       </h6>
                     )}
                     {isReplied && (
-                      <div className="bg-gray-500 border-l-4 rounded-sm border-green-700 break-words overflow-ellipsis px-2 whitespace-nowrap overflow-hidden">
-                        {msgToReply2}\{" "}
+                      <div className="bg-gray-500 border-l-4 rounded-sm border-green-700 break-words overflow-ellipsis whitespace-nowrap overflow-hidden">
+                        {msgToReply2}{" "}
                       </div>
                     )}
                     <div className="flex flex-col break-words whitespace-pre-wrap overflow-hidden w-full">
                       <h4 className="text-white break-words whitespace-pre-wrap">
                         {msg.message}
                       </h4>
-                      <div className="text-gray-200 text-xs flex items-center justify-end mt-1">
+                      <div className="text-gray-200 text-xs flex items-center justify-end">
                         {timePart}
                         &nbsp;
                         <i className="text-lg ri-check-double-line"></i>

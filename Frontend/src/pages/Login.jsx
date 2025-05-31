@@ -8,23 +8,11 @@ import { toast } from "react-toastify";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { user, setUser } = useContext(UserDataContext);
-  const [showPassword, setShowPassword] = useState(false);
-  
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    username: "",
-    email: "",
-    age: "",
-    gender: "male", // default
-    bio: "Available",
-  });
 
-  const changeHandler = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+  const [showPassword, setShowPassword] = useState(false);
+  const { user, setUser } = useContext(UserDataContext);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const submitHandler = async (e) => {
     e.preventDefault();
@@ -32,12 +20,13 @@ const Login = () => {
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_BASE_URL}/users/login`,
-        formData,
+        { password, email },
         { withCredentials: true }
       );
 
       if (response.status === 200) {
         const data = response.data;
+        console.log(data);
         setUser(data); // Save user data to context
         localStorage.setItem("token", data.token);
         toast.success("User logged in successfully");
@@ -68,9 +57,9 @@ const Login = () => {
             name="email"
             className="appearance-none border-none w-[90%] bg-transparent p-0 m-0 focus:outline-none"
             type="email"
-            value={formData.email}
+            value={email}
             placeholder="Email"
-            onChange={(e) => changeHandler(e)}
+            onChange={(e) => setEmail(e.target.value)}
           />
         </div>
         <div className="border-2 w-[80%] border-yellow-500 flex items-center justify-start  gap-2 px-3 py-2 rounded-lg">
@@ -79,9 +68,9 @@ const Login = () => {
             name="password"
             className="appearance-none border-none w-[90%] bg-transparent p-0 m-0 focus:outline-none"
             type={showPassword ? "text" : "password"}
-            value={formData.password}
+            value={password}
             placeholder="Password"
-            onChange={(e) => changeHandler(e)}
+            onChange={(e) => setPassword(e.target.value)}
           />
           <button
             type="button"

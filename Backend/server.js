@@ -8,11 +8,10 @@ const cookieParser = require("cookie-parser");
 const multer = require("multer");
 const path = require("path");
 const cors = require("cors");
-const session = require("express-session");
 const { sendEmail } = require("./sendEmail.js");
 const Message = require("./Models/message.Model.js");
-// const {storage, cloudinary} = require("./cloudConfig.js");
-// const upload = multer({ storage});
+const session = require("express-session");
+const MongoStore = require("connect-mongo");
 const connectToDb = require("./Db/db.js");
 
 //routes
@@ -37,8 +36,21 @@ app.use(
   })
 );
 
+const store = MongoStore.create({
+  mongoUrl: process.env.ATLAS_DB_URL,
+  crypto: {
+    secret: process.env.DB_SECRET,
+  },
+  touchAfter: 24 * 60 * 60, // 24 hours
+});
+
+store.on("error", function (e) {
+  console.log("Mongo Session store error", e);
+});
+
 const sessionOptions = {
-  secret: "mysupersecretcode",
+  store,
+  secret:  process.env.DB_SECRET,
   resave: false,
   saveUninitialized: true,
   cookie: {

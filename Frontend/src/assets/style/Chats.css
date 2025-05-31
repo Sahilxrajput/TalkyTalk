@@ -1,5 +1,9 @@
+.TalkyTalk {
+  font-family: "WDXL Lubrifont TC", sans-serif;
+}
+
 .chats {
-  transition: background-color 0.2s ease, transform 0.2s ease-out ; 
+  transition: background-color 0.2s ease, transform 0.2s ease-out;
 }
 
 .chats:hover {
@@ -9,10 +13,10 @@
 
 /* chat Window  */
 .popupOptions {
-  transition: background-color 0.3s ease-in; 
+  transition: background-color 0.3s ease-in;
 }
 
-.popupOptions:hover{
+.popupOptions:hover {
   background-color: #141414;
   cursor: pointer;
 }
@@ -28,4 +32,4 @@
   background-color: royalblue;
 } */
 
-             /* ${replyPopup ? "rounded-t-none" : "rounded-t-lg"} */
+/* ${replyPopup ? "rounded-t-none" : "rounded-t-lg"} */

@@ -52,9 +52,9 @@ module.exports.signUpUser = async (req, res) => {
 
     console.log(`${otp} = is otp`);
     console.log(`${serverOtp} = is serverOtp`);
-    // if(otp !== serverOtp){
-    //     return res.status(401).json({ message: "Invalid OTP. Please try again." });
-    // }
+    if(otp !== serverOtp){
+        return res.status(401).json({ message: "Invalid OTP. Please try again." });
+    }
 
     if (password !== confirmPassword) {
       return res
@@ -110,46 +110,46 @@ module.exports.signUpUser = async (req, res) => {
 };
 
 module.exports.loginUser = async (req, res, next) => {
-  req.logout((err) => {
-    if (err) {
-      return res
-        .status(400)
-        .json({ error: "current login user is not logout" });
+  req.logout(async (logoutErr) => {
+    if (logoutErr) {
+      return res.status(400).json({ error: "Current user could not be logged out" });
     }
-  });
-  passport.authenticate("local", (err, user, info) => {
-    if (err) {
-      console.error("Login error:", err);
-      return res.status(500).json({ error: "Server error during login" });
-    }
-    if (!user) {
-      console.log(info);
 
-      return res
-        .status(401)
-        .json({ error: info.message || "Invalid credentials" });
-    }
-    req.login(user, (LoginErr) => {
-      if (LoginErr) {
-        console.error("Session error:", LoginErr);
-        return res.status(500).json({ error: "Failed to establish session" });
+    passport.authenticate("local", (err, user, info) => {
+      if (err) {
+        console.error("Login error:", err);
+        return res.status(500).json({ error: "Server error during login" });
       }
-      const token = user.getAuthToken();
-      res.cookie("token", token, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "None",
-      });
 
-      return res.status(200).json({
-        success: true,
-        user,
-        token,
-        message: "Logged in successfully",
+      if (!user) {
+        console.log(info);
+        return res.status(401).json({ error: info.message || "Invalid credentials" });
+      }
+
+      req.login(user, (loginErr) => {
+        if (loginErr) {
+          console.error("Session error:", loginErr);
+          return res.status(500).json({ error: "Failed to establish session" });
+        }
+
+        const token = user.getAuthToken(); // Make sure this method exists
+        res.cookie("token", token, {
+          httpOnly: true,
+          secure: true,
+          sameSite: "None",
+        });
+
+        return res.status(200).json({
+          success: true,
+          user,
+          token,
+          message: "Logged in successfully",
+        });
       });
-    });
-  })(req, res, next);
+    })(req, res, next);
+  });
 };
+
 
 module.exports.getUserProfile = async (req, res) => {
   try {

@@ -115,7 +115,7 @@ const AboutPanel = ({
             setAddToGroupPanel(false)
           }}
           className="bg-gray-500 flex justify-center gap-2 items-center text-white border-1 p-2 w-full text-lg rounded-xl">
-            <i class="ri-close-circle-line"></i>Remove Member
+            <i className="ri-close-circle-line"></i>Remove Member
           </button>
         </>
       )}

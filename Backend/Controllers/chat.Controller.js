@@ -45,32 +45,40 @@ module.exports.createPersonalChat = async (req, res) => {
 };
 
 module.exports.createGroupChat = async (req, res) => {
-  const { chatName, members } = req.body;
-
-  if (!chatName || !members) {
-    return res.status(400).json({ message: "Please fill all the fields" });
-  }
-
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
     return res.status(422).json({ errors: errors.array() });
   }
 
-  if (members.length < 2) {
+  const { chatName, members } = req.body;
+
+  if (!chatName || !members) {
+    return res.status(400).json({ message: "Please fill all the fields" });
+  }
+
+  if (!req.file) {
+    return res.status(400).json({ message: "No image file uploaded" });
+  }
+
+  let url = req.file.path;
+  let filename = req.file.filename;
+
+  if (members.length < 1) {
     return res.status(400).json({
-      message: "More than two members are required to create a group chat",
+      message: "at least two members are required to create a group chat",
     });
   }
 
-  members.push(req.user);
+  const groupMembers = [...members, req.user];
 
   try {
     const groupChat = await Chat.create({
-      chatName: chatName,
-      members: members,
+      chatName,
+      members: groupMembers,
       isGroupChat: true,
       groupAdmin: req.user,
+      image: { url, filename },
     });
     console.log("groupChat", groupChat);
 
@@ -80,6 +88,7 @@ module.exports.createGroupChat = async (req, res) => {
 
     res.status(200).json(fullGroupChat);
   } catch (error) {
+    console.log(error);
     console.log(error);
     res.status(500).json({ message: "Internal server error" });
   }
@@ -165,7 +174,9 @@ module.exports.removeFromGroup = async (req, res) => {
     }
 
     if (String(req.user._id) !== String(chat.groupAdmin._id)) {
-      return res.status(403).json({ message: "Only admins can remove other members" });
+      return res
+        .status(403)
+        .json({ message: "Only admins can remove other members" });
     }
 
     const updatedChat = await Chat.findByIdAndUpdate(
@@ -181,7 +192,7 @@ module.exports.removeFromGroup = async (req, res) => {
     console.error("Error removing user(s) from group:", err);
     res.status(500).json({ error: "Server error" });
   }
-}
+};
 
 module.exports.addToGroup = async (req, res) => {
   const { chatId, userIds } = req.body;

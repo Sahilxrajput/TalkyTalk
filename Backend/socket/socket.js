@@ -28,7 +28,7 @@ io.on("connection", (socket) => {
 
   socket.on("userConnected", (userId) => {
     users.add(userId);
-    console.log("userId:", userId)
+    console.log("userId:", userId);
     io.emit("userCount", users.size);
   });
 
@@ -88,13 +88,12 @@ io.on("connection", (socket) => {
         }
       }
 
-
       io.to(roomId).emit("chat", {
         message,
         roomId,
         sender,
         time: new Date(),
-        _id: uuidv4(),
+        // _id: uuidv4(),
         replyTo: repliedMessage, // Include full replied message if exists
       });
 
@@ -105,9 +104,6 @@ io.on("connection", (socket) => {
         replyTo: replyTo || null,
         time: new Date(),
       });
-      console.log('====================================');
-      console.log(newMessage);
-      console.log('====================================');
     } else {
       console.error("Missing roomId or message");
     }
@@ -130,7 +126,7 @@ io.on("connection", (socket) => {
   // socket.on("candidate", (data) => socket.broadcast.emit("candidate", data));
 
   //Handle disconnection
- 
+
   socket.on("disconnect", () => {
     onlineUsers--;
     console.log("A user disconnected", socket.id, onlineUsers);

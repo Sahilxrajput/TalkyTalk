@@ -2,6 +2,9 @@ const router = require("express").Router();
 const chatController = require("../Controllers/chat.Controller");
 const { body } = require("express-validator");
 const { userAuth } = require("../Middlewares/userAuth.js");
+const multer = require("multer");
+const { storage, cloudinary } = require("../cloudConfig.js");
+const upload = multer({ storage });
 
 // router.post(
 //   "/",
@@ -20,6 +23,7 @@ router.get("/chatIds", userAuth, chatController.getChatIds);
 
 router.post(
   "/group",
+  upload.single("image"),
   [
     body("chatName")
       .isLength({ min: 3 })

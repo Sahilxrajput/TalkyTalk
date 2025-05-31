@@ -5,6 +5,7 @@ import "remixicon/fonts/remixicon.css";
 import { UserDataContext } from "../context/UserContext";
 import axios from "axios";
 import { useEffect } from "react";
+import { toast } from "react-toastify";
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -69,15 +70,17 @@ const Signup = () => {
         }
       );
 
-      console.log(`laude ${otp}`);
+      console.log(`otp ${otp}`);
       console.log("Signup successful:", response.data);
 
       if (response.status === 201) {
         const data = response.data;
         setUser(data); // Save user data to context
+        toast.success("User signedUp successfully ");
         localStorage.setItem("token", data.token);
         navigate("/home");
       } else {
+        toast.error("Something went wrong");
         console.error("Error signing up:", response.data);
       }
 

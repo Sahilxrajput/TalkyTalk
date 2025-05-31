@@ -3,7 +3,6 @@ import { UserDataContext } from "../context/UserContext";
 import io from "socket.io-client";
 import "remixicon/fonts/remixicon.css";
 import "../assets/style/Chats.css";
-import Chats from "../components/Chats";
 import BgImage from "../assets/craft.jpg";
 import MessageBox from "../components/MessageBox";
 import gsap from "gsap";
@@ -46,8 +45,8 @@ const Home = () => {
   const { user } = useContext(UserDataContext);
   const [chatRenamePanel, setChatRenamePanel] = useState(false);
   const chatRenameRef = useRef(null);
-  const [removeFromGroupPanel, setRemoveFromGroupPanel] = useState(false)
-  const removeFromGroupRef = useRef(null)
+  const [removeFromGroupPanel, setRemoveFromGroupPanel] = useState(false);
+  const removeFromGroupRef = useRef(null);
 
   const navigate = useNavigate();
 
@@ -93,7 +92,7 @@ const Home = () => {
     }
   }, [addToGroupPanel]);
 
-   useGSAP(() => {
+  useGSAP(() => {
     if (!removeFromGroupPanel) {
       gsap.to(removeFromGroupRef.current, {
         transform: "translateY(0%)",
@@ -304,7 +303,7 @@ const Home = () => {
   return (
     <div className=" h-screen w-screen flex items-center overflow-hidden bg-[#030018] ">
       <div className="h-full w-1/20 py-3  bg-[#030018] text-xl flex flex-col items-center justify-between">
-        <button className="mb-4  aspect-square w-[80%]  rounded-xl">
+        <button className="mb-4  aspect-square w-[80%] hover:cursor-pointer  rounded-xl">
           <img
             onClick={() => navigate("/profile")}
             className="object-cover border-white border-2 w-full rounded-xl h-full"
@@ -312,26 +311,19 @@ const Home = () => {
             alt="boy"
           />
         </button>
-        <span className="py-2 px-3 aspect-square w-[80%] flex items-center justify-center bg-gray-300 rounded-xl">
-          <i className="ri-chat-1-fill"></i>
-        </span>
-        <span className="py-2 px-3 aspect-square w-[80%] flex items-center justify-center bg-gray-300 rounded-xl">
-          <i className="ri-folder-fill"></i>
-        </span>
-        <span className="py-2 px-3 aspect-square w-[80%] flex items-center justify-center bg-gray-300 rounded-xl">
-          <i className="ri-folder-fill"></i>
-        </span>
-        <span className="py-2 px-3 aspect-square w-[80%] flex items-center justify-center bg-gray-300 rounded-xl">
-          <i className="ri-folder-fill"></i>
-        </span>
 
-        <span className="py-2 px-3 aspect-square w-[80%] flex items-center justify-center bg-gray-300 rounded-xl">
-          <i className="ri-inbox-archive-fill"></i>
-        </span>
-
+        <span className="bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 text-transparent bg-clip-text TalkyTalk text-2xl font-black">T</span>
+        <span className="bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 text-transparent bg-clip-text TalkyTalk text-2xl font-black">A</span>
+        <span className="bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 text-transparent bg-clip-text TalkyTalk text-2xl font-black">L</span>
+        <span className="bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 text-transparent bg-clip-text TalkyTalk text-2xl font-black">K</span>
+        <span className="bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 text-transparent bg-clip-text TalkyTalk text-2xl font-black">Y</span>
+        <span className="bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 text-transparent bg-clip-text TalkyTalk text-2xl font-black">T</span>
+        <span className="bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 text-transparent bg-clip-text TalkyTalk text-2xl font-black">A</span>
+        <span className="bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 text-transparent bg-clip-text TalkyTalk text-2xl font-black">L</span>
+        <span className="bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 text-transparent bg-clip-text TalkyTalk text-2xl font-black">K</span>
         <button
           onClick={logouthandler}
-          className="py-2 mt-4 px-3 aspect-square w-[80%] flex items-center justify-center bg-gray-300 rounded-xl"
+          className="py-2 mt-4 px-3 hover:cursor-pointer aspect-square w-[80%] flex items-center justify-center bg-gray-300 rounded-xl"
         >
           <i className="ri-logout-box-line"></i>
         </button>
@@ -346,7 +338,7 @@ const Home = () => {
         >
           <div className=" fixed w-[23.15%] flex items-center justify-between px-4 h-16 rounded-t-4xl border-r-2 border-[#4E6766] bg-[#FFDBDB] ">
             {!isFocused && (
-              <h4 className=" ml-20 font-semibold text-pink-500 text-2xl ">
+              <h4 className=" ml-20 tracking-wider bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 text-transparent bg-clip-text TalkyTalk text-2xl font-black">
                 TalkyTalk
               </h4>
             )}
@@ -371,7 +363,7 @@ const Home = () => {
 
           <div
             ref={addMemberRef}
-            className="flex fixed w-[23%] z-30  top-180 items-center justify-center  bg-yellow-300 rounded-4xl"
+            className="flex fixed w-[23%] z-30 top-180 items-center justify-center  bg-yellow-300 rounded-4xl"
           >
             <AddMembers
               setSearchNewMembelPanel={setSearchNewMembelPanel}
@@ -395,14 +387,20 @@ const Home = () => {
             ref={addToGroupRef}
             className=" w-[23%] fixed h-[682px] top-180 rounded-4xl z-30  bg-red-400"
           >
-            <AddTOGroup chatTitle={chatTitle}  setAddToGroupPanel={setAddToGroupPanel} />
+            <AddTOGroup
+              chatTitle={chatTitle}
+              setAddToGroupPanel={setAddToGroupPanel}
+            />
           </div>
 
           <div
             ref={removeFromGroupRef}
             className=" w-[23%] fixed h-[98.5%] top-180 rounded-4xl z-30  bg-red-400"
           >
-            <RemoveFromGroup chatTitle={chatTitle} setRemoveFromGroupPanel={setRemoveFromGroupPanel} />
+            <RemoveFromGroup
+              chatTitle={chatTitle}
+              setRemoveFromGroupPanel={setRemoveFromGroupPanel}
+            />
           </div>
 
           <div
@@ -452,7 +450,7 @@ const Home = () => {
             onClick={() => {
               setAddMemberpanel(true);
             }}
-            className="bg-blue-700 aspect-square z-20 absolute text-black text-3xl bottom-2 left-72 flex items-center justify-center rounded-full h-[50px]"
+            className="bg-blue-700 aspect-square hover:cursor-pointer z-20 absolute text-black text-3xl bottom-2 left-72 flex items-center justify-center rounded-full h-[50px]"
           >
             <i className="ri-add-line"></i>
           </button>
@@ -475,7 +473,7 @@ const Home = () => {
                     selectedChatHandler(chat._id);
                   }}
                   key={idx}
-                  className={`flex chats justify-start gap-4 border-2 border-[#4E6766]  w-full rounded-2xl  p-2 ${
+                  className={`flex chats justify-start hover:cursor-pointer  gap-4 border-2 border-[#4E6766]  w-full rounded-2xl  p-2 ${
                     isSelected ? "bg-red-500!" : " "
                   } `}
                 >
@@ -505,7 +503,7 @@ const Home = () => {
         >
           {selectedChatId && (
             <MessageBox
-            foundChats={foundChats}
+              foundChats={foundChats}
               replyRef={replyRef}
               videoReqHandler={videoReqHandler}
               aboutHandler={aboutHandler}

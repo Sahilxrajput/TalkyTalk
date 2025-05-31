@@ -8,6 +8,8 @@ const CreategroupPanel = ({ setCreateGroupPanel, user, setFoundChats }) => {
   const [addMembers, setAddMembers] = useState([]);
   const [chatName, setChatName] = useState("");
   const [selectedUsers, setSelectedUsers] = useState([]);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [file, setFile] = useState(null);
 
   useEffect(() => {
     if (searchUser.trim() !== "") {
@@ -63,14 +65,28 @@ const CreategroupPanel = ({ setCreateGroupPanel, user, setFoundChats }) => {
   const submitHandler = async (e) => {
     e.preventDefault();
     try {
+      const formData = new FormData();
+      console.log(file)
+      formData.append("chatName", chatName);
+      formData.append("image", file);
+      addMembers.forEach((memberId) => formData.append("members[]", memberId));
+
       const response = await axios.post(
         `${import.meta.env.VITE_BASE_URL}/chat/group`,
-        { chatName, members: addMembers },
-        { withCredentials: true }
+        formData,
+        {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
       );
+
       const newChat = response.data.chat;
+      console.log(newChat)
       setChatName(""); // Reset chat name
       setAddMembers([]); // Reset added members
+      setFile(null);
       toast.success("New Group Created Successfully");
       setCreateGroupPanel(false);
       setFoundChats((prev) => [...prev, newChat]);
@@ -79,6 +95,19 @@ const CreategroupPanel = ({ setCreateGroupPanel, user, setFoundChats }) => {
       console.error("Error creating group:", error);
     }
   };
+
+  const handleImageChange = (e) => {
+  const selectedFile = e.target.files[0];
+  if (selectedFile) {
+    setFile(selectedFile);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result);
+    };
+    reader.readAsDataURL(selectedFile);
+  }
+};
+
 
   return (
     <div
@@ -97,7 +126,7 @@ const CreategroupPanel = ({ setCreateGroupPanel, user, setFoundChats }) => {
             setSelectedUsers([]);
             setAddMembers([]);
           }}
-          className="text-2xl -mb-4 text-center text-gray-700 font-semibold  ri-arrow-down-wide-fill"
+          className="text-2xl -mb-4 hover:cursor-pointer  text-center text-gray-700 font-semibold  ri-arrow-down-wide-fill"
         ></i>
         <div className="border-2 w-[80%] bg-gray-400 border-yellow-500 flex items-center justify-start  gap-2 px-3 py-1 rounded-lg">
           <i className="ri-folder-add-fill text-2xl text-[#D30C7B]"></i>
@@ -122,12 +151,21 @@ const CreategroupPanel = ({ setCreateGroupPanel, user, setFoundChats }) => {
             placeholder="Add Members"
           />
         </div>
-        <button
-          type="submit"
-          className="bg-red-600 ml-50 -mt-2  font-semibold text-white p-2 rounded-lg "
-        >
-          Create
-        </button>
+        <div className="flex w-full items-center justify-around">
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
+            className="w-1/2 border-2 rounded-lg"
+          />
+          {imagePreview && <img src={imagePreview} alt="Preview" width="30"  />}
+          <button
+            type="submit"
+            className="bg-red-600 hover:cursor-pointer font-semibold text-white p-2 rounded-lg "
+          >
+            Create
+          </button>
+        </div>
       </form>
       <div className="flex mt-48 mx-6 h-full flex-col gap-4">
         {foundUsers.map((user, idx) => {
