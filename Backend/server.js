@@ -81,12 +81,9 @@ app.use("/message", messageRouter);
 
 app.use("/users", userRouter);
 app.use("/chat", chatRouter);
+
 app.post("/getotp", (req, res) => {
   sendEmail({
     to: req.body.to,
   });
 });
-
-///////////////////////////////////////////////////////////////////
-
-server.listen(PORT, () => console.log(`Server is running on port ${PORT}....`));
