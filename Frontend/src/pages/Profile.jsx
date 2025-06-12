@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { UserDataContext } from "../context/UserContext";
 import "remixicon/fonts/remixicon.css";
 import axios from "axios";
+import profileImg from "../assets/profilePic.jpg";
 import { toast } from "react-toastify";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -87,7 +88,7 @@ const Profile = () => {
         <div className="h-52 rounded-full border-2  border-white bg-green-400 aspect-square ">
           <img
             className="w-full h-full  rounded-full object-cover"
-            src={user.user.image.url}
+            src={user.user.image.url || profileImg}
             alt=""
           />
         </div>

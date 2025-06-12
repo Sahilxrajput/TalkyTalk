@@ -1,62 +1,65 @@
-import axios from "axios";
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { toast } from "react-toastify";
+import React, { useState, useEffect, useContext } from "react";
+import { useNavigate, Link } from "react-router-dom";
+// import backgroundImage from "../../assets/banner-bg.png";
 import "../assets/style/signup.css";
-import "remixicon/fonts/remixicon.css";
-import profileImg from "../../public/boy.png";
 
-const SignUpTwo = () => {
-  const [loading, setLoading] = useState(false);
-  const [step, setStep] = useState(1);
+import "remixicon/fonts/remixicon.css";
+import { UserDataContext } from "../context/UserContext";
+import axios from "axios";
+import { toast } from 'react-toastify' 
+
+const Signup = () => {
+  const navigate = useNavigate();
+
+  const { user, setUser } = useContext(UserDataContext);
+  const [otp, setOtp] = useState("");
   const [file, setFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
+
   const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-    otp: "",
     firstName: "",
     lastName: "",
     username: "",
-    bio: "Online!",
+    email: "",
     url: "",
     filename: "",
+    age: "",
+    gender: "male", // default
+    bio: "Available",
   });
 
+
+  const [imagePreview, setImagePreview] = useState(null);
+
+  const handleImageChange = (e) => {
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      setFile(selectedFile);
+    }
+  };
 
   const changeHandler = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const isValidEmail = (email) => {
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return regex.test(email);
-  };
-
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const stepsHandler = (e) => {
-    e.preventDefault();
-    setStep(2);
-  };
-
   const submitHandler = async (e) => {
     e.preventDefault();
+
+    const formDataToSend = new FormData();
+    formDataToSend.append("image", file); //  real file
+
+    // Append all fields from formData
+    Object.entries(formData).forEach(([key, value]) => {
+      formDataToSend.append(key, value);
+    });
+
+    formDataToSend.append("otp", otp); // append OTP separately
 
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_BASE_URL}/users/signup`,
-        formData,
+        formDataToSend,
         {
           headers: {
             "Content-Type": "multipart/form-data",
@@ -64,6 +67,10 @@ const SignUpTwo = () => {
           withCredentials: true,
         }
       );
+
+      console.log(`otp ${otp}`);
+      console.log("Signup successful:", response.data);
+
       if (response.status === 201) {
         const data = response.data;
         setUser(data); // Save user data to context
@@ -74,219 +81,150 @@ const SignUpTwo = () => {
         toast.error("Something went wrong");
         console.error("Error signing up:", response.data);
       }
+
+      // Reset form state
+      setOtp("");
+      setFile(null);
+      setFormData({
+        firstName: "",
+        lastName: "",
+        username: "",
+        email: "",
+        age: "",
+        gender: "male",
+        bio: "Available",
+      });
     } catch (error) {
       console.error("Signup failed:", error.response?.data || error.message);
     }
   };
 
-  const handleSendOtp = async () => {
-    const email = formData.email.trim();
-    console.log(isValidEmail(email));
-    if (email === "" || !isValidEmail(email)) {
-      toast.warn("Please enter a valid email address");
-      return;
-    }
-    setLoading(true);
-    try {
-      const res = await axios.post(
-        `${import.meta.env.VITE_BASE_URL}/users/send-otp`,
-        { to: formData.email },
-        { withCredentials: true }
-      );
-      toast.success("OTP sent successfully!");
-      setStep(2);
-    } catch (error) {
-      toast.error("Failed to send OTP. Please try again.");
-    } finally {
-      setLoading(false); // re-enable button
-    }
+  const getOtpHandler = async () => {
+    const res = await axios.post(
+      `${import.meta.env.VITE_BASE_URL}/users/send-otp`,
+      { to: formData.email },
+      { withCredentials: true }
+    );
   };
 
   return (
-    <div className="w-screen h-screen flex items-center justify-center  bg-green-600 bg-cover bg-no-repeat bg-center">
-      <div className="bg-[#fccee84c] backdrop-blur-lg h-[500px] p-11 rounded-xl w-[600px] flex justify-center flex-col gap-10 items-center text-white">
-        {step === 1 && (
-          <h1 className="mt-2 text-3xl font-bold text-[#D30C7B] stroke-2 stroke-yellow-500 ">
-            ~~~~ Welcome Talkytalk ~~~~{" "}
-          </h1>
-        )}
-        {step === 1 && (
-          <form
-            className="w-full h-full  flex justify-center flex-col gap-10 items-center text-white"
-            onSubmit={(e) => stepsHandler(e)}
+    <div
+      className="w-screen h-screen flex items-center justify-center bgImg bg-cover bg-no-repeat bg-center"
+    >
+      <form
+        className="bg-[#fccee84c] backdrop-blur-lg h-[680px] border-2 border-black bg-green-500 text-white p-11 rounded-xl w-[600px] flex justify-center flex-col gap-10 items-center "
+        onSubmit={(e) => submitHandler(e)}
+      >
+        <h1 className="mt-2 text-3xl font-bold text-[#D30C7B] stroke-2 stroke-yellow-500 ">
+          ~~~~ Welcome Talkytalk ~~~~{" "}
+        </h1>
+        <div className=" flex items-center justify-between gap-12">
+          <div className="border-2 border-yellow-500 flex items-center justify-between gap-1 px-3 p-2 rounded-lg">
+            <i className="ri-user-shared-line text-[#D30C7B]"></i>
+            <input
+              className="appearance-none border-none bg-transparent p-0 m-0 focus:outline-none"
+              type="text"
+              value={formData.firstName}
+              name="firstName"
+              placeholder="Firstname"
+              onChange={(e) => changeHandler(e)}
+            />
+          </div>
+          <div className="border-2 border-yellow-500  flex items-center justify-between gap-2 px-3 p-2 rounded-lg">
+            <i className="ri-user-received-line text-[#D30C7B]"></i>
+            <input
+              name="lastName"
+              className="appearance-none border-none  bg-transparent p-0 m-0 focus:outline-none"
+              type="text"
+              value={formData.lastName}
+              placeholder="Lastname"
+              onChange={(e) => changeHandler(e)}
+            />
+          </div>
+        </div>
+        <div className="border-2 w-full border-yellow-500 flex items-center  justify-start  gap-2 px-3 p-2 rounded-lg">
+          <i className="ri-user-line text-[#D30C7B]"></i>
+          <input
+            name="username"
+            className="appearance-none border-none w-[90%] bg-transparent p-0 m-0 focus:outline-none"
+            type="text"
+            value={formData.username}
+            placeholder="Username"
+            onChange={(e) => changeHandler(e)}
+          />
+        </div>
+        <div className=" flex items-center justify-between  w-full">
+          <div className="border-2 w-2/4 border-yellow-500 flex items-center justify-start  gap-2 px-3 p-2 rounded-lg">
+            <i className="ri-mail-ai-line text-[#D30C7B]"></i>
+            <input
+              name="email"
+              className="appearance-none border-none w-[90%] bg-transparent p-0 m-0 focus:outline-none"
+              type="email"
+              value={formData.email}
+              placeholder="Email"
+              onChange={(e) => changeHandler(e)}
+            />
+          </div>
+          <div className="border-2 w-1/4  border-yellow-500 flex items-center justify-start  gap-2 px-3 p-2 rounded-lg">
+            {/* <i className="ri-mail-ai-line text-[#D30C7B]"></i> */}
+            <input
+              name="email"
+              className="appearance-none border-none w-full bg-transparent p-0 m-0 focus:outline-none"
+              type="text"
+              value={otp}
+              placeholder="OTP"
+              onChange={(e) => setOtp(e.target.value)}
+            />
+          </div>
+          <button
+            type="button"
+            onClick={getOtpHandler}
+            className="bg-blue-800 rounded-lg text-sm p-2"
           >
-            <div className="border-2 w-[80%] border-yellow-500 flex items-center justify-start  gap-2 px-3 py-2 rounded-lg">
-              <i className="ri-mail-ai-line text-[#D30C7B]"></i>
-              <input
-                name="email"
-                className="appearance-none border-none w-[90%] bg-transparent p-0 m-0 focus:outline-none"
-                type="text"
-                value={formData.email}
-                placeholder="Email"
-                onChange={(e) => changeHandler(e)}
-              />
-            </div>
-            <div className="flex justify-between w-[80%] ">
-              <div className="border-2 w-[70%] border-yellow-500 flex items-center justify-start  gap-2 px-3 py-2 rounded-lg">
-                <i className="ri-lock-2-line text-[#D30C7B]"></i>
-                <input
-                  name="otp"
-                  className="appearance-none border-none  bg-transparent p-0 m-0 focus:outline-none"
-                  type="text"
-                  value={formData.otp}
-                  placeholder="Otp"
-                  onChange={(e) => changeHandler(e)}
-                />
-              </div>
-              <button
-                className={`px-2 rounded-lg transition duration-200 ${
-                  loading
-                    ? "bg-[#32746D] cursor-not-allowed"
-                    : "bg-blue-600 hover:bg-blue-700 cursor-pointer"
-                }`}
-                onClick={handleSendOtp}
-                type="button"
-                disabled={loading}
-              >
-                {loading ? (
-                  <span className="flex items-end px-4 circle-loader gap-2 h-5">
-                    <span className="h-2.5 w-2.5 rounded-full bg-[#b3d3e8]"></span>
-                    <span className="h-2.5 w-2.5 rounded-full bg-[#b3d3e8]"></span>
-                    <span className="h-2.5 w-2.5 rounded-full bg-[#b3d3e8]"></span>
-                  </span>
-                ) : (
-                  "Send OTP"
-                )}
-              </button>
-            </div>
-            <div className="border-2 w-[80%] border-yellow-500 flex items-center justify-start  gap-2 px-3 py-2 rounded-lg">
-              <i className="ri-lock-2-line text-[#D30C7B]"></i>
-              <input
-                name="password"
-                className="appearance-none border-none w-[90%] bg-transparent p-0 m-0 focus:outline-none"
-                value={formData.password}
-                placeholder="Password"
-                onChange={(e) => changeHandler(e)}
-              />
-            </div>
+            Get OTP
+          </button>
+        </div>
+        <div className=" flex items-center justify-between gap-12">
+          <div className="border-2 w-1/2 border-yellow-500 flex items-center justify-start gap-2 px-3 p-2 rounded-lg">
+            <i className="ri-lock-2-line text-[#D30C7B]"></i>
+            <input
+              name="password"
+              className="appearance-none border-none w-[90%] bg-transparent p-0 m-0 focus:outline-none"
+              type={showPassword ? "text" : "password"}
+              value={formData.password}
+              placeholder="Password"
+              onChange={(e) => changeHandler(e)}
+            />
             <button
-              className={`bg-[#D30C7B] py-2 px-8  rounded-lg transition-opacity duration-300 
-                ${
-                  step === 2
-                    ? "cursor-pointer opacity-100"
-                    : "cursor-not-allowed opacity-50"
-                }
-              `}
-              // disabled={step === 1}
-              type="submit"
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
             >
-              Next
+              <i
+                className={showPassword ? "ri-eye-off-line" : "ri-eye-line"}
+              ></i>{" "}
             </button>
-          </form>
-        )}
-        {step === 2 && (
-          <form
-            className="w-full h-full  flex justify-center flex-col gap-10 items-center text-white"
-            onSubmit={(e) => submitHandler(e)}
-          >
-            <div className="flex justify-center items-center gap-6  w-full ">
-              {imagePreview ? (
-                <img
-                  className="rounded-full object-cover w-20 border-2 aspect-square"
-                  src={imagePreview}
-                  alt="Preview"
-                  width="50"
-                />
-              ) : (
-                <img
-                  className="rounded-full object-cover w-20 border-2 aspect-square"
-                  src={profileImg}
-                  alt="Preview"
-                  width="50"
-                />
-              )}
-              <label
-                htmlFor="fileInput"
-                className=" absolute left-[49%] top-[5%]  p-6 rounded-full cursor-pointer text-3xl font-bold"
-              >
-                <i className="ri-pencil-line"></i>{" "}
-              </label>
-              <input
-                className=" hidden "
-                id="fileInput"
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-              />
-            </div>
-            <div className="flex justify-between gap-4 w-[80%] ">
-              <div className="border-2  border-yellow-500 flex items-center justify-start gap-2 px-3 py-2 rounded-lg">
-                <i className="ri-lock-2-line text-[#D30C7B]"></i>
-                <input
-                  name="otp"
-                  className="appearance-none border-none bg-transparent p-0 m-0 focus:outline-none"
-                  type="text"
-                  value={formData.firstName}
-                  placeholder="First Name"
-                  onChange={(e) => changeHandler(e)}
-                />
-              </div>
-              <div className="border-2 border-yellow-500 flex items-center justify-start  gap-2 px-3 py-2 rounded-lg">
-                <i className="ri-lock-2-line text-[#D30C7B]"></i>
-                <input
-                  name="text"
-                  className="appearance-none border-none w-[90%] bg-transparent p-0 m-0 focus:outline-none"
-                  value={formData.lastName}
-                  placeholder="Last Name"
-                  onChange={(e) => changeHandler(e)}
-                />
-              </div>
-            </div>
-            <div className="border-2 w-[80%] border-yellow-500 flex items-center justify-start  gap-2 px-3 py-2 rounded-lg">
-              <i className="ri-mail-ai-line text-[#D30C7B]"></i>
-              <input
-                name="email"
-                className="appearance-none border-none w-[90%] bg-transparent p-0 m-0 focus:outline-none"
-                type="text"
-                value={formData.username}
-                placeholder="User Name"
-                onChange={(e) => changeHandler(e)}
-              />
-            </div>
-            <div className="border-2 w-[80%] border-yellow-500 flex items-center justify-start  gap-2 px-3 py-2 rounded-lg">
-              <i className="ri-mail-ai-line text-[#D30C7B]"></i>
-              <input
-                name="bio"
-                className="appearance-none border-none w-[90%] bg-transparent p-0 m-0 focus:outline-none"
-                type="text"
-                value={formData.bio}
-                placeholder="bio"
-                onChange={(e) => changeHandler(e)}
-              />
-            </div>
-            <button
-              type="submit"
-              className="bg-[#D30C7B] py-2 px-8 rounded-lg"
-              onClick={(e) => submitHandler(e)}
-            >
-              Sign in <i className="ri-send-plane-fill"></i>
-            </button>
-          </form>
-        )}
-
-        <h4 className="">
+          </div>
+        </div>
+        <div className="flex">
+          <input type="file" accept="image/*" onChange={handleImageChange} />
+          {imagePreview && <img src={imagePreview} alt="Preview" width="50" />}
+        </div>
+        <button
+          className="bg-[#D30C7B] py-2 px-4 rounded-lg -mt-4"
+          type="submit"
+        >
+          Sign in <i className="ri-send-plane-fill"></i>
+        </button>
+        <h4 className="-mt-8">
           <i className="ri-arrow-right-long-fill text-[#D30C7B]"></i>&nbsp;
-          Already have an account &nbsp;
-          <Link
-            to="/signup"
-            className=" font-semibold underline text-[#D30C7B]"
-          >
-            Creat One
+          Already has a account &nbsp;{" "}
+          <Link to="/login" className=" font-semibold underline text-[#D30C7B]">
+            login here
           </Link>
         </h4>
-      </div>
+      </form>
     </div>
   );
 };
 
-export default SignUpTwo;
+export default Signup;

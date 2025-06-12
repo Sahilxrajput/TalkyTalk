@@ -4,42 +4,27 @@ const nodemailer = require("nodemailer");
 const User = require("../Models/user.Model.js");
 const passport = require("passport");
 const { validationResult } = require("express-validator");
+const { error } = require("console");
+const otpStore = require("../utils/otpStore.js");
 
-let  serverOtp = null;
+function generateOtp() {
+  return Math.floor(1000 + Math.random() * 9000).toString();
+}
 
 module.exports.signUpUser = async (req, res) => {
   try {
     const err = validationResult(req);
 
     if (!err.isEmpty()) {
+      console.log("Validation error", error);
       return res.status(400).json({ error: err.array() });
     }
 
-    // if (!req.file) {
-    //   return res.status(400).json({ message: "No image file uploaded" });
-    // }
-
-    const {
-      username,
-      firstName,
-      otp,
-      lastName,
-      email,
-      password,
-      bio,
-    } = req.body;
+    const { username, firstName, lastName, email, password, bio } =
+      req.body;
 
     let url = req.file.path;
     let filename = req.file.filename;
-
-    console.log(`${otp} = is otp`);
-    console.log(`${serverOtp} = is serverOtp`);
-
-    if (otp !== serverOtp) {
-      return res
-        .status(401)
-        .json({ message: "Invalid OTP. Please try again." });
-    }
 
     const newUser = new User({
       email,
@@ -89,7 +74,8 @@ module.exports.signUpUser = async (req, res) => {
   }
 };
 
-module.exports.sendEmail = async (req, res) => {
+module.exports.getOtp = async (req, res) => {
+  const { email } = req.body;
   try {
     const transporter = nodemailer.createTransport({
       service: "gmail",
@@ -100,40 +86,67 @@ module.exports.sendEmail = async (req, res) => {
         pass: process.env.MAIL_PASS,
       },
     });
+
+    const otp = generateOtp();
+    otpStore.set(email.trim(), otp);
+
+    console.log(`OTP for ${email}: ${otp}`);
+
     const mailOptions = {
       from: `"TalkyTalk App" <${process.env.MAIL_USER}>`,
-      to: req.body.to,
+      to: email,
       subject: "OTP verification for TalkyTalk.",
       html: `
       <div style="font-family: Arial, sans-serif; line-height: 1.6;">
       <p style="font-size: 18px; font-weight: bold; color: #333;">
         🔐 Your OTP is:
-        <span style="font-size: 28px; font-weight: bold; color: #000;">${serverOtp}</span>
+        <span style="font-size: 28px; font-weight: bold; color: #000;">${otp}</span>
       <p style="font-size: 12px;">Welcome to TalkyTalk – where conversations come to life! </p>
-      Please use the OTP below to verify your email address: Please do not share this otp with anyone.
+      Please use the OTP above to verify your email address. Do not share this OTP with anyone.
        If you didn’t request this, feel free to ignore this message.
       Thank you for choosing TalkyTalk. We can’t wait for you to explore all that we have in store!
       Warm regards, The TalkyTalk Team</p>
       `,
     };
-      serverOtp = Math.floor(1000 + Math.random() * 9000).toString();
-      console.log("serverOtp", serverOtp);
 
     const info = await transporter.sendMail(mailOptions);
+    setTimeout(() => {
+      otpStore.delete(email); // this deletes OTP after 5 mins
+    }, 5 * 60 * 1000);
 
-   return res.status(200).json({
+    return res.status(200).json({
       success: true,
-      message: "Email sent successfully.",
-      otp: serverOtp,
+      message: "OTP sent to your email address.",
     });
   } catch (error) {
-   console.error("Error sending email:", error.message);
+    console.error("Error sending email:", error.message);
     return res.status(500).json({
       success: false,
       message: "Failed to send email.",
       error: error.message,
     });
   }
+};
+
+module.exports.verifyOtp = (req, res) => {
+  const { email, enteredOtp } = req.body;
+
+  const savedOtp = otpStore.get(email.trim());
+
+  if (!savedOtp) {
+    return res.status(410).json({ message: "OTP expired or not found." });
+  }
+
+  if (String(savedOtp) === String(enteredOtp)) {
+    otpStore.delete(email);
+    console.log("otp verify successfully");
+    return res.status(200).json({
+      success: true,
+      message: "OTP verified successfully",
+    });
+  }
+
+  res.status(400).json({ success: false, message: "Invalid OTP" });
 };
 
 module.exports.loginUser = async (req, res, next) => {

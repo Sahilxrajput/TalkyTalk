@@ -24,25 +24,19 @@ const signupValidation = [
   body("otp")
     .isLength({ min: 4 }, { max: 4 })
     .withMessage("OTP should be 4 digit long"),
-  body("file").notEmpty().withMessage("File is required"),
-  // body("age")
-  //   .exists({ checkFalsy: true })
-  //   .withMessage("Age is required")
-  //   .isInt({ min: 12 })
-  //   .withMessage("Age must be at least 12"),
-  // body("gender").notEmpty().withMessage("gender is required"),
 ];
 
 router.get("/", userController.getAllUsers);
 
 router.post(
   "/signup",
-  upload.single("image"),
+  upload.single("file"),
   signupValidation,
   userController.signUpUser
 );
 
-router.post("/send-otp", userController.sendEmail);
+router.post("/get-otp", userController.getOtp);
+router.post("/verify-otp", userController.verifyOtp);
 
 router.post(
   "/login",

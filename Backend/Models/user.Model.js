@@ -32,13 +32,13 @@ const userSchema = new mongoose.Schema(
     },
     age: {
       type: Number,
-      required: [true, "Age is required"],
+      // required: [true, "Age is required"],
       min: [12, "age should be more than 12"],
     },
     gender: {
       type: String,
       enum: ["male", "female", "other", "prefer not to say"],
-      required: [true, "Gender is required"],
+      // required: [true, "Gender is required"],
     },
     chats: {
       type: mongoose.Schema.Types.ObjectId,
@@ -53,7 +53,7 @@ const userSchema = new mongoose.Schema(
       url: {
         type: String,
         required: true,
-        default:"https://res.cloudinary.com/duh5cemec/image/upload/v1748872360/default_pfp_pbixfp.png"
+        default: "https://res.cloudinary.com/duh5cemec/image/upload/w_1000,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_red,b_rgb:262c35/v1749701448/profilePic_dliaem.jpg"
       },
       filename: {
         type: String,

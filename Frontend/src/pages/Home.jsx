@@ -8,6 +8,7 @@ import { useGSAP } from "@gsap/react";
 import "remixicon/fonts/remixicon.css";
 import "../assets/style/Chats.css";
 import BgImage from "../assets/craft.jpg";
+import profileImg from "../assets/profilePic.jpg";
 import { toast } from "react-toastify";
 const MessageBox = lazy(() => import("../components/MessageBox"));
 const AddMembers = lazy(() => import("../components/AddMembers"));
@@ -509,7 +510,7 @@ const Home = () => {
                   <div className="w-14 rounded-full aspect-square">
                     <img
                       className="object-cover rounded-full w-full h-full"
-                      src={chatData?.image?.url || user?.user?.image?.url}
+                      src={chatData?.image?.url || profileImg}
                       alt="profil picture"
                     />
                   </div>
