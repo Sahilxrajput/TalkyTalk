@@ -32,13 +32,11 @@ const userSchema = new mongoose.Schema(
     },
     age: {
       type: Number,
-      // required: [true, "Age is required"],
       min: [12, "age should be more than 12"],
     },
     gender: {
       type: String,
       enum: ["male", "female", "other", "prefer not to say"],
-      // required: [true, "Gender is required"],
     },
     chats: {
       type: mongoose.Schema.Types.ObjectId,

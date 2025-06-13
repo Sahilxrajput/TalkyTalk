@@ -11,7 +11,7 @@ import Loading from "../components/Loading";
 const SignUpTwo = () => {
   const { user, setUser } = useContext(UserDataContext);
   const [loading, setLoading] = useState(false);
-  const [step, setStep] = useState(4);
+  const [step, setStep] = useState(1);
   const [file, setFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [formData, setFormData] = useState({
@@ -26,7 +26,7 @@ const SignUpTwo = () => {
     filename: "",
   });
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const changeHandler = (e) => {
     const { name, value } = e.target;
@@ -121,9 +121,10 @@ const SignUpTwo = () => {
       } catch (error) {
         toast.error("Failed to send OTP. Please try again.");
       } finally {
-        setLoading(false); // re-enable button
+        setLoading(false); 
       }
-    } else if (step == 2) {
+    } 
+    else if (step == 2) {
       try {
         const res = await axios.post(
           `${import.meta.env.VITE_BASE_URL}/users/verify-otp`,
@@ -178,12 +179,16 @@ const SignUpTwo = () => {
                 />
               </div>
               <button
-                className={`w-24 rounded-lg transition duration-200 border-1 otp ${
-                  loading
-                    ? "bg-[#32746D] cursor-not-allowed"
-                    : "bg-blue-600 cursor-pointer"
+                className={`w-24 rounded-lg transition duration-200 bg-blue-600 border-1 otp ${
+                  (loading || step === 3
+                    ? "cursor-not-allowed"
+                    : "cursor-pointer active:scale-75")
                 }`}
-                onClick={otpHandler}
+                onClick={() => {
+                  if (step !== 3) {
+                    otpHandler();
+                  }
+                }}
                 type="button"
                 disabled={loading}
               >
@@ -194,7 +199,7 @@ const SignUpTwo = () => {
                 ) : step === 2 ? (
                   "Verify OTP"
                 ) : step === 3 ? (
-                  <i className="ri-forbid-fill text-2xl text-red-700"></i>
+                  <i className="ri-checkbox-circle-fill text-2xl"></i>
                 ) : (
                   ""
                 )}
@@ -211,16 +216,22 @@ const SignUpTwo = () => {
               />
             </div>
             <button
-              className={`bg-[#D30C7B] flex gap-4 py-2 px-6 border-1 transition-opacity duration-300 boom
+              className={`bg-[#D30C7B] flex gap-4 py-2 px-6 border-1 transition-opacity duration-300 key
                 ${
                   step === 3
-                    ? "cursor-pointer opacity-100"
+                    ? "cursor-pointer opacity-100 active:scale-75"
                     : "cursor-not-allowed opacity-50"
-                }
+                } 
               `}
-              disabled={step === 1 || step === 2}
+              disabled={step !== 3}
               type="submit"
-              onClick={() => setStep(4)}
+              onClick={() => {
+                if (step == 3) {
+                  setTimeout(() => {
+                    setStep(4);
+                  }, 500);
+                }
+              }}
             >
               Next
               <i className="ri-arrow-right-long-fill"></i>
@@ -309,7 +320,7 @@ const SignUpTwo = () => {
             </div>
             <button
               type="submit"
-              className="bg-[#D30C7B] w-26 h-12 border-1 flex justify-center text-lg items-center cursor-pointer boom "
+              className="bg-[#D30C7B] w-26 h-12 border-1 flex justify-center text-lg items-center cursor-pointer key active:scale-75"
             >
               {loading ? (
                 <Loading />

@@ -25,16 +25,14 @@ const CreatePersonalChatPanel = ({
           const otherUsers = responseArray.filter(
             (mem) => mem._id !== user.user._id
           );
-          console.log(responseArray);
 
           const filtered = otherUsers.filter((user) =>
             `${user.firstName} ${user.lastName} ${user.username}`
               .toLowerCase()
               .includes(searchUser.toLowerCase())
           );
-          // console.log(filtered);
 
-          setFoundUsers(filtered); //  update state correctly
+          setFoundUsers(filtered); 
         } catch (error) {
           console.error("Error fetching users:", error);
         }

@@ -1,12 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import io from "socket.io-client";
 import axios from "axios";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
 import ChatWindow from "./ChatWindow";
-import { data } from "react-router-dom";
-import CryptoJS from "crypto-js";
-// import socket from '../socket/Socket'
 
 const socket = io("http://localhost:5000", {
   transports: ["websocket"],
@@ -32,32 +27,16 @@ const MessageBox = ({
   const latestMessageRef = useRef(null);
   const [msgId, setMsgId] = useState(0);
 
-  const encryptMessage = (message) => {
-    return CryptoJS.AES.encrypt(
-      message,
-      import.meta.env.VITE_SECRET_KEY
-    ).toString();
-  };
-
-  const decryptMessage = (ciphertext) => {
-    const bytes = CryptoJS.AES.decrypt(
-      ciphertext,
-      import.meta.env.VITE_SECRET_KEY
-    );
-    return bytes.toString(CryptoJS.enc.Utf8);
-  };
-
   const sendMessageHandler = async (e) => {
     e.preventDefault();
-    const encrypted = encryptMessage(latestMessage);
     if (latestMessage.trim()) {
       const messageData = {
         roomId: chatTitle._id,
-        message: encrypted,
+        message: latestMessage,
         sender: user.user,
       };
       if (replyPopup && msgId) {
-        messageData.replyTo = msgId; // assuming msgId is the ID you're replying to
+        messageData.replyTo = msgId;
       }
 
       socket.emit("chat", messageData);
@@ -89,26 +68,30 @@ const MessageBox = ({
 
     const handleChat = (payload) => {
       if (chatTitle._id === payload.roomId) {
-        const decrypted = decryptMessage(payload.message);
-        console.log("decrypted", decrypted);
-        setSocketMessages((prevMessages) => [...prevMessages, decrypted]);
+        console.log("received message =>", payload);
+        setSocketMessages((prevMessages) => [...prevMessages, payload]);
       }
     };
-    console.log(decrypted);
     socket.on("chat", handleChat);
+    
+    socket.on("connect_error", (err) => {
+socket.io.on("error", (err) => {
+  console.error("💥 io error:", err);
+});
+
+socket.on("error", (err) => {
+  console.error("💥 socket error:", err);
+});
+    });
 
     return () => {
       socket.off("chat", handleChat);
       socket.off("connect");
     };
   }, [chatTitle]);
-  //finding socketid == senderid
-  // const msgSenderUser = (payload) => {
-  //   return chatTitle.members.find((member) => member._id === payload.sender);
-  // };
 
   return (
-    <>
+    <div>
       <ChatWindow
         foundChats={foundChats}
         videoReqHandler={videoReqHandler}
@@ -130,7 +113,7 @@ const MessageBox = ({
           onSubmit={sendMessageHandler}
           className={`
             ${replyPopup ? "rounded-t-none" : "rounded-t-lg"}
-            absolute w-[35%] bg-[#DAD1BE] h-14 z-20 flex items-center justify-start gap-2 px-2 py-2 rounded-lg`}
+            absolute bottom-6 w-[35%] bg-[#DAD1BE] h-14 align-middle z-20 flex items-center justify-start gap-2 p-2 rounded-lg`}
         >
           <input
             name="message"
@@ -145,10 +128,7 @@ const MessageBox = ({
           </button>
         </form>
       </div>
-      <button className="h-12 aspect-square rounded-full text-2xl bg-red-400">
-        <i className="ri-mic-fill"></i>
-      </button>
-    </>
+    </div>
   );
 };
 

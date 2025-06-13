@@ -8,26 +8,21 @@ import Message from "../Models/message.Model.js";
 const io = new Server(server, {
   cors: {
     origin: "http://localhost:5173",
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     credentials: true, //headers and cookie
   },
   pingTimeout: 60000, //60seconda
   pingInterval: 25000, //25 seconds
+  transports: ["websocket"],
 });
-
-let onlineUsers = 0;
 
 console.log("Socket.io initialized");
 
-
 io.on("connection", (socket) => {
-  onlineUsers++;
-  console.log("A user connected", socket.id, onlineUsers);
+  console.log("A user connected", socket.id);
 
   socket.on("userConnected", (userId) => {
-    users.add(userId);
     console.log("userId:", userId);
-    io.emit("userCount", users.size);
   });
 
   // Join a room
@@ -49,32 +44,6 @@ io.on("connection", (socket) => {
   });
 
   // Send message to the room
-  // socket.on("chat", async ({ roomId, message, sender, replyTo }) => {
-  //   if (roomId && message) {
-  //     io.to(roomId).emit("chat", {
-  //       message,
-  //       roomId,
-  //       sender,
-  //       time: new Date(),
-  //     });
-  //     if(replyTo){
-
-  //     }
-
-  //     // Save the message to the database
-  //     const newMessage = await Message.create({
-  //       chatId: roomId,
-  //       content: message,
-  //       sender: sender,
-  //       replyTo: replyTo
-  //     });
-  //     // io.to(roomId).emit("chat", newMessage); // Send saved message to clients
-  //     // console.log(`Message sent to room ${roomId}: ${message}`);
-  //   } else {
-  //     console.error("Missing roomId or message");
-  //   }
-  // });
-
   socket.on("chat", async ({ roomId, message, sender, replyTo }) => {
     if (roomId && message) {
       let repliedMessage = null;
@@ -91,7 +60,7 @@ io.on("connection", (socket) => {
         roomId,
         sender,
         time: new Date(),
-        replyTo: repliedMessage, 
+        replyTo: repliedMessage,
       });
 
       const newMessage = await Message.create({
@@ -101,10 +70,20 @@ io.on("connection", (socket) => {
         replyTo: replyTo || null,
         time: new Date(),
       });
-      console.log(newMessage)
+      console.log("newMessage :", newMessage);
     } else {
       console.error("Missing roomId or message");
     }
+  });
+
+  socket.on("connect_error", (err) => {
+    socket.io.on("error", (err) => {
+      console.error("💥 io error:", err);
+    });
+
+    socket.on("error", (err) => {
+      console.error("💥 socket error:", err);
+    });
   });
 
   //   socket.on('offer', ({ roomId, offer }) => {
@@ -126,9 +105,8 @@ io.on("connection", (socket) => {
   //Handle disconnection
 
   socket.on("disconnect", () => {
-    onlineUsers--;
-    console.log("A user disconnected", socket.id, onlineUsers);
-    io.emit("userCount", onlineUsers);
+    console.log("A user disconnected", socket.id);
+    io.emit("userCount");
   });
 });
 

@@ -35,7 +35,7 @@ const ChatWindow = ({
     );
     return response.data.data;
   };
-  
+
   const otherMember = chatTitle.members.find(
     (member) => member._id !== user.user._id
   );
@@ -109,18 +109,14 @@ const ChatWindow = ({
     }
   }, [showPopup]);
 
-  useEffect(()=>{
-    // console.log(getChatData())
-  })
-
   return (
-    <>
-      <div className="flex justify-between ml-4 bg-red-400 pl-4 h-1/10 border-b-2 items-center w-full ">
+    <div className="flex  justify-center items-center">
+      <nav className="flex justify-between ml-4 bg-red-400 pl-4 h-1/10 border-b-2 items-center w-full ">
         <div className="flex gap-4">
           <div className="w-14 rounded-full aspect-square">
             <img
               className="object-cover rounded-full w-full h-full"
-              src={getChatData()?.image?.url || user.user.image.url }
+              src={getChatData()?.image?.url || user.user.image.url}
               alt="profil"
             />
           </div>
@@ -139,8 +135,9 @@ const ChatWindow = ({
           <i onClick={videoReqHandler} className="ri-phone-fill"></i>
           <i onClick={aboutHandler} className="ri-menu-3-line"></i>
         </div>
-      </div>
-      <div
+      </nav>
+
+      <main
         ref={majorRef}
         className="p-2 overflow-x-hidden flex flex-col  h-8/10"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
@@ -205,7 +202,6 @@ const ChatWindow = ({
               </div>
             );
           })}
-
           {showPopup && (
             <div
               style={{ top: pos.y, left: pos.x }}
@@ -313,16 +309,17 @@ const ChatWindow = ({
             );
           })}
         </div>
-      </div>
+      </main>
+
       {/* ..replyPopUp */}
       <div
         ref={replyRef}
         className={
-          " flex absolute w-[35%] ml-[265px] bg-[#DAD1BE]  h-12 mt-1 rounded-t-lg p-2 justify-between items-center"
+          " flex absolute bottom-6 w-[35%] bg-[#DAD1BE] h-12 rounded-lg p-2 justify-between items-center"
         }
       >
         <i className="ri-reply-fill text-xl "></i>
-        <div className="flex flex-col w-[85%] break-words whitespace-normal overflow-hidden items-start">
+        <div className="flex flex-col w-[85%]  break-words whitespace-normal overflow-hidden items-start">
           <h1 className="text-[#0b93f6] font-semibold">
             Reply to {chatTitle.chatName}
           </h1>
@@ -337,7 +334,7 @@ const ChatWindow = ({
           className="ri-add-line text-2xl rotate-45 "
         ></i>
       </div>
-    </>
+    </div>
   );
 };
 

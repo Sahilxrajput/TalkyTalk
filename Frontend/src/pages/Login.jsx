@@ -4,6 +4,7 @@ import backgroundImage from "../assets/city.jpg";
 import "remixicon/fonts/remixicon.css";
 import { UserDataContext } from "../context/UserContext";
 import axios from "axios";
+import "../assets/style/signup.css";
 import { toast } from "react-toastify";
 
 const Login = () => {
@@ -77,13 +78,13 @@ const Login = () => {
             type="button"
             onClick={() => setShowPassword((prev) => !prev)}
           >
-            <i className={showPassword ? "ri-eye-off-line" : "ri-eye-line"}></i>{" "}
+            <i className={` cursor-pointer ${showPassword ? "ri-eye-off-line" : "ri-eye-line"}`}></i>{" "}
           </button>
         </div>
 
         <div className=" flex items-center justify-center "></div>
         <button
-          className="bg-[#D30C7B] py-2 px-4 rounded-lg -mt-4"
+          className="bg-[#D30C7B] py-2 px-4 rounded-lg -mt-4 key active:scale-75 cursor-pointer"
           type="submit"
         >
           Log in <i className="ri-send-plane-fill"></i>

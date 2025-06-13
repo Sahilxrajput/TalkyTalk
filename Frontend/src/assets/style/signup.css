@@ -23,18 +23,14 @@
   }
 }
 
-.boom{
+.key{
   transition: transform 0.2s ease-out;
   border-radius: 5px ;
   transform: scale(0.9);
   box-shadow: #760242 5px 4px 0 5px ;
 }
-
-.boom:hover{
+.key:hover{
   box-shadow:  #760242 5px 4px 0 5px;
-}
-.boom:active{
-  transform: scale(0.75);
 }
 .otp{
   transition: transform 0.2s ease-out;
@@ -43,7 +39,4 @@
   box-shadow: #082a72 5px 4px 0 5px ;
 }
 
-.otp:active{
-  transform: scale(0.75);
-}
 

@@ -1,0 +1,6 @@
+node_modules
+.history
+.env
+.vscode
+Backend/Routes/payment.Routes.js
+Backend/socket/socketManager.js

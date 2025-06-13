@@ -10,8 +10,9 @@ import "../assets/style/Chats.css";
 import BgImage from "../assets/craft.jpg";
 import profileImg from "../assets/profilePic.jpg";
 import { toast } from "react-toastify";
+import Chats from "../components/Chats";
 const MessageBox = lazy(() => import("../components/MessageBox"));
-const AddMembers = lazy(() => import("../components/AddMembers"));
+const CreateChat = lazy(() => import("../components/CreateChat"));
 const CreatePersonalChatPanel = lazy(() =>
   import("../components/CreatePersonalChatPanel")
 );
@@ -27,7 +28,7 @@ const Home = () => {
   const [searchChats, setSearchChats] = useState("");
   const [foundChats, setFoundChats] = useState([]);
   const addMemberRef = useRef(null);
-  const [addMemberpanel, setAddMemberpanel] = useState(false);
+  const [createChat, setcreateChat] = useState(false);
   const searchNewMemberRef = useRef(null);
   const [searchNewMembelPanel, setSearchNewMembelPanel] = useState(false);
   const [createGroupPanel, setCreateGroupPanel] = useState(false);
@@ -54,33 +55,58 @@ const Home = () => {
 
   const navigate = useNavigate();
 
+  //DONE
   useGSAP(() => {
-    if (!addMemberpanel) {
+    if (!createChat) {
       gsap.to(addMemberRef.current, {
-        transform: "translateY(0.7%)",
+        y: "100%",
         opacity: 0,
+        duration: 0.4,
+        ease: "power2.inOut",
       });
     } else {
       gsap.to(addMemberRef.current, {
-        transform: "translateY(-115%)",
+        y: "-100%",
         opacity: 1,
+        duration: 0.4,
+        ease: "power2.inOut",
       });
     }
-  }, [addMemberpanel]);
+  }, [createChat]);
 
+//DONE
   useGSAP(() => {
     if (!searchNewMembelPanel) {
       gsap.to(searchNewMemberRef.current, {
-        transform: "translateY(0%)",
-        opacity: 0,
+        y: "100%",
+        opacity: 1,
+        ease: "power2.inOut",
       });
     } else {
       gsap.to(searchNewMemberRef.current, {
-        transform: "translateY(-104.7%)",
+        y: "-100%",
         opacity: 1,
+        ease: "power2.inOut",
       });
     }
   }, [searchNewMembelPanel]);
+  
+  //DONE
+  useGSAP(() => {
+    if (!createGroupPanel) {
+      gsap.to(createGroupRef.current, {
+        y: "100%",
+        opacity: 1,
+        ease: "power2.inOut",
+      });
+    } else {
+      gsap.to(createGroupRef.current, {
+        y: "-100%",
+        opacity: 1,
+        ease: "power2.inOut",
+      });
+    }
+  }, [createGroupPanel]);
 
   useGSAP(() => {
     if (!addToGroupPanel) {
@@ -109,20 +135,6 @@ const Home = () => {
       });
     }
   }, [removeFromGroupPanel]);
-
-  useGSAP(() => {
-    if (!createGroupPanel) {
-      gsap.to(createGroupRef.current, {
-        transform: "translateY(0%)",
-        opacity: 0,
-      });
-    } else {
-      gsap.to(createGroupRef.current, {
-        transform: "translateY(-104.7%)",
-        opacity: 1,
-      });
-    }
-  }, [createGroupPanel]);
 
   useGSAP(() => {
     if (!videoReqPanel) {
@@ -204,7 +216,7 @@ const Home = () => {
         toast.error("user logout failed");
       }
     } else {
-       alert("Logout cancelled.");
+      alert("Logout cancelled.");
     }
   };
 
@@ -358,15 +370,16 @@ const Home = () => {
           <i className="ri-logout-box-line"></i>
         </button>
       </div>
+
       <div
         className="basis-1/1 flex rounded-4xl mr-1 bg-cover bg-center h-[98%]"
         style={{ backgroundImage: `url(${BgImage})` }}
       >
         <div
-          className="w-[24.4%] relative flex flex-col overflow-x-hidden gap-2 justify-between h-full"
+          className="w-[24.4%] relative flex flex-col overflow-hidden gap-2 justify-between h-full"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
-          <div className=" fixed w-[23.15%] flex items-center justify-between px-4 h-16 rounded-t-4xl border-r-2 border-[#4E6766] bg-[#FFDBDB] ">
+          <nav className=" fixed w-[23.15%] flex items-center justify-between px-4 h-16 rounded-t-4xl border-r-2 border-[#4E6766] bg-[#FFDBDB] ">
             {!isFocused && (
               <h4 className=" ml-20 tracking-wider bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 text-transparent bg-clip-text TalkyTalk text-2xl font-black">
                 TalkyTalk
@@ -389,21 +402,21 @@ const Home = () => {
                 placeholder="Search"
               />
             </div>
-          </div>
+          </nav>
 
           <div
             ref={addMemberRef}
-            className="flex fixed w-[23%] z-30 top-180 items-center justify-center  bg-yellow-300 rounded-4xl"
+            className="flex absolute w-full z-30 -bottom-1/4 h-1/4 items-center justify-center bg-yellow-300 rounded-4xl"
           >
-            <AddMembers
+            <CreateChat
               setSearchNewMembelPanel={setSearchNewMembelPanel}
-              setAddMemberpanel={setAddMemberpanel}
+              setcreateChat={setcreateChat}
               setCreateGroupPanel={setCreateGroupPanel}
             />
           </div>
           <div
             ref={searchNewMemberRef}
-            className=" w-[23%] fixed h-[682px] rounded-4xl top-180 px-2 pt-[3%] z-30 overflow-x-hidden bg-red-400"
+            className=" w-full absolute h-full rounded-4xl -bottom-1/1 px-2 z-30 overflow-x-hidden bg-red-400"
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
             <CreatePersonalChatPanel
@@ -414,8 +427,19 @@ const Home = () => {
           </div>
 
           <div
+            ref={createGroupRef}
+            className="absolute -bottom-1/1 z-30 w-full h-full"
+          >
+            <CreategroupPanel
+              user={user}
+              setCreateGroupPanel={setCreateGroupPanel}
+              setFoundChats={setFoundChats}
+            />
+          </div>
+
+          <div
             ref={addToGroupRef}
-            className=" w-[23%] fixed h-[682px] top-180 rounded-4xl z-30  bg-red-400"
+            className=" w-full absolute h-full top-180 rounded-4xl z-30  bg-red-400"
           >
             <AddTOGroup
               chatTitle={chatTitle}
@@ -425,22 +449,11 @@ const Home = () => {
 
           <div
             ref={removeFromGroupRef}
-            className=" w-[23%] fixed h-[98.5%] top-180 rounded-4xl z-30  bg-red-400"
+            className=" w-full absolute h-full top-180 rounded-4xl z-30  bg-red-400"
           >
             <RemoveFromGroup
               chatTitle={chatTitle}
               setRemoveFromGroupPanel={setRemoveFromGroupPanel}
-            />
-          </div>
-
-          <div
-            ref={createGroupRef}
-            className="fixed top-180 z-30 w-[23%]  h-[98%]"
-          >
-            <CreategroupPanel
-              user={user}
-              setCreateGroupPanel={setCreateGroupPanel}
-              setFoundChats={setFoundChats}
             />
           </div>
 
@@ -478,7 +491,7 @@ const Home = () => {
           <button
             type="button"
             onClick={() => {
-              setAddMemberpanel(true);
+              setcreateChat(true);
             }}
             className="bg-blue-700 aspect-square hover:cursor-pointer z-20 absolute text-black text-3xl bottom-2 left-72 flex items-center justify-center rounded-full h-[50px]"
           >
