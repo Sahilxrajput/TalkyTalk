@@ -1,6 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
+import Loading from "./Loading";
 
 const CreategroupPanel = ({ setCreateGroupPanel, user, setFoundChats }) => {
   const [searchUser, setSearchUser] = useState("");
@@ -10,17 +11,20 @@ const CreategroupPanel = ({ setCreateGroupPanel, user, setFoundChats }) => {
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [imagePreview, setImagePreview] = useState(null);
   const [file, setFile] = useState(null);
+  const [btnLoading, setBtnLoading] = useState(false);
+  const [mainLoading, setMainLoading] = useState(false);
 
   useEffect(() => {
     if (searchUser.trim() !== "") {
       (async () => {
+        setMainLoading(true);
         try {
           const response = await axios.get(
             `${import.meta.env.VITE_BASE_URL}/users`,
             { withCredentials: true }
           );
-          const responseArray = response.data.users;
 
+          const responseArray = response.data.users;
           const otherUsers = responseArray.filter(
             (mem) => mem._id !== user.user._id
           );
@@ -31,14 +35,19 @@ const CreategroupPanel = ({ setCreateGroupPanel, user, setFoundChats }) => {
               .includes(searchUser.toLowerCase())
           );
 
-          setFoundUsers(filtered); //  update state correctly
+          setFoundUsers(filtered);
         } catch (error) {
           console.error("Error fetching users:", error);
+        } finally {
+          setMainLoading(false);
         }
       })();
-    } else {
-      setFoundUsers([]);
     }
+
+    return () => {
+      setFoundUsers([]);
+      setMainLoading(false);
+    };
   }, [searchUser]);
 
   const selectUsersHandler = (user) => {
@@ -61,12 +70,12 @@ const CreategroupPanel = ({ setCreateGroupPanel, user, setFoundChats }) => {
       }
     });
   };
-
   const submitHandler = async (e) => {
     e.preventDefault();
+    setBtnLoading(true);
     try {
       const formData = new FormData();
-      console.log(file)
+      console.log(file);
       formData.append("chatName", chatName);
       formData.append("image", file);
       addMembers.forEach((memberId) => formData.append("members[]", memberId));
@@ -83,7 +92,7 @@ const CreategroupPanel = ({ setCreateGroupPanel, user, setFoundChats }) => {
       );
 
       const newChat = response.data.chat;
-      console.log(newChat)
+      console.log(newChat);
       setChatName(""); // Reset chat name
       setAddMembers([]); // Reset added members
       setFile(null);
@@ -93,30 +102,31 @@ const CreategroupPanel = ({ setCreateGroupPanel, user, setFoundChats }) => {
     } catch (error) {
       toast.error(" Something went wrong");
       console.error("Error creating group:", error);
+    } finally {
+      setBtnLoading(false);
     }
   };
 
   const handleImageChange = (e) => {
-  const selectedFile = e.target.files[0];
-  if (selectedFile) {
-    setFile(selectedFile);
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setImagePreview(reader.result);
-    };
-    reader.readAsDataURL(selectedFile);
-  }
-};
-
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      setFile(selectedFile);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(selectedFile);
+    }
+  };
 
   return (
     <div
-      className="flex flex-col fixed w-full  h-full overflow-x-hidden  justify-start gap-4  bg-red-300 rounded-4xl"
+      className="flex flex-col fixed w-full  h-full overflow-x-hidden  justify-start gap-4 rounded-4xl"
       style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
     >
       <form
         onSubmit={submitHandler}
-        className="flex flex-col absolute w-full z-20 h-[27%]  items-center  justify-start gap-4  bg-red-300 rounded-4xl"
+        className="flex flex-col absolute w-full z-20 h-[27%]  items-center justify-start gap-4 rounded-4xl"
       >
         <i
           onClick={() => {
@@ -126,10 +136,10 @@ const CreategroupPanel = ({ setCreateGroupPanel, user, setFoundChats }) => {
             setSelectedUsers([]);
             setAddMembers([]);
           }}
-          className="text-2xl -mb-4 hover:cursor-pointer  text-center text-gray-700 font-semibold  ri-arrow-down-wide-fill"
+          className="text-2xl -mb-4 hover:cursor-pointer text-center text-gray-700 font-semibold  ri-arrow-down-wide-fill"
         ></i>
-        <div className="border-2 w-[80%] bg-gray-400 border-yellow-500 flex items-center justify-start  gap-2 px-3 py-1 rounded-lg">
-          <i className="ri-folder-add-fill text-2xl text-[#D30C7B]"></i>
+        <div className="border-2 w-[80%] bg-gray-400 border-yellow-500 flex items-center justify-start  text-[#1d3557] gap-2 px-3 py-1 rounded-lg">
+          <i className="ri-folder-add-fill text-2xl"></i>
           <input
             className="appearance-none border-none w-[90%] bg-transparent p-0 m-0 focus:outline-none"
             type="text"
@@ -139,8 +149,8 @@ const CreategroupPanel = ({ setCreateGroupPanel, user, setFoundChats }) => {
           />
         </div>
 
-        <div className="border-2 w-[80%] bg-gray-400 border-yellow-500 flex items-center justify-start  gap-2 px-3 py-1 rounded-lg">
-          <i className="ri-user-add-fill text-2xl text-[#D30C7B]"></i>
+        <div className="border-2 w-[80%] bg-gray-400 border-yellow-500 flex items-center justify-start text-[#1d3557] gap-2 px-3 py-1 rounded-lg">
+          <i className="ri-user-add-fill text-2xl "></i>
           <input
             className="appearance-none border-none w-[90%] bg-transparent p-0 m-0 focus:outline-none"
             type="text"
@@ -158,53 +168,66 @@ const CreategroupPanel = ({ setCreateGroupPanel, user, setFoundChats }) => {
             onChange={handleImageChange}
             className="w-1/2 border-2 rounded-lg"
           />
-          {imagePreview && <img src={imagePreview} alt="Preview" width="30"  />}
+          {imagePreview && <img src={imagePreview} alt="Preview" width="30" />}
           <button
             type="submit"
-            className="bg-red-600 hover:cursor-pointer font-semibold text-white p-2 rounded-lg "
+            className=" bg-[#1d3557] hover:cursor-pointer flex items-center justify-center font-semibold text-white py-2 w-20 rounded-lg "
           >
-            Create
+            {btnLoading ? (
+              <div>
+                <Loading />
+              </div>
+            ) : (
+              "Create"
+            )}
           </button>
         </div>
       </form>
+
       <div className="flex mt-48 mx-6 h-full flex-col gap-4">
-        {foundUsers.map((user, idx) => {
-          const isSelected = selectedUsers.includes(user._id); // Check if user is selected
-          return (
-            <div
-              onClick={() => {
-                selectUsersHandler(user);
-              }}
-              key={idx}
-              className={`${
-                isSelected ? "bg-red-500" : "bg-green-600"
-              } border-2 h-16 py-2 cursor-pointer w-full flex justify-between items-center px-2 rounded-2xl`}
-            >
-              <div className="h-full w-full flex gap-4">
-                <div className="h-full rounded-full aspect-square">
-                  <img
-                    className="object-cover rounded-full w-full h-full"
-                    src={user.image.url}
-                    alt=""
-                  />
-                </div>
-                <div className="flex flex-col items-start ">
-                  <div className="flex justify-start items-center gap-2">
-                    <h2>
-                      {user.firstName} {user.lastName}
-                    </h2>
+        {mainLoading ? (
+          <Loading />
+        ) : (
+          foundUsers.map((user, idx) => {
+            const isSelected = selectedUsers.includes(user._id); // Check if user is selected
+            return (
+              <div>
+                <div
+                  onClick={() => {
+                    selectUsersHandler(user);
+                  }}
+                  key={idx}
+                  className={`${
+                    isSelected ? "bg-red-500" : "bg-green-600"
+                  } border-2 h-16 py-2 cursor-pointer w-full flex justify-between items-center px-2 rounded-2xl`}
+                >
+                  <div className="h-full w-full flex gap-4">
+                    <div className="h-full rounded-full aspect-square">
+                      <img
+                        className="object-cover rounded-full w-full h-full"
+                        src={user.image.url}
+                        alt=""
+                      />
+                    </div>
+                    <div className="flex flex-col items-start ">
+                      <div className="flex justify-start items-center gap-2">
+                        <h2>
+                          {user.firstName} {user.lastName}
+                        </h2>
+                      </div>
+                      <h4>{user.username}</h4>
+                    </div>
                   </div>
-                  <h4>{user.username}</h4>
+                  {isSelected ? (
+                    <i className="text-xl text-[#1d3557] ri-close-circle-fill"></i>
+                  ) : (
+                    <i className="text-xl text-[#1d3557] ri-add-circle-fill"></i>
+                  )}
                 </div>
               </div>
-              {isSelected ? (
-                <i className="text-xl ri-close-circle-fill"></i>
-              ) : (
-                <i className="text-xl ri-add-circle-fill"></i>
-              )}
-            </div>
-          );
-        })}
+            );
+          })
+        )}
       </div>
     </div>
   );

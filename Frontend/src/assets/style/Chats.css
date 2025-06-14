@@ -2,6 +2,10 @@
   font-family: "WDXL Lubrifont TC", sans-serif;
 }
 
+body{
+  overflow: hidden;
+}
+
 .chats {
   transition: background-color 0.2s ease, transform 0.2s ease-out;
 }
@@ -20,16 +24,3 @@
   background-color: #141414;
   cursor: pointer;
 }
-
-/* Message Box */
-/* .messageBox:before{
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  height:100%;
-  width: 100%;
-  background-color: royalblue;
-} */
-
-/* ${replyPopup ? "rounded-t-none" : "rounded-t-lg"} */

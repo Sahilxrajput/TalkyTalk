@@ -1,46 +1,53 @@
-const User = require("../Models/user.Model");
 const Chat = require("../Models/chat.Model");
 const { validationResult } = require("express-validator");
 
 module.exports.createPersonalChat = async (req, res) => {
-  const { chatName, members } = req.body;
+  const { chatName, memberId } = req.body;
 
+  // Validate request body
   const errors = validationResult(req);
-
   if (!errors.isEmpty()) {
     return res.status(422).json({ errors: errors.array() });
   }
 
-  if (!chatName || !members) {
-    return res.status(400).json({ message: "Please fill all the fields" });
-  }
+  const currentUserId = String(req.user._id);
 
-  if (members.length == 2) {
-    return res.status(400).json({
-      message: "Only one user are required to create a personal chat",
-    });
+  if (currentUserId === memberId) {
+    return res
+      .status(400)
+      .json({ message: "You cannot create a chat with yourself." });
   }
-
-  members.push(req.user);
 
   try {
+    const existingChat = await Chat.findOne({
+      isGroupChat: false,
+      members: { $all: [currentUserId, memberId], $size: 2 },
+    });
+
+    if (existingChat) {
+      return res.status(200).json({
+        message: "Personal chat already exists",
+        chat: existingChat,
+        duplicate: true,
+      });
+    }
+
+    // Create new personal chat
     const personalChat = await Chat.create({
       chatName: chatName,
-      members: members,
+      members: [currentUserId, memberId],
       isGroupChat: false,
       groupAdmin: null,
     });
 
-    console.log("personalChat", personalChat);
-
-    const fullPersonalChat = await Chat.findOne({ _id: personalChat._id })
+    const fullPersonalChat = await Chat.findById(personalChat._id)
       .populate("members", "-password")
       .populate("groupAdmin", "-password");
 
-    res.status(200).json(fullPersonalChat);
+    return res.status(201).json(fullPersonalChat);
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Internal server error" });
+    console.error("Error creating personal chat:", error);
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
 
@@ -53,22 +60,12 @@ module.exports.createGroupChat = async (req, res) => {
 
   const { chatName, members } = req.body;
 
-  if (!chatName || !members) {
-    return res.status(400).json({ message: "Please fill all the fields" });
-  }
-
   if (!req.file) {
     return res.status(400).json({ message: "No image file uploaded" });
   }
 
   let url = req.file.path;
   let filename = req.file.filename;
-
-  if (members.length < 1) {
-    return res.status(400).json({
-      message: "at least two members are required to create a group chat",
-    });
-  }
 
   const groupMembers = [...members, req.user];
 
@@ -156,7 +153,7 @@ module.exports.renameGroup = async (req, res) => {
   }
 };
 
-module.exports.removeFromGroup = async (req, res) => {
+module.exports.ViewChatDetails = async (req, res) => {
   const { chatId, userIds } = req.body;
 
   const errors = validationResult(req);
@@ -173,10 +170,13 @@ module.exports.removeFromGroup = async (req, res) => {
       return res.status(404).json({ error: "Chat not found" });
     }
 
-    if (String(req.user._id) !== String(chat.groupAdmin._id)) {
+    const isAdmin = String(req.user._id) === String(chat.groupAdmin._id);
+    const isRemovingSelf = idsToRemove.includes(String(req.user._id));
+
+    if (!isAdmin && !isRemovingSelf) {
       return res
         .status(403)
-        .json({ message: "Only admins can remove other members" });
+        .json({ message: "You are not authorized to perform this action." });
     }
 
     const updatedChat = await Chat.findByIdAndUpdate(
@@ -253,5 +253,36 @@ module.exports.getChatIds = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+module.exports.deleteChat = async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
+    }
+
+    const chatId = req.params.chatId; // ✅ Corrected
+
+    const chat = await Chat.findById(chatId);
+    if (!chat) {
+      return res.status(404).json({ error: "Chat not found" });
+    }
+
+    if (String(chat.groupAdmin) !== String(req.user._id)) {
+      return res
+        .status(403)
+        .json({ error: "Only group admin can delete the chat" });
+    }
+
+    await Chat.findByIdAndDelete(chatId);
+
+    return res
+      .status(200)
+      .json({ success: true, message: "Chat deleted successfully" });
+  } catch (err) {
+    console.error("Delete chat error:", err);
+    return res.status(500).json({ error: "Internal server error" });
   }
 };

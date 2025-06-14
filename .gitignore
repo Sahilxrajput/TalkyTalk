@@ -4,3 +4,4 @@ node_modules
 .vscode
 Backend/Routes/payment.Routes.js
 Backend/socket/socketManager.js
+Backend/passport.js

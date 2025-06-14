@@ -3,7 +3,7 @@ const chatController = require("../Controllers/chat.Controller");
 const { body } = require("express-validator");
 const { userAuth } = require("../Middlewares/userAuth.js");
 const multer = require("multer");
-const { storage, cloudinary } = require("../cloudConfig.js");
+const { storage, cloudinary } = require("../utils/cloudConfig.js");
 const upload = multer({ storage });
 
 // router.post(
@@ -42,8 +42,8 @@ router.post(
     body("chatName")
       .isLength({ min: 3 })
       .withMessage("group name should be minimum 3 letter long"),
-    body("members")
-      .isArray({ min: 1 }, { max: 1 })
+    body("memberId")
+      .isMongoId()
       .withMessage("Only two people are needed to create a group chat"),
   ],
   userAuth,
@@ -75,7 +75,7 @@ router.put(
       .withMessage("userId is required"),
   ],
   userAuth,
-  chatController.removeFromGroup
+  chatController.ViewChatDetails
 );
 
 router.put(
@@ -90,6 +90,12 @@ router.put(
   ],
   userAuth,
   chatController.renameGroup
+);
+
+router.delete(
+  "/delete/:chatId",
+  userAuth,
+  chatController.deleteChat
 );
 
 module.exports = router;

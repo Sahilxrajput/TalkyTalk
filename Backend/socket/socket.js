@@ -70,20 +70,9 @@ io.on("connection", (socket) => {
         replyTo: replyTo || null,
         time: new Date(),
       });
-      console.log("newMessage :", newMessage);
     } else {
       console.error("Missing roomId or message");
     }
-  });
-
-  socket.on("connect_error", (err) => {
-    socket.io.on("error", (err) => {
-      console.error("💥 io error:", err);
-    });
-
-    socket.on("error", (err) => {
-      console.error("💥 socket error:", err);
-    });
   });
 
   //   socket.on('offer', ({ roomId, offer }) => {
@@ -110,4 +99,4 @@ io.on("connection", (socket) => {
   });
 });
 
-export { app, server, express, io };
+export {app, server, express};

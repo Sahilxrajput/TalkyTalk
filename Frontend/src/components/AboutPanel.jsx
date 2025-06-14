@@ -7,7 +7,9 @@ const AboutPanel = ({
   setAddToGroupPanel,
   setAboutPanel,
   user,
-  setRemoveFromGroupPanel,
+  setIsGrpAdmin,
+  isGrpAdmin,
+  setViewChatDetailsPanel,
   chatTitle,
   foundChats,
   setFoundChats,
@@ -17,10 +19,11 @@ const AboutPanel = ({
 
   useEffect(() => {
     const totalMembers = chatTitle.members;
-    if (totalMembers?.length != 2) {
+    if (totalMembers?.length > 2) {
       setIsGroupChat(true);
-    } else {
-      setIsGroupChat(false);
+      if (chatTitle.groupAdmin === user?.user?._id) {
+        setIsGrpAdmin(true);
+      }
     }
   }, [chatTitle]);
 
@@ -29,10 +32,9 @@ const AboutPanel = ({
       (member) => member._id !== user.user._id
     );
 
-    // Check if it's a one-on-one chat
     if (chatTitle.members.length === 2 && otherMember) {
       try {
-        const response = await axios.put(
+        await axios.put(
           `${import.meta.env.VITE_BASE_URL}/users/block`,
           {
             blockerId: user.user._id,
@@ -50,19 +52,19 @@ const AboutPanel = ({
     }
   };
 
-  const removeChatHandler = async () => {
+  const deleteChatHandler = async () => {
     try {
-      await axios.put(
-        `${import.meta.env.VITE_BASE_URL}/chat/groupremove`,
+      const res = await axios.delete(
+        `${import.meta.env.VITE_BASE_URL}/chat/delete/${chatTitle._id}`,
         {
-          userId: user.user._id,
-          chatId: chatTitle._id,
-        },
-        { withCredentials: true }
+          withCredentials: true,
+        }
       );
-      const remainingChat = foundChats.filter((c) => c._id !== chatTitle._id);
-      setFoundChats(remainingChat);
-      setAboutPanel(false);
+      if (res.status == 200) {
+        toast.success("Group deleted successfully");
+        setAboutPanel(false);
+      }
+      console.log(res.data);
     } catch (error) {
       console.error(
         "Error removing user from group:",
@@ -71,67 +73,92 @@ const AboutPanel = ({
     }
   };
 
+  const exitChatHandler = async () => {
+    try {
+      const response = await axios.put(
+        `${import.meta.env.VITE_BASE_URL}/chat/groupremove`,
+        { userIds: user.user._id, chatId: chatTitle._id },
+        { withCredentials: true }
+      );
+      console.log(response.data);
+      if (response.status == 200) {
+        setAboutPanel(false);
+        toast.success("Exit chat succesfully");
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("Something went wrong. Please try again.");
+    }
+  };
+
   return (
-    <div className="flex flex-col justify-between px-4 pb-2 gap-2 items-center ">
+    <div className="flex flex-col justify-between px-4 gap-1 items-center">
       <i
         onClick={() => {
           setAboutPanel(false);
         }}
-        className="text-2xl -mb-4 text-center text-gray-700 font-semibold  ri-arrow-down-wide-fill"
+        className="text-2xl -mb-2 cursor-pointer text-center text-gray-700 font-semibold  ri-arrow-down-wide-fill"
       ></i>
-      <button className="bg-blue-800 flex justify-center gap-2 items-center text-white border-1 p-2 w-full rounded-xl">
+      <button
+        onClick={() => {
+          setViewChatDetailsPanel(true);
+          setAboutPanel(false);
+          setChatRenamePanel(false);
+          setAddToGroupPanel(false);
+        }}
+        className="cursor-pointer hover:bg-blue-800 text-[#457b9d] hover:text-white transition-colors duration-300 ease-in flex justify-center gap-2 items-center border-1 p-2 w-full rounded-xl"
+      >
         <i className="ri-user-smile-line"></i>View
       </button>
-      <button className="bg-gray-500 flex justify-center gap-2 items-center text-white border-1 p-2 w-full rounded-xl">
+      <button className="cursor-pointer hover:bg-gray-500 transition-colors hover:text-white duration-300 ease-in flex justify-center gap-2 items-center text-[#457b9d] border-1 p-2 w-full rounded-xl">
         <i className="ri-delete-bin-6-line"></i>Clear Chat
       </button>
-      {chatTitle.groupAdmin === user?.user?._id && (
+      {isGrpAdmin && (
         <>
           {" "}
           <button
             onClick={() => {
               setChatRenamePanel(true);
               setAboutPanel(false);
-              setAddToGroupPanel(false)
-              setRemoveFromGroupPanel(false)
+              setAddToGroupPanel(false);
+              setViewChatDetailsPanel(false);
             }}
-            className="bg-gray-500 flex justify-center gap-2 items-center text-white border-1 p-2 w-full text-lg rounded-xl"
+            className="hover:bg-gray-500 transition-colors duration-300 ease-in hover:text-white cursor-pointer flex justify-center gap-2 items-center text-[#457b9d] border-1 p-2 w-full text-lg rounded-xl"
           >
             <i className="ri-pencil-fill"></i> Rename Chat
           </button>
           <button
-            onClick={()=>{setAddToGroupPanel(true)
-              setChatRenamePanel(false)
-              setRemoveFromGroupPanel(false)
-              setAboutPanel(false)
+            onClick={() => {
+              setAddToGroupPanel(true);
+              setChatRenamePanel(false);
+              setViewChatDetailsPanel(false);
+              setAboutPanel(false);
             }}
-          className="bg-gray-500 flex justify-center gap-2 items-center text-white border-1 p-2 w-full text-lg rounded-xl">
-           <i className="ri-user-add-line"></i> Add Member
+            className="hover:bg-gray-500 transition-colors duration-300 ease-in hover:text-white flex cursor-pointer justify-center gap-2 items-center text-[#457b9d] border-1 p-2 w-full text-lg rounded-xl"
+          >
+            <i className="ri-user-add-line"></i>Add Member
           </button>
-          <button 
-          onClick={()=>{setRemoveFromGroupPanel(true)
-            setAboutPanel(false)
-            setChatRenamePanel(false)
-            setAddToGroupPanel(false)
-          }}
-          className="bg-gray-500 flex justify-center gap-2 items-center text-white border-1 p-2 w-full text-lg rounded-xl">
-            <i className="ri-close-circle-line"></i>Remove Member
+          <button
+            onClick={deleteChatHandler}
+            className="hover:bg-red-600 transition-colors duration-300 ease-in hover:text-white flex justify-center cursor-pointer gap-2 items-center text-[#457b9d] border-1 p-2 w-full text-lg rounded-xl"
+          >
+            <i className="ri-door-open-line"></i>Delete Group
           </button>
         </>
       )}
-      {!isGroupChat ? (
+      {isGroupChat ? (
         <button
-          onClick={BlockHandler}
-          className="bg-red-600 flex justify-center text-white gap-2 items-center  border-1 p-2 w-full text-lg rounded-xl"
+          onClick={exitChatHandler}
+          className="hover:bg-red-600 transition-colors duration-300 ease-in hover:text-white flex justify-center cursor-pointer gap-2 items-center text-[#457b9d] border-1 p-2 w-full text-lg rounded-xl"
         >
-          <i className="ri-spam-line font-black"></i>Block
+          <i className="ri-door-open-line"></i>Exit Group
         </button>
       ) : (
         <button
-          onClick={removeChatHandler}
-          className="bg-red-600 flex justify-center gap-2 items-center text-white border-1 p-2 w-full text-lg rounded-xl"
+          onClick={BlockHandler}
+          className="hover:bg-red-600 transition-colors duration-300 ease-in hover:text-white flex justify-center cursor-pointer text-[#457b9d] gap-2 items-center  border-1 p-2 w-full text-lg rounded-xl"
         >
-          <i className="ri-door-open-line"></i>Exit Chat
+          <i className="ri-spam-line font-black"></i>Block
         </button>
       )}
     </div>

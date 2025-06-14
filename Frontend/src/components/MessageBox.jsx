@@ -10,6 +10,8 @@ const socket = io("http://localhost:5000", {
 
 const MessageBox = ({
   user,
+  ViewChatDetailsPanel,
+  setViewChatDetailsPanel,
   foundChats,
   aboutHandler,
   videoReqHandler,
@@ -26,6 +28,7 @@ const MessageBox = ({
   const [latestMessage, setLatestMessage] = useState("");
   const latestMessageRef = useRef(null);
   const [msgId, setMsgId] = useState(0);
+  const [isUserAtBottom, setIsUserAtBottom] = useState(true);
 
   const sendMessageHandler = async (e) => {
     e.preventDefault();
@@ -73,15 +76,15 @@ const MessageBox = ({
       }
     };
     socket.on("chat", handleChat);
-    
-    socket.on("connect_error", (err) => {
-socket.io.on("error", (err) => {
-  console.error("💥 io error:", err);
-});
 
-socket.on("error", (err) => {
-  console.error("💥 socket error:", err);
-});
+    socket.on("connect_error", (err) => {
+      socket.io.on("error", (err) => {
+        console.error("💥 io error:", err);
+      });
+
+      socket.on("error", (err) => {
+        console.error("💥 socket error:", err);
+      });
     });
 
     return () => {
@@ -91,8 +94,10 @@ socket.on("error", (err) => {
   }, [chatTitle]);
 
   return (
-    <div>
+    <main className="overflow-y-auto h-full px-1 w-full">
       <ChatWindow
+        ViewChatDetailsPanel={ViewChatDetailsPanel}
+        setViewChatDetailsPanel={setViewChatDetailsPanel}
         foundChats={foundChats}
         videoReqHandler={videoReqHandler}
         aboutHandler={aboutHandler}
@@ -107,16 +112,20 @@ socket.on("error", (err) => {
         setSocketMessages={setSocketMessages}
         socketMessages={socketMessages}
         chatTitle={chatTitle}
+        isUserAtBottom={isUserAtBottom}
       />
+
       <div className="flex flex-col items-center">
         <form
           onSubmit={sendMessageHandler}
           className={`
             ${replyPopup ? "rounded-t-none" : "rounded-t-lg"}
-            absolute bottom-6 w-[35%] bg-[#DAD1BE] h-14 align-middle z-20 flex items-center justify-start gap-2 p-2 rounded-lg`}
+            absolute bottom-6 w-4/10 bg-[#DAD1BE] h-14 align-middle z-20 flex items-center justify-start gap-2 p-2 rounded-lg`}
         >
           <input
             name="message"
+            onFocus={() => setIsUserAtBottom(true)}
+            onBlur={() => setIsUserAtBottom(false)}
             className="appearance-none text-lg border-none w-[95%] bg-transparent px-2 m-0 focus:outline-none"
             type="text"
             placeholder="Your message"
@@ -124,11 +133,11 @@ socket.on("error", (err) => {
             onChange={(e) => setLatestMessage(e.target.value)}
           />
           <button ref={latestMessageRef} type="submit">
-            <i className="text-2xl  ri-send-plane-fill"></i>
+            <i className="text-2xl  ri-send-plane-fill cursor-pointer"></i>
           </button>
         </form>
       </div>
-    </div>
+    </main>
   );
 };
 

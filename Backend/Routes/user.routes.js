@@ -1,10 +1,9 @@
 const router = require("express").Router();
-const User = require("../Models/user.Model.js");
 const { body } = require("express-validator");
 const userController = require("../Controllers/user.controller.js");
 const { userAuth } = require("../Middlewares/userAuth.js");
 const multer = require("multer");
-const { storage, cloudinary } = require("../cloudConfig.js");
+const { storage, cloudinary } = require("../utils/cloudConfig.js");
 const upload = multer({ storage });
 
 const signupValidation = [

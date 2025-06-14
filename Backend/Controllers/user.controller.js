@@ -11,6 +11,24 @@ function generateOtp() {
   return Math.floor(1000 + Math.random() * 9000).toString();
 }
 
+module.exports.getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find({});
+    if (users && users.length > 0) {
+      // users.forEach((user) => console.log(user.email)); // logs each email
+      return res.status(200).json({
+        message: "Users found",
+        users, // optionally include users in response
+      });
+    } else {
+      return res.status(404).json({ error: "No users found" });
+    }
+  } catch (err) {
+    console.error("Error fetching users:", err);
+    return res.status(500).json({ error: "Server error" });
+  }
+};
+
 module.exports.signUpUser = async (req, res) => {
   try {
     const err = validationResult(req);
@@ -20,8 +38,7 @@ module.exports.signUpUser = async (req, res) => {
       return res.status(400).json({ error: err.array() });
     }
 
-    const { username, firstName, lastName, email, password, bio } =
-      req.body;
+    const { username, firstName, lastName, email, password, bio } = req.body;
 
     let url = req.file.path;
     let filename = req.file.filename;
@@ -207,24 +224,6 @@ module.exports.getUserProfile = async (req, res) => {
   }
 };
 
-module.exports.getAllUsers = async (req, res) => {
-  try {
-    const users = await User.find({});
-    if (users && users.length > 0) {
-      // users.forEach((user) => console.log(user.email)); // logs each email
-      return res.status(200).json({
-        message: "Users found",
-        users, // optionally include users in response
-      });
-    } else {
-      return res.status(404).json({ error: "No users found" });
-    }
-  } catch (err) {
-    console.error("Error fetching users:", err);
-    return res.status(500).json({ error: "Server error" });
-  }
-};
-
 module.exports.logoutUser = async (req, res) => {
   req.logout((err) => {
     if (err) {
@@ -300,3 +299,5 @@ module.exports.unblockUser = async (req, res) => {
   });
   res.status(200).json({ message: "User unblocked successfully." });
 };
+
+

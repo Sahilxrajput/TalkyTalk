@@ -2,11 +2,13 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import "remixicon/fonts/remixicon.css";
+import Loading from "./Loading";
 
 const AddTOGroup = ({ setAddToGroupPanel, chatTitle }) => {
   const [searchUser, setSearchUser] = useState("");
   const [availableUser, setAvailableUser] = useState([]);
   const [selectedUsers, setSelectedUsers] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (searchUser.trim() !== "") {
@@ -50,6 +52,7 @@ const AddTOGroup = ({ setAddToGroupPanel, chatTitle }) => {
   };
 
   const submitHandler = async () => {
+    setIsLoading(true);
     try {
       const response = await axios.put(
         `${import.meta.env.VITE_BASE_URL}/chat/groupadd`,
@@ -63,6 +66,8 @@ const AddTOGroup = ({ setAddToGroupPanel, chatTitle }) => {
       }
     } catch (error) {
       console.log(error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -71,29 +76,32 @@ const AddTOGroup = ({ setAddToGroupPanel, chatTitle }) => {
       <div className="flex w-full  flex-col items-center justify-center">
         <i
           onClick={() => setAddToGroupPanel(false)}
-          className="text-2xl py-2 text-gray-700 font-semibold ri-arrow-down-wide-fill"
+          className="text-2xl py-2 cursor-pointer text-gray-700 font-semibold ri-arrow-down-wide-fill"
         ></i>
-        <div className="border-2 w-full bg-gray-400 border-yellow-500 flex items-center justify-start  gap-2 px-3 py-1 rounded-lg">
-          <i className="ri-user-add-fill text-2xl text-[#D30C7B]"></i>
-          <input
-            className="appearance-none border-none w-full bg-transparent p-0 m-0 focus:outline-none"
-            type="text"
-            value={searchUser}
-            onChange={(e) => {
-              setSearchUser(e.target.value);
-            }}
-            placeholder="Add Members"
-          />
-        </div>
-        <div>
-          {1 && (
-            <button
-              onClick={() => submitHandler()}
-              className="p-2 mt-2 ml-36 text-white bg-blue-600 rounded-lg"
-            >
-              Add
-            </button>
-          )}
+        <div className="w-full flex flex-col items-end justify-center gap-2">
+          <div className="border-2 w-full bg-gray-400 border-yellow-500 flex items-center justify-start  gap-2 px-3 py-1 rounded-lg">
+            <i className="ri-user-add-fill text-2xl text-[#D30C7B]"></i>
+            <input
+              className="appearance-none border-none w-full bg-transparent p-0 m-0 focus:outline-none"
+              type="text"
+              value={searchUser}
+              onChange={(e) => {
+                setSearchUser(e.target.value);
+              }}
+              placeholder="Add Members"
+            />
+          </div>
+          <button
+            disabled={isLoading || selectedUsers.length == 0}
+            onClick={() => submitHandler()}
+            className={`py-2 w-1/4 text-white bg-blue-600 rounded-lg ${
+              selectedUsers.length == 0 || isLoading
+                ? "cursor-not-allowed"
+                : "cursor-pointer"
+            }`}
+          >
+            {isLoading ? <Loading /> : "Add"}
+          </button>
         </div>
       </div>
       <div className="flex items-center flex-col w-full gap-4">
