@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import "remixicon/fonts/remixicon.css";
-// import '../assets/style/Chats.css'
+import '../assets/style/Chats.css'
 
 const ChatWindow = ({
   foundChats,
+  isGroupChat,
   ViewChatDetailsPanel,
   setViewChatDetailsPanel,
   socketMessages,
@@ -112,7 +113,7 @@ const ChatWindow = ({
 
   return (
     <div className="flex relative justify-center items-center h-full w-full overflow-y-auto">
-      <nav className="flex justify-between items-center absolute top-0 border-2 rounded-4xl px-4 text-white border-black  bg-[#457b9d] h-1/10 border-b-2 w-full ">
+      <nav className="flex justify-between items-center absolute top-0 border-2 rounded-4xl px-4 text-white border-[#DAD1BE]  bg-[#457b9d] h-1/10 border-b-2 w-full ">
         <div
           onClick={() => {
             setViewChatDetailsPanel(!ViewChatDetailsPanel);
@@ -127,13 +128,11 @@ const ChatWindow = ({
               alt="profil"
             />
           </div>
-          <div>
+          <div className="flex justify-center flex-col ">
             <h1 className="text-3xl font-semibold">
               {getChatData()?.username || matchedChat?.chatName}
             </h1>
-            <h4>
-              {matchedChat?.members?.length} members, &nbsp; {} online
-            </h4>
+            {isGroupChat && <h4> {matchedChat?.members?.length} members </h4>}
           </div>
         </div>
         <div className="flex justify-end gap-6 items-center w-1/10 text-2xl">
@@ -217,8 +216,8 @@ const ChatWindow = ({
 
         {showPopup && (
           <div
-            style={{ top: `${pos.y}px`, left: `${pos.x}px` }}
-            className="absolute bg-[#1f1f1fca] justify-between flex flex-col h-27 w-40 rounded-xl py-1.5 px-1 z-50"
+            // style={{ top: `${pos.y}px`, left: `${pos.x}px` }}
+            className="absolute  left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#1f1f1fca] justify-between flex flex-col h-27 w-40 rounded-xl py-1.5 px-1 z-50"
           >
             <div
               onClick={() => {
@@ -226,7 +225,7 @@ const ChatWindow = ({
                 setReplyPopup(true);
                 setShowPopup(false);
               }}
-              className="flex text-white popupOptions bg-green-500 items-center py-1 px-3 gap-4 rounded-[5px]"
+              className="flex text-white popupOptions hover:bg-green-500! items-center py-1 px-3 gap-4 rounded-[5px]"
             >
               <i className="ri-reply-line"></i>
               <p>Reply</p>
@@ -245,7 +244,7 @@ const ChatWindow = ({
                 deleteMessage();
                 setShowPopup(false);
               }}
-              className="flex text-red-600 popupOptions items-center py-1 px-3 gap-4 rounded-[5px]"
+              className="flex hover:bg-red-600! text-white popupOptions items-center py-1 px-3 gap-4 rounded-[5px]"
             >
               <i className="ri-delete-bin-6-line"></i>
               <p>Delete</p>

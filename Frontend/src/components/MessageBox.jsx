@@ -10,6 +10,7 @@ const socket = io("http://localhost:5000", {
 
 const MessageBox = ({
   user,
+  isGroupChat,
   ViewChatDetailsPanel,
   setViewChatDetailsPanel,
   foundChats,
@@ -19,8 +20,6 @@ const MessageBox = ({
   setFoundChats,
   chatTitle,
   replyRef,
-  setShowPopup,
-  showPopup,
   replyPopup,
   setReplyPopup,
 }) => {
@@ -29,6 +28,7 @@ const MessageBox = ({
   const latestMessageRef = useRef(null);
   const [msgId, setMsgId] = useState(0);
   const [isUserAtBottom, setIsUserAtBottom] = useState(true);
+  const [showPopup, setShowPopup] = useState(false);
 
   const sendMessageHandler = async (e) => {
     e.preventDefault();
@@ -96,6 +96,7 @@ const MessageBox = ({
   return (
     <main className="overflow-y-auto h-full px-1 w-full">
       <ChatWindow
+        isGroupChat={isGroupChat}
         ViewChatDetailsPanel={ViewChatDetailsPanel}
         setViewChatDetailsPanel={setViewChatDetailsPanel}
         foundChats={foundChats}

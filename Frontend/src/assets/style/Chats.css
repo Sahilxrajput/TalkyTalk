@@ -7,12 +7,20 @@ body{
 }
 
 .chats {
+  transition: background-color 0.3s ease-in-out;
+}
+
+.slide {
   transition: background-color 0.2s ease, transform 0.2s ease-out;
+}
+
+.slide:hover{
+  background-color: rgba(128, 128, 128, 0.358);
+  border: 1px solid white;
 }
 
 .chats:hover {
   background-color: #0069925e;
-  transform: scale(1.08);
 }
 
 /* chat Window  */

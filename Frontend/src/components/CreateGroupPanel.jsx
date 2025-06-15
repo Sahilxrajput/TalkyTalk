@@ -2,6 +2,8 @@ import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import Loading from "./Loading";
+import tax from "../assets/pic/tex.jpg";
+
 
 const CreategroupPanel = ({ setCreateGroupPanel, user, setFoundChats }) => {
   const [searchUser, setSearchUser] = useState("");
@@ -124,9 +126,17 @@ const CreategroupPanel = ({ setCreateGroupPanel, user, setFoundChats }) => {
       className="flex flex-col fixed w-full  h-full overflow-x-hidden  justify-start gap-4 rounded-4xl"
       style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
     >
+       <div className="absolute inset-0 z-0 pointer-events-none"
+              style={{
+                backgroundImage: `url(${tax})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                opacity: 1,
+              }}
+            ></div>
       <form
         onSubmit={submitHandler}
-        className="flex flex-col absolute w-full z-20 h-[27%]  items-center justify-start gap-4 rounded-4xl"
+        className="flex flex-col absolute w-full z-20 h-[27%] text-[#DAD1BE]  items-center justify-start gap-4 rounded-4xl"
       >
         <i
           onClick={() => {
@@ -136,9 +146,9 @@ const CreategroupPanel = ({ setCreateGroupPanel, user, setFoundChats }) => {
             setSelectedUsers([]);
             setAddMembers([]);
           }}
-          className="text-2xl -mb-4 hover:cursor-pointer text-center text-gray-700 font-semibold  ri-arrow-down-wide-fill"
+          className="text-2xl -mb-4 hover:cursor-pointer text-center font-semibold  ri-arrow-down-wide-fill"
         ></i>
-        <div className="border-2 w-[80%] bg-gray-400 border-yellow-500 flex items-center justify-start  text-[#1d3557] gap-2 px-3 py-1 rounded-lg">
+        <div className="border-2 w-[80%]  border-[#DAD1BE]  flex items-center justify-start  gap-2 px-3 py-1 rounded-lg">
           <i className="ri-folder-add-fill text-2xl"></i>
           <input
             className="appearance-none border-none w-[90%] bg-transparent p-0 m-0 focus:outline-none"
@@ -149,7 +159,7 @@ const CreategroupPanel = ({ setCreateGroupPanel, user, setFoundChats }) => {
           />
         </div>
 
-        <div className="border-2 w-[80%] bg-gray-400 border-yellow-500 flex items-center justify-start text-[#1d3557] gap-2 px-3 py-1 rounded-lg">
+        <div className="border-2 w-[80%] border-[#DAD1BE] flex items-center justify-start  gap-2 px-3 py-1 rounded-lg">
           <i className="ri-user-add-fill text-2xl "></i>
           <input
             className="appearance-none border-none w-[90%] bg-transparent p-0 m-0 focus:outline-none"

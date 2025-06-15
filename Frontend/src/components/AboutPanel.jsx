@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 
 const AboutPanel = ({
   setAddToGroupPanel,
+  isGroupChat,
   setAboutPanel,
   user,
   setIsGrpAdmin,
@@ -15,22 +16,12 @@ const AboutPanel = ({
   setFoundChats,
   setChatRenamePanel,
 }) => {
-  const [isGroupChat, setIsGroupChat] = useState(false);
-
-  useEffect(() => {
-    const totalMembers = chatTitle.members;
-    if (totalMembers?.length > 2) {
-      setIsGroupChat(true);
-      if (chatTitle.groupAdmin === user?.user?._id) {
-        setIsGrpAdmin(true);
-      }
-    }
-  }, [chatTitle]);
 
   const BlockHandler = async () => {
     const otherMember = chatTitle.members.find(
       (member) => member._id !== user.user._id
     );
+    console.log(foundChats)
 
     if (chatTitle.members.length === 2 && otherMember) {
       try {
@@ -42,7 +33,7 @@ const AboutPanel = ({
           },
           { withCredentials: true }
         );
-
+        setFoundChats((prev)=> prev.filter((chat) => chat._id !== chatTitle._id));
         toast.success("User blocked successfully");
       } catch (error) {
         console.error("Failed to block user:", error);
@@ -91,6 +82,7 @@ const AboutPanel = ({
     }
   };
 
+
   return (
     <div className="flex flex-col justify-between px-4 gap-1 items-center">
       <i
@@ -113,7 +105,7 @@ const AboutPanel = ({
       <button className="cursor-pointer hover:bg-gray-500 transition-colors hover:text-white duration-300 ease-in flex justify-center gap-2 items-center text-[#457b9d] border-1 p-2 w-full rounded-xl">
         <i className="ri-delete-bin-6-line"></i>Clear Chat
       </button>
-      {isGrpAdmin && (
+      {(isGrpAdmin && isGroupChat) && (
         <>
           {" "}
           <button

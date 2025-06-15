@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import Loading from "./Loading";
+import tax from "../assets/pic/tex.jpg";
 
 const CreatePersonalChatPanel = ({
   setSearchNewMemberPanel,
@@ -92,19 +93,30 @@ const CreatePersonalChatPanel = ({
 
   return (
     <div
-      className="flex flex-col w-full  h-full overflow-x-hidden justify-center rounded-4xl"
-      style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+      className="flex flex-col w-full h-full overflow-x-hidden justify-center rounded-4xl"
+      style={{
+        scrollbarWidth: "none",
+        msOverflowStyle: "none",
+      }}
     >
-      <nav className="absolute flex flex-col items-center rounded-4xl w-full z-20 h-[13%] top-0 left-0">
+      <div className="absolute inset-0 z-0 pointer-events-none"
+        style={{
+          backgroundImage: `url(${tax})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          opacity: 1,
+        }}
+      ></div>
+      <nav className="absolute flex flex-col items-center text-[#DAD1BE] rounded-4xl w-full z-20 h-[13%] top-0 left-0">
         <i
           onClick={() => {
             setSearchNewMemberPanel(false);
             setSearchUser("");
             setSelectedUserId(null);
           }}
-          className="text-2xl hover:cursor-pointer  text-gray-700 font-semibold ri-arrow-down-wide-fill"
+          className="text-2xl hover:cursor-pointer font-semibold ri-arrow-down-wide-fill"
         ></i>
-        <div className="border-2 border-red-500 w-9/10 bg-gray-400 flex items-center justify-between gap-2 px-3 p-2 rounded-lg">
+        <div className="border-2 border-[#DAD1BE] w-9/10  flex items-center justify-between gap-2 px-3 p-2 rounded-lg">
           <i className="ri-find-replace-line"></i>
           <input
             value={searchUser}
@@ -117,7 +129,7 @@ const CreatePersonalChatPanel = ({
       </nav>
 
       <div
-        className="flex h-full w-full overflow-x-hidden mt-24 flex-col gap-2"
+        className="flex h-full w-full overflow-x-hidden mt-24 z-30 flex-col gap-2"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {" "}
@@ -125,7 +137,7 @@ const CreatePersonalChatPanel = ({
           <Loading />
         ) : searchUser.trim() !== "" && foundUsers.length === 0 ? (
           <h2 className="text-red-600 text-center text-xl font-semibold">
-           &#9734; No User Found
+            &#9734; No User Found
           </h2>
         ) : (
           foundUsers.map((user, idx) => {

@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { UserDataContext } from "../context/UserContext";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -7,13 +7,15 @@ import "../assets/style/signup.css";
 import "remixicon/fonts/remixicon.css";
 import profileImg from "../assets/profilePic.jpg";
 import Loading from "../components/Loading";
+import SignupSvg from "../assets/svg/logIn.svg";
 
-const SignUpTwo = () => {
+const SignUp = () => {
   const { user, setUser } = useContext(UserDataContext);
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1);
   const [file, setFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -103,8 +105,7 @@ const SignUpTwo = () => {
   const otpHandler = async () => {
     const email = formData.email.trim();
 
-    console.log(isValidEmail(email));
-    if (email === "" || !isValidEmail(email)) {
+    if (!isValidEmail(email)) {
       toast.warn("Please enter a valid email address");
       return;
     }
@@ -121,10 +122,9 @@ const SignUpTwo = () => {
       } catch (error) {
         toast.error("Failed to send OTP. Please try again.");
       } finally {
-        setLoading(false); 
+        setLoading(false);
       }
-    } 
-    else if (step == 2) {
+    } else if (step == 2) {
       try {
         const res = await axios.post(
           `${import.meta.env.VITE_BASE_URL}/users/verify-otp`,
@@ -142,20 +142,20 @@ const SignUpTwo = () => {
   };
 
   return (
-    <div className="w-screen h-screen flex items-center justify-center  bg-green-600 bg-cover bg-no-repeat bg-center">
-      <div className="bg-[#fccee84c] backdrop-blur-lg h-[500px] p-11 rounded-xl w-[600px] flex justify-center flex-col gap-10 items-center text-white">
+    <div className="w-screen h-screen gap-16 flex items-center justify-center login bg-cover bg-no-repeat bg-center">
+      <div className="bg-[#fccee84c] border-2 border-[#1d3557] backdrop-blur-lg h-[500px] p-11 rounded-xl w-[600px] flex justify-center flex-col gap-10 items-center text-white">
         {step !== 4 && (
-          <h1 className="mt-2 text-3xl font-bold text-[#D30C7B] stroke-2 stroke-yellow-500 ">
-            ~~~~ Welcome Talkytalk ~~~~{" "}
+          <h1 className="mt-2 text-3xl font-bold text-[#D30C7B]">
+            ~~~~ Welcome to Talkytalk ~~~~{" "}
           </h1>
         )}
         {step !== 4 && (
           <form
-            className="w-full h-full  flex justify-center flex-col gap-10 items-center text-white"
+            className="w-full h-full  flex justify-center flex-col gap-10 items-center text-[#1d3557]"
             onSubmit={(e) => stepsHandler(e)}
           >
-            <div className="border-2 w-[80%] border-yellow-500 flex items-center justify-start  gap-2 px-3 py-2 rounded-lg">
-              <i className="ri-mail-ai-line text-[#D30C7B]"></i>
+            <div className="border-2 w-[80%] border-[#1d3557] flex items-center justify-start  gap-2 px-3 py-2 rounded-lg">
+              <i className="ri-mail-ai-line "></i>
               <input
                 name="email"
                 className="appearance-none border-none w-[90%] bg-transparent p-0 m-0 focus:outline-none"
@@ -166,8 +166,8 @@ const SignUpTwo = () => {
               />
             </div>
             <div className="flex justify-between w-[80%] ">
-              <div className="border-2 w-[70%] border-yellow-500 flex items-center justify-start  gap-2 px-3 py-2 rounded-lg">
-                <i className="ri-lock-2-line text-[#D30C7B]"></i>
+              <div className="border-2 w-[70%] border-[#1d3557] flex items-center justify-start  gap-2 px-3 py-2 rounded-lg">
+                <i className="ri-settings-2-line"></i>
                 <input
                   name="otp"
                   className="appearance-none border-none  bg-transparent p-0 m-0 focus:outline-none"
@@ -179,10 +179,10 @@ const SignUpTwo = () => {
                 />
               </div>
               <button
-                className={`w-24 rounded-lg transition duration-200 bg-blue-600 border-1 otp ${
-                  (loading || step === 3
+                className={`w-24 rounded-lg transition duration-200 text-white bg-blue-600 border-1 otp ${
+                  loading || step === 3
                     ? "cursor-not-allowed"
-                    : "cursor-pointer active:scale-75")
+                    : "cursor-pointer active:scale-75"
                 }`}
                 onClick={() => {
                   if (step !== 3) {
@@ -205,18 +205,29 @@ const SignUpTwo = () => {
                 )}
               </button>
             </div>
-            <div className="border-2 w-[80%] border-yellow-500 flex items-center justify-start  gap-2 px-3 py-2 rounded-lg">
-              <i className="ri-lock-2-line text-[#D30C7B]"></i>
+            <div className="border-2 w-[80%] border-[#1d3557] flex items-center justify-start  gap-2 px-3 py-2 rounded-lg">
+              <i className="ri-lock-2-line"></i>
               <input
                 name="password"
+                type={showPassword ? "text" : "password"}
                 className="appearance-none border-none w-[90%] bg-transparent p-0 m-0 focus:outline-none"
                 value={formData.password}
                 placeholder="Password"
                 onChange={(e) => changeHandler(e)}
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+              >
+                <i
+                  className={` cursor-pointer ${
+                    showPassword ? "ri-eye-off-line" : "ri-eye-line"
+                  }`}
+                ></i>{" "}
+              </button>
             </div>
             <button
-              className={`bg-[#D30C7B] flex gap-4 py-2 px-6 border-1 transition-opacity duration-300 key
+              className={`bg-[#D30C7B] flex gap-4 py-2 text-white px-6 border-1 transition-opacity duration-300 key
                 ${
                   step === 3
                     ? "cursor-pointer opacity-100 active:scale-75"
@@ -240,7 +251,7 @@ const SignUpTwo = () => {
         )}
         {step === 4 && (
           <form
-            className="w-full h-full  flex justify-center flex-col gap-10 items-center text-white"
+            className="w-full h-full  flex justify-center flex-col gap-10 items-center text-[#1d3557]"
             onSubmit={(e) => signinHandler(e)}
           >
             <div className="flex justify-center items-center gap-6  w-full ">
@@ -274,8 +285,8 @@ const SignUpTwo = () => {
               />
             </div>
             <div className="flex justify-between gap-4 w-[80%] ">
-              <div className="border-2  border-yellow-500 flex items-center justify-start gap-2 px-3 py-2 rounded-lg">
-                <i className="ri-user-shared-line text-[#D30C7B]"></i>
+              <div className="border-2  border-[#1d3557] flex items-center justify-start gap-2 px-3 py-2 rounded-lg">
+                <i className="ri-user-shared-line "></i>
                 <input
                   name="firstName"
                   className="appearance-none border-none bg-transparent p-0 m-0 focus:outline-none"
@@ -285,8 +296,8 @@ const SignUpTwo = () => {
                   onChange={(e) => changeHandler(e)}
                 />
               </div>
-              <div className="border-2 border-yellow-500 flex items-center justify-start  gap-2 px-3 py-2 rounded-lg">
-                <i className="ri-user-received-line text-[#D30C7B]"></i>
+              <div className="border-2 border-[#1d3557] flex items-center justify-start  gap-2 px-3 py-2 rounded-lg">
+                <i className="ri-user-received-line"></i>
                 <input
                   name="lastName"
                   className="appearance-none border-none w-[90%] bg-transparent p-0 m-0 focus:outline-none"
@@ -296,8 +307,8 @@ const SignUpTwo = () => {
                 />
               </div>
             </div>
-            <div className="border-2 w-[80%] border-yellow-500 flex items-center justify-start  gap-2 px-3 py-2 rounded-lg">
-              <i className="ri-user-line text-[#D30C7B]"></i>
+            <div className="border-2 w-[80%] border-[#1d3557] flex items-center justify-start  gap-2 px-3 py-2 rounded-lg">
+              <i className="ri-user-line"></i>
               <input
                 name="username"
                 className="appearance-none border-none w-[90%] bg-transparent p-0 m-0 focus:outline-none"
@@ -307,8 +318,8 @@ const SignUpTwo = () => {
                 onChange={(e) => changeHandler(e)}
               />
             </div>
-            <div className="border-2 w-[80%] border-yellow-500 flex items-center justify-start  gap-2 px-3 py-2 rounded-lg">
-              <i className="ri-quill-pen-ai-fill text-[#D30C7B]"></i>
+            <div className="border-2 w-[80%] border-[#1d3557] flex items-center justify-start  gap-2 px-3 py-2 rounded-lg">
+              <i className="ri-quill-pen-ai-fill"></i>
               <input
                 name="bio"
                 className="appearance-none border-none w-[90%] bg-transparent p-0 m-0 focus:outline-none"
@@ -320,7 +331,7 @@ const SignUpTwo = () => {
             </div>
             <button
               type="submit"
-              className="bg-[#D30C7B] w-26 h-12 border-1 flex justify-center text-lg items-center cursor-pointer key active:scale-75"
+              className="bg-[#D30C7B] text-white w-26 h-12 border-1 flex justify-center text-lg items-center cursor-pointer key active:scale-75"
             >
               {loading ? (
                 <Loading />
@@ -333,9 +344,9 @@ const SignUpTwo = () => {
           </form>
         )}
 
-        <h4 className="">
-          <i className="ri-arrow-right-long-fill text-[#D30C7B]"></i>&nbsp;
-          Already have an account &nbsp;
+        <h4 className="text-[#1d3557]">
+          <i className="ri-arrow-right-long-fill"></i>&nbsp; Already have an
+          account &nbsp;
           <Link to="/login" className=" font-semibold underline text-[#D30C7B]">
             login here
           </Link>
@@ -345,4 +356,4 @@ const SignUpTwo = () => {
   );
 };
 
-export default SignUpTwo;
+export default SignUp;

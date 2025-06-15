@@ -6,6 +6,10 @@ import { UserDataContext } from "../context/UserContext";
 import axios from "axios";
 import "../assets/style/signup.css";
 import { toast } from "react-toastify";
+import LogInSvg from "../assets/svg/logIn.svg";
+import BgImg from "../assets/svg/gradient.svg";
+import loginVid from '../../public/login.mp4' 
+
 
 const Login = () => {
   const navigate = useNavigate();
@@ -28,7 +32,7 @@ const Login = () => {
       if (response.status === 200) {
         const data = response.data;
         console.log(data);
-        setUser(data); 
+        setUser(data);
         localStorage.setItem("token", data.token);
         toast.success("User logged in successfully");
         navigate("/home");
@@ -40,21 +44,29 @@ const Login = () => {
     }
   };
 
+
+
   return (
-    <div
-      className="w-screen h-screen flex items-center justify-center bg-cover bg-no-repeat bg-center"
-      style={{ backgroundImage: `url(${backgroundImage})` }}
-    >
+    <div className="w-screen h-screen flex login gap-20 items-center justify-center bg-center">
+    
+      <div className=" w-120 -bottom-10 left-0">
+        <img
+          src={LogInSvg}
+          alt="svg"
+          className="drop-shadow-2xl drop-shadow-black-900"
+        />
+      </div> 
+
       <form
-        className="bg-[#fccee84c] backdrop-blur-lg h-[450px] p-11 rounded-xl w-[600px] flex justify-center flex-col gap-10 items-center text-white"
+        className="bg-[#fccee84c] border-[#1d3557] border-2 backdrop-blur-lg h-[450px] py-11 rounded-xl w-[400px] flex justify-center flex-col gap-10 items-center text-white"
         onSubmit={(e) => submitHandler(e)}
       >
-        <h1 className="mt-2 text-3xl font-bold text-[#D30C7B] stroke-2 stroke-yellow-500 ">
-          ~~~~ Welcome Talkytalk ~~~~{" "}
+        <h1 className="mt-2 text-3xl font-bold text-[#D30C7B]">
+          ~Welcome to Talkytalk~
         </h1>
 
-        <div className="border-2 w-[80%] border-yellow-500 flex items-center justify-start  gap-2 px-3 py-2 rounded-lg">
-          <i className="ri-mail-ai-line text-[#D30C7B]"></i>
+        <div className="border-2 w-[80%] border-[#1d3557] font-bold text-[#1d3557] flex items-center justify-start  gap-2 px-3 py-2 rounded-lg">
+          <i className="ri-mail-ai-line "></i>
           <input
             name="email"
             className="appearance-none border-none w-[90%] bg-transparent p-0 m-0 focus:outline-none"
@@ -64,8 +76,8 @@ const Login = () => {
             onChange={(e) => setEmail(e.target.value)}
           />
         </div>
-        <div className="border-2 w-[80%] border-yellow-500 flex items-center justify-start  gap-2 px-3 py-2 rounded-lg">
-          <i className="ri-lock-2-line text-[#D30C7B]"></i>
+        <div className="border-2 w-[80%] border-[#1d3557] font-bold text-[#1d3557] flex items-center justify-start  gap-2 px-3 py-2 rounded-lg">
+          <i className="ri-lock-2-line "></i>
           <input
             name="password"
             className="appearance-none border-none w-[90%] bg-transparent p-0 m-0 focus:outline-none"
@@ -78,7 +90,11 @@ const Login = () => {
             type="button"
             onClick={() => setShowPassword((prev) => !prev)}
           >
-            <i className={` cursor-pointer ${showPassword ? "ri-eye-off-line" : "ri-eye-line"}`}></i>{" "}
+            <i
+              className={` cursor-pointer ${
+                showPassword ? "ri-eye-off-line" : "ri-eye-line"
+              }`}
+            ></i>{" "}
           </button>
         </div>
 
@@ -89,9 +105,9 @@ const Login = () => {
         >
           Log in <i className="ri-send-plane-fill"></i>
         </button>
-        <h4 className="">
-          <i className="ri-arrow-right-long-fill text-[#D30C7B]"></i>&nbsp;
-          Don't have an account &nbsp;
+        <h4 className=" text-[#1d3557]">
+          <i className="ri-arrow-right-long-fill"></i>&nbsp; Don't have an
+          account &nbsp;
           <Link
             to="/signup"
             className=" font-semibold underline text-[#D30C7B]"
@@ -99,7 +115,15 @@ const Login = () => {
             Creat One
           </Link>
         </h4>
-      </form>
+      </form> 
+
+{/* <div className="w-full mx-auto bg-yellow-500">
+  <video className="w-full h-auto" autoPlay loop muted>
+    <source src={loginVid} type="video/mp4" />
+    Your browser does not support the video tag.
+  </video>
+</div> */}
+
     </div>
   );
 };

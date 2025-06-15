@@ -1,13 +1,13 @@
 import React, { useEffect, useRef, useState, useContext, lazy } from "react";
 import { UserDataContext } from "../context/UserContext";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import io from "socket.io-client";
 import gsap from "gsap";
 import axios from "axios";
 import { useGSAP } from "@gsap/react";
 import "remixicon/fonts/remixicon.css";
 import "../assets/style/Chats.css";
-import BgImage from "../assets/craft.jpg";
+import BgImage from "../assets/theme/craft.jpg";
 import profileImg from "../assets/profilePic.jpg";
 import { toast } from "react-toastify";
 const MessageBox = lazy(() => import("../components/MessageBox"));
@@ -24,6 +24,10 @@ const ViewChatDetails = lazy(() => import("../components/ViewChatDetails"));
 const socket = io();
 
 const Home = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const blockedUsers = location.state;
+
   const [searchChats, setSearchChats] = useState("");
   const [foundChats, setFoundChats] = useState([]);
   const addMemberRef = useRef(null);
@@ -52,8 +56,7 @@ const Home = () => {
   const [ViewChatDetailsPanel, setViewChatDetailsPanel] = useState(false);
   const ViewChatDetailsRef = useRef(null);
   const [isGrpAdmin, setIsGrpAdmin] = useState(false);
-
-  const navigate = useNavigate();
+  const [isGroupChat, setIsGroupChat] = useState(false);
 
   //DONE
   useGSAP(() => {
@@ -298,7 +301,11 @@ const Home = () => {
         console.error("Error fetching chats:", error);
       }
     })();
-  }, [searchChats, foundChats]);
+  }, [searchChats, blockedUsers]);
+
+  useEffect(()=>{
+    console.log(blockedUsers)
+  },[blockedUsers])
 
   useEffect(() => {
     const handleTabKey = (e) => {
@@ -314,9 +321,15 @@ const Home = () => {
     };
   }, []);
 
-useEffect(()=>{
-  console.log(chatTitle)
-},[chatTitle])
+  useEffect(() => {
+    const totalMembers = chatTitle.members;
+    if (totalMembers?.length > 2) {
+      setIsGroupChat(true);
+      if (chatTitle.groupAdmin === user?.user?._id) {
+        setIsGrpAdmin(true);
+      }
+    }
+  }, [chatTitle]);
 
   //   useEffect(() => {
   //   if (chatUserId) {
@@ -339,8 +352,8 @@ useEffect(()=>{
   // }, []);
 
   return (
-    <div className=" h-screen w-screen flex items-center bg-[#adbaa9] bg-[#1d3557] ">
-      <div className="h-full w-1/20 py-3  bg-[#1d3557] rounded-4xl text-xl flex flex-col items-center justify-between">
+    <div className=" h-screen w-screen flex items-center  bg-[#1d3557]">
+      <div className="h-full w-1/20 py-3 rounded-4xl text-xl flex flex-col items-center justify-between">
         <button className="mb-4  aspect-square w-[80%] hover:cursor-pointer  rounded-xl">
           <img
             onClick={() => navigate("/profile")}
@@ -350,33 +363,60 @@ useEffect(()=>{
           />
         </button>
 
-        <span className="bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 text-transparent bg-clip-text TalkyTalk text-2xl font-black">
-          T
-        </span>
-        <span className="bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 text-transparent bg-clip-text TalkyTalk text-2xl font-black">
-          A
-        </span>
-        <span className="bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 text-transparent bg-clip-text TalkyTalk text-2xl font-black">
-          L
-        </span>
-        <span className="bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 text-transparent bg-clip-text TalkyTalk text-2xl font-black">
-          K
-        </span>
-        <span className="bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 text-transparent bg-clip-text TalkyTalk text-2xl font-black">
-          Y
-        </span>
-        <span className="bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 text-transparent bg-clip-text TalkyTalk text-2xl font-black">
-          T
-        </span>
-        <span className="bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 text-transparent bg-clip-text TalkyTalk text-2xl font-black">
-          A
-        </span>
-        <span className="bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 text-transparent bg-clip-text TalkyTalk text-2xl font-black">
-          L
-        </span>
-        <span className="bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 text-transparent bg-clip-text TalkyTalk text-2xl font-black">
-          K
-        </span>
+        <div className="bg-gray-300 p-2 aspect-square flex items-center justify-center rounded-xl">
+          <span className="bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 text-transparent bg-clip-text TalkyTalk text-2xl font-black">
+            T
+          </span>
+        </div>
+
+        <div className="bg-gray-300 p-2 aspect-square flex items-center justify-center rounded-xl">
+          <span className="bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 text-transparent bg-clip-text TalkyTalk text-2xl font-black">
+            A
+          </span>
+        </div>
+
+        <div className="bg-gray-300 p-2 aspect-square flex items-center justify-center rounded-xl">
+          <span className="bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 text-transparent bg-clip-text TalkyTalk text-2xl font-black">
+            L
+          </span>
+        </div>
+
+        <div className="bg-gray-300 p-2 aspect-square flex items-center justify-center rounded-xl">
+          <span className="bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 text-transparent bg-clip-text TalkyTalk text-2xl font-black">
+            K
+          </span>
+        </div>
+
+        <div className="bg-gray-300 p-2 aspect-square flex items-center justify-center rounded-xl">
+          <span className="bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 text-transparent bg-clip-text TalkyTalk text-2xl font-black">
+            Y
+          </span>
+        </div>
+
+        <div className="bg-gray-300 p-2 aspect-square flex items-center justify-center rounded-xl">
+          <span className="bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 text-transparent bg-clip-text TalkyTalk text-2xl font-black">
+            T
+          </span>
+        </div>
+
+        <div className="bg-gray-300 p-2 aspect-square flex items-center justify-center rounded-xl">
+          <span className="bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 text-transparent bg-clip-text TalkyTalk text-2xl font-black">
+            A
+          </span>
+        </div>
+
+        <div className="bg-gray-300 p-2 aspect-square flex items-center justify-center rounded-xl">
+          <span className="bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 text-transparent bg-clip-text TalkyTalk text-2xl font-black">
+            L
+          </span>
+        </div>
+
+        <div className="bg-gray-300 p-2 aspect-square flex items-center justify-center rounded-xl">
+          <span className="bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 text-transparent bg-clip-text TalkyTalk text-2xl font-black">
+            K
+          </span>
+        </div>
+
         <button
           onClick={logouthandler}
           className="py-2 mt-4 px-3 hover:cursor-pointer aspect-square w-[80%] flex items-center justify-center bg-gray-300 rounded-xl"
@@ -387,7 +427,7 @@ useEffect(()=>{
 
       <div
         className="basis-1/1 flex rounded-4xl mr-1 bg-cover bg-center h-[98%]"
-        // style={{ backgroundImage: `url(${BgImage})` }}
+        style={{ backgroundImage: `url(${BgImage})` }}
       >
         <div
           className="w-[24.4%] relative flex flex-col overflow-hidden gap-2 justify-between h-full"
@@ -420,7 +460,7 @@ useEffect(()=>{
 
           <div
             ref={addMemberRef}
-            className="flex absolute w-full z-30 -bottom-1/4 h-1/4 items-center justify-center border-2  bg-red-400 rounded-4xl"
+            className="flex absolute  w-full z-30 -bottom-1/4 h-1/4 bg-[#a8dadc] items-center justify-center border-2  rounded-4xl"
           >
             <CreateChat
               setSearchNewMemberPanel={setSearchNewMemberPanel}
@@ -430,7 +470,7 @@ useEffect(()=>{
           </div>
           <div
             ref={searchNewMemberRef}
-            className=" w-full absolute h-full rounded-4xl -bottom-1/1 px-2 z-30 overflow-x-hidden bg-red-400"
+            className=" w-full absolute h-full rounded-4xl -bottom-1/1 px-2 z-30 overflow-x-hidden  border-[#DAD1BE] border-2  bg-green-500"
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
             <CreatePersonalChatPanel
@@ -442,7 +482,7 @@ useEffect(()=>{
 
           <div
             ref={createGroupRef}
-            className="absolute -bottom-1/1 bg-red-400 rounded-4xl z-30 w-full h-full overflow-x-hidden"
+            className="absolute -bottom-1/1 bg-red-400 rounded-4xl border-[#DAD1BE] border-2 z-30 w-full h-full overflow-x-hidden"
           >
             <CreategroupPanel
               user={user}
@@ -463,7 +503,7 @@ useEffect(()=>{
 
           <div
             ref={ViewChatDetailsRef}
-            className=" w-full absolute h-full -bottom-1/1 rounded-4xl z-30 bg-red-400 overflow-x-hidden"
+            className=" w-full absolute h-full -bottom-1/1 rounded-4xl z-30  bg-[#a8dadc] overflow-x-hidden"
           >
             <ViewChatDetails
               isGrpAdmin={isGrpAdmin}
@@ -505,7 +545,7 @@ useEffect(()=>{
           </button>
 
           <div
-            className="flex items-start justify-start mt-16 pt-4 gap-4 h-full flex-col w-full rounded-b-4xl  bg-[#a8dadc] border-2 border-t-0 border-[#4E6766] overflow-x-hidden px-4 "
+            className="flex items-start justify-start mt-16 pt-4 h-full flex-col w-full gap-1 rounded-b-4xl  bg-[#a8dadc] border-2 border-t-0 border-[#4E6766] overflow-x-hidden "
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
             {foundChats.map((chat, idx) => {
@@ -522,7 +562,7 @@ useEffect(()=>{
                     selectedChatHandler(chat._id);
                   }}
                   key={idx}
-                  className={`flex chats justify-start hover:cursor-pointer  gap-4 border-2 border-[#4E6766]  w-full rounded-2xl  p-2 ${
+                  className={`flex chats border-2 justify-start hover:cursor-pointer gap-4 border-[#4E6766]  w-full rounded-2xl  p-2 ${
                     isSelected ? " bg-[#e63946]!" : " "
                   } `}
                 >
@@ -549,6 +589,7 @@ useEffect(()=>{
           className=" rounded-2xl z-50 border-2 pb-2 bg-[#a8dadc] border-gray-500 absolute right-0 top-20"
         >
           <AboutPanel
+            isGroupChat={isGroupChat}
             isGrpAdmin={isGrpAdmin}
             setIsGrpAdmin={setIsGrpAdmin}
             foundChats={foundChats}
@@ -569,8 +610,9 @@ useEffect(()=>{
         >
           {selectedChatId && (
             <MessageBox
-            setViewChatDetailsPanel={setViewChatDetailsPanel}
-            ViewChatDetailsPanel={ViewChatDetailsPanel}
+              isGroupChat={isGroupChat}
+              setViewChatDetailsPanel={setViewChatDetailsPanel}
+              ViewChatDetailsPanel={ViewChatDetailsPanel}
               foundChats={foundChats}
               replyRef={replyRef}
               videoReqHandler={videoReqHandler}

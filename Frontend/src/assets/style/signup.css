@@ -15,7 +15,8 @@
 }
 
 @keyframes jump {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
   }
   50% {
@@ -23,20 +24,76 @@
   }
 }
 
-.key{
+.key {
   transition: transform 0.2s ease-out;
-  border-radius: 5px ;
+  border-radius: 5px;
   transform: scale(0.9);
-  box-shadow: #760242 5px 4px 0 5px ;
+  box-shadow: #760242 5px 4px 0 5px;
 }
-.key:hover{
-  box-shadow:  #760242 5px 4px 0 5px;
-}
-.otp{
+.otp {
   transition: transform 0.2s ease-out;
-  border-radius: 5px ;
+  border-radius: 5px;
   transform: scale(0.9);
-  box-shadow: #082a72 5px 4px 0 5px ;
+  box-shadow: #082a72 5px 4px 0 5px;
 }
 
+/* .login {
+  background: linear-gradient(
+    90deg,
+    rgb(5, 5, 10) 0%,
+    rgb(5, 5, 10) 7.692%,
+    rgb(9, 10, 14) 7.692%,
+    rgb(9, 10, 14) 15.385%,
+    rgb(13, 14, 18) 15.385%,
+    rgb(13, 14, 18) 23.077%,
+    rgb(18, 19, 22) 23.077%,
+    rgb(18, 19, 22) 30.769%,
+    rgb(22, 23, 26) 30.769%,
+    rgb(22, 23, 26) 38.462%,
+    rgb(26, 27, 30) 38.462%,
+    rgb(26, 27, 30) 46.154%,
+    rgb(30, 31, 34) 46.154%,
+    rgb(30, 31, 34) 53.846%,
+    rgb(34, 35, 38) 53.846%,
+    rgb(34, 35, 38) 61.538%,
+    rgb(38, 39, 42) 61.538%,
+    rgb(38, 39, 42) 69.231%,
+    rgb(41, 42, 45) 69.231%,
+    rgb(41, 42, 45) 76.923%,
+    rgb(44, 45, 48) 76.923%,
+    rgb(44, 45, 48) 84.615%,
+    rgb(46, 47, 51) 84.615%,
+    rgb(46, 47, 51) 92.308%,
+    rgb(48, 49, 53) 92.308%,
+    rgb(48, 49, 53) 100%
+  );
+}
 
+.log-in {
+  background: conic-gradient(
+    from 285deg,
+    rgb(218, 197, 179) 0deg,
+    rgb(172, 182, 164) 90deg,
+    rgb(121, 157, 141) 180deg,
+    rgb(86, 127, 112) 270deg,
+    rgb(81, 95, 79) 360deg
+  );
+} */
+
+.login{
+  background: #83a4d4;  /* fallback for old browsers */
+background: -webkit-linear-gradient(to right, #b6fbff, #83a4d4);  /* Chrome 10-25, Safari 5.1-6 */
+background: linear-gradient(to right, #b6fbff, #83a4d4); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+}
+
+.bg-opacity-wrapper::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("your-background-image-url"); /* fallback */
+  background-size: cover;
+  background-position: center;
+  opacity: 0.5;
+  z-index: -1; /* Behind the content */
+  border-radius: inherit; /* Matches rounded corners */
+}
