@@ -7,7 +7,7 @@ import Message from "../Models/message.Model.js";
 
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: "https://talky-talk-8vad.vercel.app",
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     credentials: true, //headers and cookie
   },
