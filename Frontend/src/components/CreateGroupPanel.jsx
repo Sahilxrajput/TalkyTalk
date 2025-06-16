@@ -79,7 +79,6 @@ const CreategroupPanel = ({ setCreateGroupPanel, user, setFoundChats }) => {
     setBtnLoading(true);
     try {
       const formData = new FormData();
-      console.log(file);
       formData.append("chatName", chatName);
       formData.append("image", file);
       addMembers.forEach((memberId) => formData.append("members[]", memberId));
@@ -96,7 +95,6 @@ const CreategroupPanel = ({ setCreateGroupPanel, user, setFoundChats }) => {
       );
 
       const newChat = response.data.chat;
-      console.log(newChat);
       setChatName(""); 
       setAddMembers([]); 
       setFoundUsers([])

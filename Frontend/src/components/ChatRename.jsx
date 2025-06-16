@@ -15,7 +15,6 @@ const ChatRename = ({ setChatRenamePanel, chatTitle }) => {
         { updatedChatName: updatedName, chatId: chatTitle._id },
         { withCredentials: true }
       );
-      console.log(response.data);
       if (response.status == 200) {
         setChatRenamePanel(false);
         setUpdatedName(false);
@@ -25,7 +24,7 @@ const ChatRename = ({ setChatRenamePanel, chatTitle }) => {
         toast.warning("Only admin can rename chat");
       }
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       toast.error("Somthing goes wrong");
     }
   };

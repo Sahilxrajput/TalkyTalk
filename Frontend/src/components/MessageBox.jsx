@@ -41,7 +41,6 @@ const MessageBox = ({
       }
 
       socket.emit("chat", messageData);
-      console.log("messageData", messageData);
       setLatestMessage("");
       setReplyPopup(false);
     }
@@ -64,12 +63,11 @@ const MessageBox = ({
   // receive a message
   useEffect(() => {
     socket.on("connect", () => {
-      console.log("Connected to socket:", socket.id);
+      // console.log("Connected to socket:", socket.id);
     });
 
     const handleChat = (payload) => {
       if (chatTitle._id === payload.roomId) {
-        console.log("received message =>", payload);
         setSocketMessages((prevMessages) => [...prevMessages, payload]);
       }
     };

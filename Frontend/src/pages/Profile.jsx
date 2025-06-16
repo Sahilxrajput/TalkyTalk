@@ -9,8 +9,9 @@ import { Link, useNavigate } from "react-router-dom";
 import tax from "../assets/pic/tex.jpg";
 import "../assets/style/signup.css";
 import "../assets/style/Chats.css";
-// import homeVid from "../assets/homeVid.mp4";
 import Loading from "../components/Loading";
+import home from "../assets/pic/home.jpg";
+import landing from "../assets/pic/landing.png";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -46,7 +47,7 @@ const Profile = () => {
       );
       setBlockedUsers(blockedUsers);
     } catch (error) {
-      console.log(error);
+      // console.log(error);
     } finally {
       setIsLoading((prev) => ({ ...prev, blockeUser: false }));
     }
@@ -188,26 +189,26 @@ const Profile = () => {
           </button>
         </div>
       </form>
+     
+      <div className="flex flex-col justify-center items-center gap-36">
+        <div
+          onClick={() => navigate("/home", { state: blockedUsers })}
+          draggable={false}
+          className="w-32 h-32 rounded-full cursor-pointer mx-auto bg-white"
+        >
+          <img src={home} className="rounded-full" alt="home" />
+          <p className=""> Return to Home</p>
+        </div>
 
-      {/* <div
-        onClick={() => navigate("/home", { state: blockedUsers })}
-        draggable={false}
-        className="w-32 h-32 rounded-full cursor-pointer border-1 border-[#1d3557]  mx-auto bg-white"
-      >
-        {(
-          <video
-            className="w-full rounded-full aspect-square"
-            autoPlay
-            loop
-            muted
-          >
-            <source src={homeVid} type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
-        ) || <h1>Home</h1>}
-        <p className=""> Return to Home</p>
-      </div> */}
-
+        <div
+          onClick={() => navigate("/")}
+          draggable={false}
+          className="w-32 h-32 rounded-full cursor-pointer mx-auto bg-white"
+        >
+          <img src={landing} className="rounded-full" alt="home" />
+          <p className=""> Return to Start</p>
+        </div>
+      </div>
       <div
         className={`w-1/4 flex flex-col overflow-x-hidden text-white border-[#1d3557] rounded-xl transition-all duration-300  ease-in-out z-50 ${
           open

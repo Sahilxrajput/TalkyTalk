@@ -268,7 +268,7 @@ const Home = () => {
   useEffect(() => {
     socket.on("userCount", (count) => {
       setOnlineUsers(count);
-      console.log(`Users online: ${onlineUsers}`);
+      // console.log(`Users online: ${onlineUsers}`);
     });
 
     return () => {

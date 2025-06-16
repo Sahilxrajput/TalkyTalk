@@ -5,3 +5,6 @@ node_modules
 Backend/Routes/payment.Routes.js
 Backend/socket/socketManager.js
 Backend/passport.js
+Frontend/src/pages/VideoMeet.jsx
+Frontend/src/pages/VideoComponent.jsx
+Frontend/src/pages/Payment.jsx

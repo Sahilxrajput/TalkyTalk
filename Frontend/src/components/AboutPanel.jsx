@@ -20,7 +20,6 @@ const AboutPanel = ({
     const otherMember = chatTitle.members.find(
       (member) => member._id !== user.user._id
     );
-    console.log(foundChats)
 
     if (chatTitle.members.length === 2 && otherMember) {
       try {
@@ -54,7 +53,6 @@ const AboutPanel = ({
         toast.success("Group deleted successfully");
         setAboutPanel(false);
       }
-      console.log(res.data);
     } catch (error) {
       console.error(
         "Error removing user from group:",
@@ -70,13 +68,12 @@ const AboutPanel = ({
         { userIds: user.user._id, chatId: chatTitle._id },
         { withCredentials: true }
       );
-      console.log(response.data);
       if (response.status == 200) {
         setAboutPanel(false);
         toast.success("Exit chat succesfully");
       }
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       toast.error("Something went wrong. Please try again.");
     }
   };

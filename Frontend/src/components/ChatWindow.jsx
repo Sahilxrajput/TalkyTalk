@@ -78,7 +78,6 @@ const ChatWindow = ({
     try {
       await navigator.clipboard.writeText(msgToReply);
       setCopied(true);
-      console.log(msgToReply);
       setTimeout(() => {
         setCopied(false);
         setShowPopup(false);
@@ -98,12 +97,12 @@ const ChatWindow = ({
       (async function () {
         const chatAllMessages = await getAllMessages(chatTitle._id);
         setSavedMessages(chatAllMessages);
-        setSocketMessages([]); // reset on chat change
+        setSocketMessages([]); 
       })();
     } catch (error) {
-      console.log(error);
+      // console.log(error);
     }
-  }, [chatTitle._id, savedMessages, socketMessages]);
+  }, [chatTitle._id]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -132,6 +131,7 @@ const ChatWindow = ({
   return (
     <div
       ref={messageContainerRef}
+      onClick={()=>setShowPopup(false)}
       className="flex relative justify-center items-center h-full w-full overflow-y-auto"
     >
       <nav className="flex justify-between items-center absolute top-0 border-2 rounded-4xl px-4 text-white border-[#DAD1BE]  bg-[#457b9d] h-1/10 border-b-2 w-full ">
@@ -291,7 +291,7 @@ const ChatWindow = ({
                 } mb-2 w-full`}
               >
                 <div
-                  onContextMenu={(e) => ContextMenuhandler(e, msg)}
+                  // onContextMenu={(e) => ContextMenuhandler(e, msg)}
                   onClick={clickhandler}
                   className={`flex justify-end gap-2 min-w-28 items-end px-1 p-t-1 max-w-[450px] rounded-[10px] ${
                     isMine ? "bg-[#0b93f6]" : "bg-[#E57A44]"

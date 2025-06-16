@@ -28,7 +28,6 @@ const Login = () => {
 
       if (response.status === 200) {
         const data = response.data;
-        console.log(data);
         setUser(data);
         localStorage.setItem("token", data.token);
         toast.success("User logged in successfully");

@@ -16,13 +16,13 @@ const io = new Server(server, {
   transports: ["websocket"],
 });
 
-console.log("Socket.io initialized");
+// console.log("Socket.io initialized");
 
 io.on("connection", (socket) => {
-  console.log("A user connected", socket.id);
+  // console.log("A user connected", socket.id);
 
   socket.on("userConnected", (userId) => {
-    console.log("userId:", userId);
+    // console.log("userId:", userId);
   });
 
   // Join a room
@@ -35,7 +35,7 @@ io.on("connection", (socket) => {
         const room = io.sockets.adapter.rooms.get(roomId);
         // Notify others in the room
         const count = room ? room.size : 0;
-        console.log(`Room ${roomId} has ${count} users`);
+        // console.log(`Room ${roomId} has ${count} users`);
         io.to(roomId).emit("roomUserCount", { roomId, count });
       });
     } else {
@@ -105,7 +105,7 @@ io.on("connection", (socket) => {
   //Handle disconnection
 
   socket.on("disconnect", () => {
-    console.log("A user disconnected", socket.id);
+    // console.log("A user disconnected", socket.id);
     io.emit("userCount");
   });
 });

@@ -15,7 +15,6 @@ module.exports.getAllUsers = async (req, res) => {
   try {
     const users = await User.find({});
     if (users && users.length > 0) {
-      // users.forEach((user) => console.log(user.email)); // logs each email
       return res.status(200).json({
         message: "Users found",
         users, // optionally include users in response
@@ -34,7 +33,6 @@ module.exports.signUpUser = async (req, res) => {
     const err = validationResult(req);
 
     if (!err.isEmpty()) {
-      console.log("Validation error", error);
       return res.status(400).json({ error: err.array() });
     }
 
@@ -57,10 +55,8 @@ module.exports.signUpUser = async (req, res) => {
 
     User.register(newUser, password, async (err, user) => {
       if (err) {
-        console.log("Registration error:", err);
         return res.status(500).json({ error: err.message });
       }
-      console.log("User Registered successful", user);
 
       const token = user.getAuthToken();
 
@@ -72,7 +68,6 @@ module.exports.signUpUser = async (req, res) => {
 
       req.login(user, (LoginErr) => {
         if (LoginErr) {
-          console.log("login after signin err", LoginErr);
           return res.status(500).json({
             error: "Registration successful but automatic login failed",
           });
@@ -156,7 +151,6 @@ module.exports.verifyOtp = (req, res) => {
 
   if (String(savedOtp) === String(enteredOtp)) {
     otpStore.delete(email);
-    console.log("otp verify successfully");
     return res.status(200).json({
       success: true,
       message: "OTP verified successfully",
@@ -181,7 +175,6 @@ module.exports.loginUser = async (req, res, next) => {
       }
 
       if (!user) {
-        console.log(info);
         return res
           .status(401)
           .json({ error: info.message || "Invalid credentials" });
@@ -216,7 +209,6 @@ module.exports.getUserProfile = async (req, res) => {
     if (!req.user) {
       return res.status(400).json({ error: "profile is not valid" });
     }
-    // console.log(req.user);
     return res.json({ user: req.user });
   } catch (error) {
     console.error("Error fetching User profile:", error);
@@ -227,7 +219,6 @@ module.exports.getUserProfile = async (req, res) => {
 module.exports.logoutUser = async (req, res) => {
   req.logout((err) => {
     if (err) {
-      console.log("logout error", err);
       return res.status(500).json({ error: "Failed to logout" });
     }
     res.clearCookie("token");
@@ -299,5 +290,3 @@ module.exports.unblockUser = async (req, res) => {
   });
   res.status(200).json({ message: "User unblocked successfully." });
 };
-
-

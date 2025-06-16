@@ -59,13 +59,12 @@ const AddTOGroup = ({ setAddToGroupPanel, chatTitle }) => {
         { userIds: selectedUsers, chatId: chatTitle._id },
         { withCredentials: true }
       );
-      console.log(response.data);
       if (response.status == 200) {
         setAddToGroupPanel(false);
         toast.success("member add succesfully");
       }
     } catch (error) {
-      console.log(error);
+      // console.log(error);
     } finally {
       setIsLoading(false);
     }

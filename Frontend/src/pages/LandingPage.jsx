@@ -1,9 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Coffee from "../assets/pic/Coffee.svg";
-import pookie from "../assets/pic/pookie.png";
-import cloud from "../assets/pic/cloud.png";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
+import "../assets/style/signup.css";
 import "remixicon/fonts/remixicon.css";
 import { Link, useNavigate } from "react-router-dom";
 import CursorFollower from "../components/CursorFollower";
@@ -14,7 +10,7 @@ const Landingpage = () => {
 
   const navigate = useNavigate();
   return (
-    <div className="h-screen w-screen flex items-center justify-center overflow-hidden relative bg-[#B4D2BA]">
+    <div className="h-screen w-screen flex items-center justify-center overflow-hidden relative gradient-bg">
       <div className="flex gap-12 items-baseline">
         <h1
           onMouseEnter={() => setHoveringText(true)}

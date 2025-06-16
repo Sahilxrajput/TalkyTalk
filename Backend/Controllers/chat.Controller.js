@@ -76,7 +76,6 @@ module.exports.createGroupChat = async (req, res) => {
       groupAdmin: req.user,
       image: { url, filename },
     });
-    console.log("groupChat", groupChat);
 
     const fullGroupChat = await Chat.findOne({ _id: groupChat._id })
       .populate("members", "-password")
@@ -84,8 +83,6 @@ module.exports.createGroupChat = async (req, res) => {
 
     res.status(200).json(fullGroupChat);
   } catch (error) {
-    console.log(error);
-    console.log(error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -109,7 +106,6 @@ module.exports.accessChats = async (req, res) => {
       res.status(404).json({ message: "No chats found" });
     }
   } catch (error) {
-    console.log(error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -125,8 +121,6 @@ module.exports.renameGroup = async (req, res) => {
 
   //admin check*
   const chat = await Chat.findById(chatId);
-  console.log(chat.groupAdmin._id);
-  console.log(req.user._id);
   if (req.user._id.equals(chat.groupAdmin._id)) {
     const updatedChat = await Chat.findByIdAndUpdate(
       chatId,
@@ -250,7 +244,6 @@ module.exports.getChatIds = async (req, res) => {
       res.status(404).json({ message: "No chats found" });
     }
   } catch (error) {
-    console.log(error);
     res.status(500).json({ message: "Internal server error" });
   }
 };

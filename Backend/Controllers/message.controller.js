@@ -47,7 +47,6 @@ module.exports.sendMessage = async (req, res) => {
     res.json(message);
     //res.json({ message: req.user });
   } catch (error) {
-    console.log(error);
     res.status(500).json({ message: "Internal server error" });
   }
 };

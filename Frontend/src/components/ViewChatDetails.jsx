@@ -43,13 +43,12 @@ const ViewChatDetails = ({
         { userIds: selectedUsers, chatId: chatTitle._id },
         { withCredentials: true }
       );
-      console.log(response.data);
       if (response.status == 200) {
         setViewChatDetailsPanel(false);
         toast.success("member remove succesfully");
       }
     } catch (error) {
-      console.log(error);
+      // console.log(error);
     } finally {
       setSelectedUsers([]);
       setIsLoading(false);
