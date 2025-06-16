@@ -5,7 +5,7 @@ import Loading from "./Loading";
 import tax from "../assets/pic/tex.jpg";
 
 const CreatePersonalChatPanel = ({
-  setSearchNewMemberPanel,
+  setCreatePersonalChatPanel,
   user,
   setFoundChats,
 }) => {
@@ -19,35 +19,37 @@ const CreatePersonalChatPanel = ({
   useEffect(() => {
     let isCancelled = false;
 
-    if (searchUser.trim() !== "") {
-      (async () => {
-        setMainLoading(true);
-        try {
-          const response = await axios.get(
-            `${import.meta.env.VITE_BASE_URL}/users`,
-            { withCredentials: true }
-          );
-
-          const responseArray = response.data.users;
-
-          const otherUsers = responseArray.filter(
-            (mem) => mem._id !== user.user._id
-          );
-
-          const filtered = otherUsers.filter((user) =>
-            `${user.firstName} ${user.lastName} ${user.username}`
-              .toLowerCase()
-              .includes(searchUser.toLowerCase())
-          );
-
-          if (!isCancelled) setFoundUsers(filtered);
-        } catch (error) {
-          console.error("Error fetching users:", error);
-        } finally {
-          setMainLoading(false);
-        }
-      })();
+    if (searchUser.trim() === "") {
+      setFoundUsers([]); 
+      return;
     }
+    (async () => {
+      setMainLoading(true);
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_BASE_URL}/users`,
+          { withCredentials: true }
+        );
+
+        const responseArray = response.data.users;
+
+        const otherUsers = responseArray.filter(
+          (mem) => mem._id !== user.user._id
+        );
+
+        const filtered = otherUsers.filter((user) =>
+          `${user.firstName} ${user.lastName} ${user.username}`
+            .toLowerCase()
+            .includes(searchUser.toLowerCase())
+        );
+
+        if (!isCancelled) setFoundUsers(filtered);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      } finally {
+        setMainLoading(false);
+      }
+    })();
 
     return () => {
       isCancelled = true;
@@ -67,10 +69,10 @@ const CreatePersonalChatPanel = ({
       if (response.data.duplicate) {
         toast.info("Chat already exists with this user!");
       } else {
-        toast.success("Personal chat created successfully!");
+        toast.success("One-to-One chat created successfully!");
       }
       setFoundChats((prev) => [...prev, response.data.chat]);
-      setSearchNewMemberPanel(false);
+      setCreatePersonalChatPanel(false);
       setSearchUser("");
       setFoundUsers([]);
       setSelectedUserId(null);
@@ -87,10 +89,6 @@ const CreatePersonalChatPanel = ({
     setSelectedUserId((prevId) => (prevId === userId ? null : userId));
   };
 
-  useEffect(() => {
-    console.log(foundUsers);
-  }, [foundUsers]);
-
   return (
     <div
       className="flex flex-col w-full h-full overflow-x-hidden justify-center rounded-4xl"
@@ -99,7 +97,8 @@ const CreatePersonalChatPanel = ({
         msOverflowStyle: "none",
       }}
     >
-      <div className="absolute inset-0 z-0 pointer-events-none"
+      <div
+        className="absolute inset-0 z-0 pointer-events-none"
         style={{
           backgroundImage: `url(${tax})`,
           backgroundSize: "cover",
@@ -110,7 +109,7 @@ const CreatePersonalChatPanel = ({
       <nav className="absolute flex flex-col items-center text-[#DAD1BE] rounded-4xl w-full z-20 h-[13%] top-0 left-0">
         <i
           onClick={() => {
-            setSearchNewMemberPanel(false);
+            setCreatePersonalChatPanel(false);
             setSearchUser("");
             setSelectedUserId(null);
           }}

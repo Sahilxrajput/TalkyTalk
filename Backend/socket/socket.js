@@ -75,22 +75,33 @@ io.on("connection", (socket) => {
     }
   });
 
-  //   socket.on('offer', ({ roomId, offer }) => {
-  //   socket.to(roomId).emit('offer', offer);
-  // });
+  socket.on("call-user", data => {
+    io.to(data.to).emit("incoming-call", {
+      from: socket.id,
+      offer: data.offer,
+    });
+  });
 
-  // socket.on('answer', ({ roomId, answer }) => {
-  //   socket.to(roomId).emit('answer', answer);
-  // });
+  socket.on("answer-call", data => {
+    io.to(data.to).emit("call-accepted", {
+      answer: data.answer,
+    });
+  });
 
-  // socket.on('candidate', ({ roomId, candidate }) => {
-  //   socket.to(roomId).emit('candidate', candidate);
-  // });
+  socket.on("reject-call", data => {
+    io.to(data.to).emit("call-rejected");
+  });
 
-  // socket.on("offer", (data) => socket.broadcast.emit("offer", data));
-  // socket.on("answer", (data) => socket.broadcast.emit("answer", data));
-  // socket.on("candidate", (data) => socket.broadcast.emit("candidate", data));
+  socket.on("send-candidate", data => {
+    io.to(data.to).emit("receive-candidate", {
+      candidate: data.candidate,
+    });
+  });
 
+  socket.on("register", id => {
+    socket.join(id);
+  });
+  
   //Handle disconnection
 
   socket.on("disconnect", () => {

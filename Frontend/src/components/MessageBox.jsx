@@ -10,7 +10,6 @@ const socket = io("http://localhost:5000", {
 
 const MessageBox = ({
   user,
-  isGroupChat,
   ViewChatDetailsPanel,
   setViewChatDetailsPanel,
   foundChats,
@@ -27,7 +26,6 @@ const MessageBox = ({
   const [latestMessage, setLatestMessage] = useState("");
   const latestMessageRef = useRef(null);
   const [msgId, setMsgId] = useState(0);
-  const [isUserAtBottom, setIsUserAtBottom] = useState(true);
   const [showPopup, setShowPopup] = useState(false);
 
   const sendMessageHandler = async (e) => {
@@ -96,7 +94,6 @@ const MessageBox = ({
   return (
     <main className="overflow-y-auto h-full px-1 w-full">
       <ChatWindow
-        isGroupChat={isGroupChat}
         ViewChatDetailsPanel={ViewChatDetailsPanel}
         setViewChatDetailsPanel={setViewChatDetailsPanel}
         foundChats={foundChats}
@@ -113,7 +110,6 @@ const MessageBox = ({
         setSocketMessages={setSocketMessages}
         socketMessages={socketMessages}
         chatTitle={chatTitle}
-        isUserAtBottom={isUserAtBottom}
       />
 
       <div className="flex flex-col items-center">
@@ -125,8 +121,6 @@ const MessageBox = ({
         >
           <input
             name="message"
-            onFocus={() => setIsUserAtBottom(true)}
-            onBlur={() => setIsUserAtBottom(false)}
             className="appearance-none text-lg border-none w-[95%] bg-transparent px-2 m-0 focus:outline-none"
             type="text"
             placeholder="Your message"

@@ -2,7 +2,7 @@ import React from "react";
 import "remixicon/fonts/remixicon.css";
 
 const AddMembers = ({
-  setSearchNewMemberPanel,
+  setCreatePersonalChatPanel,
   setCreateGroupPanel,
   setcreateChat,
 }) => {
@@ -30,7 +30,7 @@ const AddMembers = ({
         </button>
         <button
           onClick={() => {
-            setSearchNewMemberPanel(true);
+            setCreatePersonalChatPanel(true);
             setcreateChat(false);
           }}
           type="button"

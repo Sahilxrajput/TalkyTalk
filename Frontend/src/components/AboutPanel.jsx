@@ -5,7 +5,6 @@ import { toast } from "react-toastify";
 
 const AboutPanel = ({
   setAddToGroupPanel,
-  isGroupChat,
   setAboutPanel,
   user,
   setIsGrpAdmin,
@@ -82,7 +81,6 @@ const AboutPanel = ({
     }
   };
 
-
   return (
     <div className="flex flex-col justify-between px-4 gap-1 items-center">
       <i
@@ -105,7 +103,7 @@ const AboutPanel = ({
       <button className="cursor-pointer hover:bg-gray-500 transition-colors hover:text-white duration-300 ease-in flex justify-center gap-2 items-center text-[#457b9d] border-1 p-2 w-full rounded-xl">
         <i className="ri-delete-bin-6-line"></i>Clear Chat
       </button>
-      {(isGrpAdmin && isGroupChat) && (
+      {chatTitle.isGroupChat && isGrpAdmin && (
         <>
           {" "}
           <button
@@ -138,7 +136,7 @@ const AboutPanel = ({
           </button>
         </>
       )}
-      {isGroupChat ? (
+      {chatTitle.isGroupChat ? (
         <button
           onClick={exitChatHandler}
           className="hover:bg-red-600 transition-colors duration-300 ease-in hover:text-white flex justify-center cursor-pointer gap-2 items-center text-[#457b9d] border-1 p-2 w-full text-lg rounded-xl"

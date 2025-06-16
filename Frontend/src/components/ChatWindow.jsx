@@ -1,11 +1,10 @@
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import "remixicon/fonts/remixicon.css";
-import '../assets/style/Chats.css'
+import "../assets/style/Chats.css";
 
 const ChatWindow = ({
   foundChats,
-  isGroupChat,
   ViewChatDetailsPanel,
   setViewChatDetailsPanel,
   socketMessages,
@@ -21,9 +20,10 @@ const ChatWindow = ({
   setShowPopup,
   setReplyPopup,
   chatTitle,
-  isUserAtBottom,
 }) => {
   const messagesEndRef = useRef(null);
+  const messageContainerRef = useRef(null);
+  const [autoScroll, setAutoScroll] = useState(true);
   const [savedMessages, setSavedMessages] = useState([]);
   const [pos, setPos] = useState({ x: 0, y: 0 });
   const [msgToReply, setMsgToReply] = useState("");
@@ -105,14 +105,35 @@ const ChatWindow = ({
     }
   }, [chatTitle._id, savedMessages, socketMessages]);
 
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
   useEffect(() => {
-    if (isUserAtBottom) {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    const container = messageContainerRef.current;
+
+    const handleScroll = () => {
+      const isBottom =
+        container.scrollHeight - container.scrollTop === container.clientHeight;
+
+      setAutoScroll(isBottom);
+    };
+
+    container?.addEventListener("scroll", handleScroll);
+    return () => container?.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    if (autoScroll) {
+      scrollToBottom();
     }
   }, [socketMessages]);
 
   return (
-    <div className="flex relative justify-center items-center h-full w-full overflow-y-auto">
+    <div
+      ref={messageContainerRef}
+      className="flex relative justify-center items-center h-full w-full overflow-y-auto"
+    >
       <nav className="flex justify-between items-center absolute top-0 border-2 rounded-4xl px-4 text-white border-[#DAD1BE]  bg-[#457b9d] h-1/10 border-b-2 w-full ">
         <div
           onClick={() => {
@@ -132,7 +153,7 @@ const ChatWindow = ({
             <h1 className="text-3xl font-semibold">
               {getChatData()?.username || matchedChat?.chatName}
             </h1>
-            {isGroupChat && <h4> {matchedChat?.members?.length} members </h4>}
+            {chatTitle.isGroupChat && <h4> {matchedChat?.members?.length} members </h4>}
           </div>
         </div>
         <div className="flex justify-end gap-6 items-center w-1/10 text-2xl">
@@ -173,9 +194,6 @@ const ChatWindow = ({
                   className={`flex justify-end gap-2 min-w-28 items-end p-t-1 px-1 max-w-[450px] rounded-[10px] ${
                     isMine ? "bg-[#0b93f6]" : "bg-[#E57A44]"
                   }`}
-                  ref={
-                    index === savedMessages.length - 1 ? messagesEndRef : null
-                  }
                 >
                   <div className="text-lg flex flex-col w-full">
                     {chatTitle.members.length > 2 && (
@@ -216,8 +234,11 @@ const ChatWindow = ({
 
         {showPopup && (
           <div
-            // style={{ top: `${pos.y}px`, left: `${pos.x}px` }}
-            className="absolute  left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#1f1f1fca] justify-between flex flex-col h-27 w-40 rounded-xl py-1.5 px-1 z-50"
+            style={{
+              top: `${pos.y}px`,
+              left: myMsg ? `${pos.x - 200}px` : `${pos.x}px`,
+            }}
+            className="fixed bg-[#1f1f1fca] justify-between flex flex-col h-27 w-40 rounded-xl py-1.5 px-1 z-50"
           >
             <div
               onClick={() => {
@@ -329,7 +350,7 @@ const ChatWindow = ({
       <div
         ref={replyRef}
         className={
-          " flex absolute bottom-5 w-[56%]  bg-[#DAD1BE] h-12 rounded-t-lg p-2 justify-between items-center"
+          " flex absolute bottom-5 w-[56.5%]  bg-[#DAD1BE] h-12 rounded-t-lg p-2 justify-between items-center"
         }
       >
         <i className="ri-reply-fill text-xl "></i>
@@ -345,7 +366,7 @@ const ChatWindow = ({
             setMsgToReply2("");
             setReplyPopup(false);
           }}
-          className="ri-add-line text-2xl rotate-45 "
+          className="ri-add-line cursor-pointer text-2xl rotate-45 "
         ></i>
       </div>
     </div>

@@ -1,14 +1,11 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import backgroundImage from "../assets/city.jpg";
 import "remixicon/fonts/remixicon.css";
 import { UserDataContext } from "../context/UserContext";
 import axios from "axios";
 import "../assets/style/signup.css";
 import { toast } from "react-toastify";
 import LogInSvg from "../assets/svg/logIn.svg";
-import BgImg from "../assets/svg/gradient.svg";
-import loginVid from '../../public/login.mp4' 
 
 
 const Login = () => {
@@ -47,7 +44,7 @@ const Login = () => {
 
 
   return (
-    <div className="w-screen h-screen flex login gap-20 items-center justify-center bg-center">
+    <div className="w-screen h-screen flex  gradient-bg gap-20 items-center justify-center bg-center">
     
       <div className=" w-120 -bottom-10 left-0">
         <img

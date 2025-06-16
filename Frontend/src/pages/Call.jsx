@@ -1,106 +1,127 @@
 import React, { useEffect, useRef, useState } from "react";
 import io from "socket.io-client";
 
-const socket = io("http://localhost:5000", {
-  transports: ["websocket"],
-  withCredentials: true,
-});
-
+const socket = io("http://localhost:5000");
+  
 const Call = () => {
-  const localVideoRef = useRef(null);
-  const remoteVideoRef = useRef(null);
-  const peerRef = useRef(null);
-  const localStreamRef = useRef(null);
-  const [callStarted, setCallStarted] = useState(false);
+  const localVideo = useRef();
+  const remoteVideo = useRef();
+
+  const [localStream, setLocalStream] = useState(null);
+  const [remoteStream, setRemoteStream] = useState(null);
+  const [pc, setPc] = useState(null);
+  const [incomingCall, setIncomingCall] = useState(null);
+  const [isMuted, setIsMuted] = useState(false);
+  const [videoEnabled, setVideoEnabled] = useState(true);
 
   useEffect(() => {
-    navigator.mediaDevices
-      .getUserMedia({ video: true, audio: true })
-      .then((stream) => {
-        localStreamRef.current = stream;
-        localVideoRef.current.srcObject = stream;
+    const getMedia = async () => {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true,
       });
+      setLocalStream(stream);
+      localVideo.current.srcObject = stream;
+    };
 
-    socket.on("offer", async (offer) => {
-      peerRef.current = createPeer(false);
-      await peerRef.current.setRemoteDescription(
-        new RTCSessionDescription(offer)
-      );
-      console.log(offer);
-      
-      const answer = await peerRef.current.createAnswer();
-      await peerRef.current.setLocalDescription(answer);
-      socket.emit("answer", answer);
+    getMedia();
+
+    socket.emit("register", user.user); // Replace with dynamic ID
+
+    socket.on("incoming-call", async ({ from, offer }) => {
+      setIncomingCall({ from, offer });
     });
 
-    socket.on("answer", async (answer) => {
-      await peerRef.current.setRemoteDescription(
-        new RTCSessionDescription(answer)
-    );
+    socket.on("call-accepted", async ({ answer }) => {
+      await pc.setRemoteDescription(new RTCSessionDescription(answer));
     });
 
-    socket.on("candidate", async (candidate) => {
-      if (peerRef.current) {
-        await peerRef.current.addIceCandidate(new RTCIceCandidate(candidate));
+    socket.on("call-rejected", () => {
+      alert("Call rejected");
+    });
+
+    socket.on("receive-candidate", async ({ candidate }) => {
+      if (pc) {
+        await pc.addIceCandidate(new RTCIceCandidate(candidate));
       }
     });
-  }, []);
+  }, [pc]);
 
-  const createPeer = (isInitiator) => {
-    const peer = new RTCPeerConnection({
-      iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
-    });
+  const createPeerConnection = (remoteSocketId) => {
+    const peer = new RTCPeerConnection();
+    localStream.getTracks().forEach(track => peer.addTrack(track, localStream));
+
+    peer.ontrack = (e) => {
+      setRemoteStream(e.streams[0]);
+      remoteVideo.current.srcObject = e.streams[0];
+    };
 
     peer.onicecandidate = (e) => {
       if (e.candidate) {
-        socket.emit("candidate", e.candidate);
+        socket.emit("send-candidate", { to: remoteSocketId, candidate: e.candidate });
       }
     };
 
-    peer.ontrack = (e) => {
-      remoteVideoRef.current.srcObject = e.streams[0];
-    };
-
-    localStreamRef.current
-      .getTracks()
-      .forEach((track) => peer.addTrack(track, localStreamRef.current));
-
+    setPc(peer);
     return peer;
   };
 
-  const startCall = async () => {
-    peerRef.current = createPeer(true);
-    const offer = await peerRef.current.createOffer();
-    await peerRef.current.setLocalDescription(offer);
-    socket.emit("offer", offer);
-    setCallStarted(true);
+  const callUser = async (remoteSocketId) => {
+    const peer = createPeerConnection(remoteSocketId);
+
+    const offer = await peer.createOffer();
+    await peer.setLocalDescription(offer);
+
+    socket.emit("call-user", { to: remoteSocketId, offer });
+  };
+
+  const acceptCall = async () => {
+    const peer = createPeerConnection(incomingCall.from);
+
+    await peer.setRemoteDescription(new RTCSessionDescription(incomingCall.offer));
+    const answer = await peer.createAnswer();
+    await peer.setLocalDescription(answer);
+
+    socket.emit("answer-call", { to: incomingCall.from, answer });
+    setIncomingCall(null);
+  };
+
+  const rejectCall = () => {
+    socket.emit("reject-call", { to: incomingCall.from });
+    setIncomingCall(null);
+  };
+
+  const toggleMute = () => {
+    localStream.getAudioTracks()[0].enabled = isMuted;
+    setIsMuted(!isMuted);
+  };
+
+  const toggleVideo = () => {
+    localStream.getVideoTracks()[0].enabled = !videoEnabled;
+    setVideoEnabled(!videoEnabled);
   };
 
   return (
-    <div className="flex flex-col items-center p-4 gap-4">
-      <h1 className="text-2xl font-bold mb-4">WebRTC Video Call</h1>
-      <div className="flex gap-4">
-        <video
-          ref={localVideoRef}
-          autoPlay
-          muted
-          playsInline
-          className="w-64 border rounded-lg"
-        />
-        <video
-          ref={remoteVideoRef}
-          autoPlay
-          playsInline
-          className="w-64 border rounded-lg"
-        />
+    <div className="p-6">
+      <h2 className="text-xl font-bold mb-4">TalkyTalk Video Call</h2>
+
+      <div className="flex gap-6">
+        <video ref={localVideo} autoPlay muted playsInline className="w-1/2 border" />
+        <video ref={remoteVideo} autoPlay playsInline className="w-1/2 border" />
       </div>
-      {!callStarted && (
-        <button
-          onClick={startCall}
-          className="bg-green-600 text-white px-4 py-2 mt-4 rounded-lg"
-        >
-          Start Call
-        </button>
+
+      <div className="mt-4 flex gap-3">
+        <button onClick={() => callUser("user2")} className="bg-blue-500 px-4 py-2 text-white rounded">Call User2</button>
+        <button onClick={toggleMute} className="bg-gray-500 px-4 py-2 text-white rounded">{isMuted ? "Unmute" : "Mute"}</button>
+        <button onClick={toggleVideo} className="bg-gray-700 px-4 py-2 text-white rounded">{videoEnabled ? "Hide Video" : "Show Video"}</button>
+      </div>
+
+      {incomingCall && (
+        <div className="mt-4 bg-yellow-200 p-4 rounded">
+          <p>Incoming Call</p>
+          <button onClick={acceptCall} className="bg-green-500 px-3 py-1 text-white rounded mr-2">Accept</button>
+          <button onClick={rejectCall} className="bg-red-500 px-3 py-1 text-white rounded">Reject</button>
+        </div>
       )}
     </div>
   );

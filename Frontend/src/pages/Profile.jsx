@@ -9,7 +9,7 @@ import { Link, useNavigate } from "react-router-dom";
 import tax from "../assets/pic/tex.jpg";
 import "../assets/style/signup.css";
 import "../assets/style/Chats.css";
-import homeVid from "../../public/home.mp4";
+// import homeVid from "../assets/homeVid.mp4";
 import Loading from "../components/Loading";
 
 const Profile = () => {
@@ -105,7 +105,7 @@ const Profile = () => {
   };
 
   return (
-    <div className="flex h-screen w-screen p-8 login justify-between">
+    <div className="flex h-screen w-screen p-8  gradient-bg justify-between">
       <form
         onSubmit={(e) => submitHandler(e)}
         className=" w-1/4 h-full flex flex-col items-center justify-center gap-6 rounded-xl border-[#1d3557] border-1 relative overflow-hidden"
@@ -189,7 +189,7 @@ const Profile = () => {
         </div>
       </form>
 
-      <div
+      {/* <div
         onClick={() => navigate("/home", { state: blockedUsers })}
         draggable={false}
         className="w-32 h-32 rounded-full cursor-pointer border-1 border-[#1d3557]  mx-auto bg-white"
@@ -206,7 +206,7 @@ const Profile = () => {
           </video>
         ) || <h1>Home</h1>}
         <p className=""> Return to Home</p>
-      </div>
+      </div> */}
 
       <div
         className={`w-1/4 flex flex-col overflow-x-hidden text-white border-[#1d3557] rounded-xl transition-all duration-300  ease-in-out z-50 ${

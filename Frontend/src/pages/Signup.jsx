@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext} from "react";
 import { UserDataContext } from "../context/UserContext";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -7,7 +7,6 @@ import "../assets/style/signup.css";
 import "remixicon/fonts/remixicon.css";
 import profileImg from "../assets/profilePic.jpg";
 import Loading from "../components/Loading";
-import SignupSvg from "../assets/svg/logIn.svg";
 
 const SignUp = () => {
   const { user, setUser } = useContext(UserDataContext);
@@ -142,7 +141,7 @@ const SignUp = () => {
   };
 
   return (
-    <div className="w-screen h-screen gap-16 flex items-center justify-center login bg-cover bg-no-repeat bg-center">
+    <div className="w-screen h-screen gap-16 flex items-center justify-center  gradient-bg bg-cover bg-no-repeat bg-center">
       <div className="bg-[#fccee84c] border-2 border-[#1d3557] backdrop-blur-lg h-[500px] p-11 rounded-xl w-[600px] flex justify-center flex-col gap-10 items-center text-white">
         {step !== 4 && (
           <h1 className="mt-2 text-3xl font-bold text-[#D30C7B]">

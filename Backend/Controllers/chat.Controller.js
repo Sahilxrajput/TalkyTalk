@@ -17,7 +17,6 @@ module.exports.createPersonalChat = async (req, res) => {
       .status(400)
       .json({ message: "You cannot create a chat with yourself." });
   }
-
   try {
     const existingChat = await Chat.findOne({
       isGroupChat: false,

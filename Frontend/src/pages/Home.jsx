@@ -33,12 +33,12 @@ const Home = () => {
   const addMemberRef = useRef(null);
   const [createChat, setcreateChat] = useState(false);
   const searchNewMemberRef = useRef(null);
-  const [searchNewMembelPanel, setSearchNewMemberPanel] = useState(false);
+  const [createPersonalChatPanel, setCreatePersonalChatPanel] = useState(false);
   const [createGroupPanel, setCreateGroupPanel] = useState(false);
   const createGroupRef = useRef(null);
   const addToGroupRef = useRef(null);
   const [addToGroupPanel, setAddToGroupPanel] = useState(false);
-  const [selectedChatId, setSelectedChatId] = useState(null);
+  const [startChat, setStartChat] = useState(null);
   const [chatTitle, setChatTitle] = useState({});
   const [welcomeTag, setWelcomeTag] = useState(true);
   const [onlineUsers, setOnlineUsers] = useState(0);
@@ -56,7 +56,6 @@ const Home = () => {
   const [ViewChatDetailsPanel, setViewChatDetailsPanel] = useState(false);
   const ViewChatDetailsRef = useRef(null);
   const [isGrpAdmin, setIsGrpAdmin] = useState(false);
-  const [isGroupChat, setIsGroupChat] = useState(false);
 
   //DONE
   useGSAP(() => {
@@ -79,7 +78,7 @@ const Home = () => {
 
   //DONE
   useGSAP(() => {
-    if (!searchNewMembelPanel) {
+    if (!createPersonalChatPanel) {
       gsap.to(searchNewMemberRef.current, {
         y: "100%",
         opacity: 1,
@@ -92,7 +91,7 @@ const Home = () => {
         ease: "power2.inOut",
       });
     }
-  }, [searchNewMembelPanel]);
+  }, [createPersonalChatPanel]);
 
   //DONE
   useGSAP(() => {
@@ -161,19 +160,19 @@ const Home = () => {
     }
   }, [ViewChatDetailsPanel]);
 
-  useGSAP(() => {
-    if (!videoReqPanel) {
-      gsap.to(videoReqRef.current, {
-        transform: "translateX(0%)",
-        duration: 0.3,
-      });
-    } else {
-      gsap.to(videoReqRef.current, {
-        transform: "translateX(-110%)",
-        duration: 0.3,
-      });
-    }
-  }, [videoReqPanel]);
+  // useGSAP(() => {
+  //   if (!videoReqPanel) {
+  //     gsap.to(videoReqRef.current, {
+  //       transform: "translateX(0%)",
+  //       duration: 0.3,
+  //     });
+  //   } else {
+  //     gsap.to(videoReqRef.current, {
+  //       transform: "translateX(-110%)",
+  //       duration: 0.3,
+  //     });
+  //   }
+  // }, [videoReqPanel]);
 
   useGSAP(() => {
     if (replyPopup) {
@@ -232,8 +231,9 @@ const Home = () => {
   };
 
   const selectedChatHandler = (chatId) => {
-    setSelectedChatId((prevId) => (prevId === chatId ? null : chatId));
-    setWelcomeTag(false);
+    setStartChat((prevId) => (prevId === chatId ? null : chatId));  
+    setReplyPopup(false)
+    setAboutPanel(false)  
   };
 
   const videoReqHandler = () => {
@@ -283,29 +283,35 @@ const Home = () => {
           `${import.meta.env.VITE_BASE_URL}/chat`,
           { withCredentials: true }
         );
-        const responseArray = response.data;
-        const filtered = responseArray.filter((chat) =>
-          ` ${chat.chatName}`.toLowerCase().includes(searchChats.toLowerCase())
+
+        const allChats = response.data;
+
+        // Filter chats by search keyword
+        const filteredChats = allChats.filter((chat) =>
+          chat.chatName.toLowerCase().includes(searchChats.toLowerCase())
         );
 
-        const isOneToOne = filtered.some((chat) => chat.members.length === 2);
-        if (isOneToOne) {
-          const unblockedChats = filtered.filter((chat) =>
-            chat.members.every(
+        // Filter based on chat type
+        const finalChats = filteredChats.filter((chat) => {
+          const isOneToOne = chat.members.length === 2;
+
+          if (isOneToOne) {
+            // Hide if either of the two members is blocked
+            return chat.members.every(
               (member) => !user.user.blockedUsers.includes(member._id)
-            )
-          );
-          setFoundChats(unblockedChats);
-        }
+            );
+          }
+
+          // Always show group chats
+          return true;
+        });
+
+        setFoundChats(finalChats);
       } catch (error) {
         console.error("Error fetching chats:", error);
       }
     })();
-  }, [searchChats, blockedUsers]);
-
-  useEffect(()=>{
-    console.log(blockedUsers)
-  },[blockedUsers])
+  }, [searchChats, blockedUsers, createPersonalChatPanel, createGroupPanel]);
 
   useEffect(() => {
     const handleTabKey = (e) => {
@@ -322,34 +328,10 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
-    const totalMembers = chatTitle.members;
-    if (totalMembers?.length > 2) {
-      setIsGroupChat(true);
-      if (chatTitle.groupAdmin === user?.user?._id) {
-        setIsGrpAdmin(true);
-      }
+    if (chatTitle.groupAdmin === user?.user?._id) {
+      setIsGrpAdmin(true);
     }
   }, [chatTitle]);
-
-  //   useEffect(() => {
-  //   if (chatUserId) {
-  //     // Notify server that messages from chatUserId have been seen
-  //     socket.emit('message_seen', {
-  //       senderId: chatUserId,
-  //       receiverId: currentUserId
-  //     });
-  //   }
-  // }, [chatUserId]);
-
-  // Listen for real-time seen confirmation
-  // useEffect(() => {
-  //   socket.on('messages_marked_seen', ({ receiverId }) => {
-  //     console.log(`Messages seen by ${receiverId}`);
-  //     // Optional: update UI to show "Seen"
-  //   });
-
-  //   return () => socket.off('messages_marked_seen');
-  // }, []);
 
   return (
     <div className=" h-screen w-screen flex items-center  bg-[#1d3557]">
@@ -463,7 +445,7 @@ const Home = () => {
             className="flex absolute  w-full z-30 -bottom-1/4 h-1/4 bg-[#a8dadc] items-center justify-center border-2  rounded-4xl"
           >
             <CreateChat
-              setSearchNewMemberPanel={setSearchNewMemberPanel}
+              setCreatePersonalChatPanel={setCreatePersonalChatPanel}
               setcreateChat={setcreateChat}
               setCreateGroupPanel={setCreateGroupPanel}
             />
@@ -476,7 +458,7 @@ const Home = () => {
             <CreatePersonalChatPanel
               user={user}
               setFoundChats={setFoundChats}
-              setSearchNewMemberPanel={setSearchNewMemberPanel}
+              setCreatePersonalChatPanel={setCreatePersonalChatPanel}
             />
           </div>
 
@@ -549,10 +531,9 @@ const Home = () => {
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
             {foundChats.map((chat, idx) => {
-              const isSelected = selectedChatId === chat?._id;
+              const isSelected = startChat === chat?._id;
 
               let chatData = getChatData(chat);
-
               return (
                 <button
                   onClick={() => {
@@ -573,11 +554,19 @@ const Home = () => {
                       alt="profil picture"
                     />
                   </div>
-                  <div>
-                    <h2 className=" font-semibold ">
-                      {chatData?.username || chatData?.chatName}
-                    </h2>
-                  </div>
+
+                  {chat?.members?.length === 2 ? (
+                    <div className="flex flex-col justify-center items-start">
+                      <h2 className=" font-semibold">
+                        {chatData?.firstName} {chatData?.lastName}
+                      </h2>
+                      <h6 className="italic">{chatData?.username}</h6>
+                    </div>
+                  ) : (
+                    <h3 className="font-semibold text-lg">
+                      {chatData?.chatName}
+                    </h3>
+                  )}
                 </button>
               );
             })}
@@ -589,7 +578,6 @@ const Home = () => {
           className=" rounded-2xl z-50 border-2 pb-2 bg-[#a8dadc] border-gray-500 absolute right-0 top-20"
         >
           <AboutPanel
-            isGroupChat={isGroupChat}
             isGrpAdmin={isGrpAdmin}
             setIsGrpAdmin={setIsGrpAdmin}
             foundChats={foundChats}
@@ -608,9 +596,8 @@ const Home = () => {
           className="w-[75%]"
           // onClick={() => setShowPopup(false)}
         >
-          {selectedChatId && (
+          {startChat && (
             <MessageBox
-              isGroupChat={isGroupChat}
               setViewChatDetailsPanel={setViewChatDetailsPanel}
               ViewChatDetailsPanel={ViewChatDetailsPanel}
               foundChats={foundChats}

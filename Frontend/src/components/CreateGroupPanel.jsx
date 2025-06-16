@@ -1,9 +1,8 @@
 import axios from "axios";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import Loading from "./Loading";
 import tax from "../assets/pic/tex.jpg";
-
 
 const CreategroupPanel = ({ setCreateGroupPanel, user, setFoundChats }) => {
   const [searchUser, setSearchUser] = useState("");
@@ -17,39 +16,42 @@ const CreategroupPanel = ({ setCreateGroupPanel, user, setFoundChats }) => {
   const [mainLoading, setMainLoading] = useState(false);
 
   useEffect(() => {
-    if (searchUser.trim() !== "") {
-      (async () => {
-        setMainLoading(true);
-        try {
-          const response = await axios.get(
-            `${import.meta.env.VITE_BASE_URL}/users`,
-            { withCredentials: true }
-          );
+    const fetchUsers = async () => {
+      if (searchUser.trim() === "") {
+        setFoundUsers([]); // Clear if input is empty
+        return;
+      }
 
-          const responseArray = response.data.users;
-          const otherUsers = responseArray.filter(
-            (mem) => mem._id !== user.user._id
-          );
+      setMainLoading(true);
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_BASE_URL}/users`,
+          { withCredentials: true }
+        );
 
-          const filtered = otherUsers.filter((user) =>
-            `${user.firstName} ${user.lastName} ${user.username}`
-              .toLowerCase()
-              .includes(searchUser.toLowerCase())
-          );
+        const responseArray = response.data.users || [];
 
-          setFoundUsers(filtered);
-        } catch (error) {
-          console.error("Error fetching users:", error);
-        } finally {
-          setMainLoading(false);
-        }
-      })();
-    }
+        const otherUsers = responseArray.filter(
+          (mem) => mem._id !== user?.user?._id
+        );
 
-    return () => {
-      setFoundUsers([]);
-      setMainLoading(false);
+        const filtered = otherUsers.filter((u) =>
+          `${u.firstName} ${u.lastName} ${u.username}`
+            .toLowerCase()
+            .includes(searchUser.toLowerCase())
+        );
+
+        setFoundUsers(filtered);
+      } catch (error) {
+        toast.error("Something went wrong");
+        console.error("Error fetching users:", error);
+      } finally {
+        setMainLoading(false);
+      }
     };
+
+    fetchUsers();
+
   }, [searchUser]);
 
   const selectUsersHandler = (user) => {
@@ -95,8 +97,9 @@ const CreategroupPanel = ({ setCreateGroupPanel, user, setFoundChats }) => {
 
       const newChat = response.data.chat;
       console.log(newChat);
-      setChatName(""); // Reset chat name
-      setAddMembers([]); // Reset added members
+      setChatName(""); 
+      setAddMembers([]); 
+      setFoundUsers([])
       setFile(null);
       toast.success("New Group Created Successfully");
       setCreateGroupPanel(false);
@@ -126,14 +129,15 @@ const CreategroupPanel = ({ setCreateGroupPanel, user, setFoundChats }) => {
       className="flex flex-col fixed w-full  h-full overflow-x-hidden  justify-start gap-4 rounded-4xl"
       style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
     >
-       <div className="absolute inset-0 z-0 pointer-events-none"
-              style={{
-                backgroundImage: `url(${tax})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-                opacity: 1,
-              }}
-            ></div>
+      <div
+        className="absolute inset-0 z-0 pointer-events-none"
+        style={{
+          backgroundImage: `url(${tax})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          opacity: 1,
+        }}
+      ></div>
       <form
         onSubmit={submitHandler}
         className="flex flex-col absolute w-full z-20 h-[27%] text-[#DAD1BE]  items-center justify-start gap-4 rounded-4xl"
@@ -201,39 +205,37 @@ const CreategroupPanel = ({ setCreateGroupPanel, user, setFoundChats }) => {
           foundUsers.map((user, idx) => {
             const isSelected = selectedUsers.includes(user._id); // Check if user is selected
             return (
-              <div>
-                <div
-                  onClick={() => {
-                    selectUsersHandler(user);
-                  }}
-                  key={idx}
-                  className={`${
-                    isSelected ? "bg-red-500" : "bg-green-600"
-                  } border-2 h-16 py-2 cursor-pointer w-full flex justify-between items-center px-2 rounded-2xl`}
-                >
-                  <div className="h-full w-full flex gap-4">
-                    <div className="h-full rounded-full aspect-square">
-                      <img
-                        className="object-cover rounded-full w-full h-full"
-                        src={user.image.url}
-                        alt=""
-                      />
-                    </div>
-                    <div className="flex flex-col items-start ">
-                      <div className="flex justify-start items-center gap-2">
-                        <h2>
-                          {user.firstName} {user.lastName}
-                        </h2>
-                      </div>
-                      <h4>{user.username}</h4>
-                    </div>
+              <div
+                onClick={() => {
+                  selectUsersHandler(user);
+                }}
+                key={idx}
+                className={`${
+                  isSelected ? "bg-red-500" : "bg-green-600"
+                } border-2 h-16 py-2 z-20 cursor-pointer w-full flex justify-between items-center px-2 rounded-2xl`}
+              >
+                <div className="h-full w-full flex gap-4">
+                  <div className="h-full rounded-full aspect-square">
+                    <img
+                      className="object-cover rounded-full w-full h-full"
+                      src={user.image.url}
+                      alt=""
+                    />
                   </div>
-                  {isSelected ? (
-                    <i className="text-xl text-[#1d3557] ri-close-circle-fill"></i>
-                  ) : (
-                    <i className="text-xl text-[#1d3557] ri-add-circle-fill"></i>
-                  )}
+                  <div className="flex flex-col items-start ">
+                    <div className="flex justify-start items-center gap-2">
+                      <h2>
+                        {user.firstName} {user.lastName}
+                      </h2>
+                    </div>
+                    <h4>{user.username}</h4>
+                  </div>
                 </div>
+                {isSelected ? (
+                  <i className="text-xl text-[#1d3557] ri-close-circle-fill"></i>
+                ) : (
+                  <i className="text-xl text-[#1d3557] ri-add-circle-fill"></i>
+                )}
               </div>
             );
           })

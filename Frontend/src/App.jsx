@@ -4,7 +4,7 @@ import UserProtectedWrapper from "./protectedWrapper/UserProtectedWrapper";
 import axios from "axios";
 import Signup from "./pages/Signup";
 const VideoComponent = lazy(() => import("./pages/VideoComponent"));
-// const Call = lazy(() => import("./pages/Call"));
+const Call = lazy(() => import("./pages/Call"));
 const PageNotFound = lazy(() => import("./pages/PageNotFound"));
 const Home = lazy(() => import("./pages/Home"));
 const Profile = lazy(() => import("./pages/Profile"));
@@ -20,6 +20,8 @@ const App = () => {
     }
   }, []);
 
+
+  
   return (
     <Routes>
       <Route
@@ -42,7 +44,7 @@ const App = () => {
       {/* <Route path="/payment" element={<Payment />} /> */}
       <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Login />} />
-      <Route path="/call" element={<VideoComponent />} />
+      <Route path="/call" element={<Call />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
