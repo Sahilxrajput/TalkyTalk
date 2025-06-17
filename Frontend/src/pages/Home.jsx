@@ -10,6 +10,7 @@ import "../assets/style/Chats.css";
 import BgImage from "../assets/theme/craft.jpg";
 import profileImg from "../assets/profilePic.jpg";
 import { toast } from "react-toastify";
+import Loading from "../components/Loading";
 const MessageBox = lazy(() => import("../components/MessageBox"));
 const CreateChat = lazy(() => import("../components/CreateChat"));
 const CreatePersonalChatPanel = lazy(() =>
@@ -58,6 +59,7 @@ const Home = () => {
   const [isGrpAdmin, setIsGrpAdmin] = useState(false);
   const [savedMessages, setSavedMessages] = useState([]);
   const [socketMessages, setSocketMessages] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   //DONE
   useGSAP(() => {
@@ -529,49 +531,57 @@ const Home = () => {
           </button>
 
           <div
-            className="flex items-start justify-start mt-16 pt-4 h-full flex-col w-full gap-1 rounded-b-4xl  bg-[#a8dadc] border-2 border-t-0 border-[#4E6766] overflow-x-hidden "
+            className={`flex mt-16 pt-4 h-full flex-col w-full gap-1 rounded-b-4xl  bg-[#a8dadc] border-2 border-t-0 border-[#4E6766] overflow-x-hidden ${
+              isLoading
+                ? "items-center justify-center"
+                : "items-start justify-start"
+            } `}
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
-            {foundChats.map((chat, idx) => {
-              const isSelected = startChat === chat?._id;
+            {!isLoading ? (
+              foundChats.map((chat, idx) => {
+                const isSelected = startChat === chat?._id;
 
-              let chatData = getChatData(chat);
-              return (
-                <button
-                  onClick={() => {
-                    setShowPopup(false);
-                    setReplyPopup(false);
-                    setChatTitle({ ...chat });
-                    selectedChatHandler(chat._id);
-                  }}
-                  key={idx}
-                  className={`flex chats border-2 justify-start hover:cursor-pointer gap-4 border-[#4E6766]  w-full rounded-2xl  p-2 ${
-                    isSelected ? " bg-[#e63946]!" : " "
-                  } `}
-                >
-                  <div className="w-14 rounded-full aspect-square">
-                    <img
-                      className="object-cover rounded-full w-full h-full"
-                      src={chatData?.image?.url || profileImg}
-                      alt="profil picture"
-                    />
-                  </div>
-
-                  {chat?.members?.length === 2 ? (
-                    <div className="flex flex-col justify-center items-start">
-                      <h2 className=" font-semibold">
-                        {chatData?.firstName} {chatData?.lastName}
-                      </h2>
-                      <h6 className="italic">{chatData?.username}</h6>
+                let chatData = getChatData(chat);
+                return (
+                  <button
+                    onClick={() => {
+                      setShowPopup(false);
+                      setReplyPopup(false);
+                      setChatTitle({ ...chat });
+                      selectedChatHandler(chat._id);
+                    }}
+                    key={idx}
+                    className={`flex chats border-2 justify-start hover:cursor-pointer gap-4 border-[#4E6766]  w-full rounded-2xl  p-2 ${
+                      isSelected ? " bg-[#e63946]!" : " "
+                    } `}
+                  >
+                    <div className="w-14 rounded-full aspect-square">
+                      <img
+                        className="object-cover rounded-full w-full h-full"
+                        src={chatData?.image?.url || profileImg}
+                        alt="profil picture"
+                      />
                     </div>
-                  ) : (
-                    <h3 className="font-semibold text-lg">
-                      {chatData?.chatName}
-                    </h3>
-                  )}
-                </button>
-              );
-            })}
+
+                    {chat?.members?.length === 2 ? (
+                      <div className="flex flex-col justify-center items-start">
+                        <h2 className=" font-semibold">
+                          {chatData?.firstName} {chatData?.lastName}
+                        </h2>
+                        <h6 className="italic">{chatData?.username}</h6>
+                      </div>
+                    ) : (
+                      <h3 className="font-semibold text-lg">
+                        {chatData?.chatName}
+                      </h3>
+                    )}
+                  </button>
+                );
+              })
+            ) : (
+              <Loading bg={"bg-red-500"} />
+            )}
           </div>
         </div>
 

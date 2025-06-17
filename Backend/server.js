@@ -78,14 +78,6 @@ app.use("/chat", chatRouter);
 app.use("/message", messageRouter);
 
 
-// Serve static files from the React frontend app
-app.use(express.static(path.join(__dirname, "Frontend/dist")));
-
-// Catch-all handler: for any request that doesn't match an API route, send back React's index.html
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "Frontend/dist" , "index.html"));
-});
-
 server.listen(PORT, (req, res) => {
   console.log(`server is listening ${PORT}`);
 });
