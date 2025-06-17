@@ -39,7 +39,7 @@ const UserProtectedWrapper = ({ children }) => {
   }, [token]);
 
   if (isLoading) {
-    return <div>Loading <Loading/></div>;
+    return <div className="flex justify-center h-screen w-screen items-center">Loading   <Loading bg={"bg-red-500"} /></div>;
   }
 
 
