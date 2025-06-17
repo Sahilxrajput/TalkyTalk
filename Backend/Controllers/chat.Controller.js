@@ -1,4 +1,5 @@
 const Chat = require("../Models/chat.Model");
+const Message = require("../Models/message.Model");
 const { validationResult } = require("express-validator");
 
 module.exports.createPersonalChat = async (req, res) => {
@@ -248,21 +249,55 @@ module.exports.getChatIds = async (req, res) => {
   }
 };
 
-module.exports.deleteChat = async (req, res) => {
+module.exports.clearChat = async (req, res) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(422).json({ errors: errors.array() });
     }
 
-    const chatId = req.params.chatId; // ✅ Corrected
+    const chatId = req.params.chatId;
 
     const chat = await Chat.findById(chatId);
     if (!chat) {
       return res.status(404).json({ error: "Chat not found" });
     }
 
-    if (String(chat.groupAdmin) !== String(req.user._id)) {
+    if (chat.isGroupChat && String(chat.groupAdmin) !== String(req.user._id)) {
+      return res
+        .status(403)
+        .json({ error: "Only group admin can delete the chat messages" });
+    }
+
+    const deleted = await Message.deleteMany({ chatId: chatId });
+
+    return res
+      .status(200)
+      .json({
+        success: true,
+        message: `${deleted.deletedCount} message(s) deleted successfully`,
+      });
+  } catch (err) {
+    console.error("Delete messages error:", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+module.exports.deleteChat = async () => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
+    }
+
+    const chatId = req.params.chatId;
+
+    const chat = await Chat.findById(chatId);
+    if (!chat) {
+      return res.status(404).json({ error: "Chat not found" });
+    }
+
+    if (String(chat.groupAdmin) !== String(req.user._id) && chat.isGroupChat) {
       return res
         .status(403)
         .json({ error: "Only group admin can delete the chat" });

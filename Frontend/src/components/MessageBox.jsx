@@ -3,13 +3,17 @@ import io from "socket.io-client";
 import axios from "axios";
 import ChatWindow from "./ChatWindow";
 
-const socket = io("http://localhost:5000", {
+const socket = io(import.meta.env.VITE_BASE_URL, {
   transports: ["websocket"],
   withCredentials: true,
 });
 
 const MessageBox = ({
+  setSocketMessages,
+  socketMessages,
   user,
+  setSavedMessages,
+  savedMessages,
   ViewChatDetailsPanel,
   setViewChatDetailsPanel,
   foundChats,
@@ -22,7 +26,6 @@ const MessageBox = ({
   replyPopup,
   setReplyPopup,
 }) => {
-  const [socketMessages, setSocketMessages] = useState([]);
   const [latestMessage, setLatestMessage] = useState("");
   const latestMessageRef = useRef(null);
   const [msgId, setMsgId] = useState(0);
@@ -92,6 +95,8 @@ const MessageBox = ({
   return (
     <main className="overflow-y-auto h-full px-1 w-full">
       <ChatWindow
+        setSavedMessages={setSavedMessages}
+        savedMessages={savedMessages}
         ViewChatDetailsPanel={ViewChatDetailsPanel}
         setViewChatDetailsPanel={setViewChatDetailsPanel}
         foundChats={foundChats}

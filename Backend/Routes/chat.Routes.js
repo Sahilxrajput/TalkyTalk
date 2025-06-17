@@ -6,16 +6,6 @@ const multer = require("multer");
 const { storage, cloudinary } = require("../utils/cloudConfig.js");
 const upload = multer({ storage });
 
-// router.post(
-//   "/",
-//   [
-//     body("userId")
-//       .exists({ checkFalsy: true })
-//       .withMessage("userId is required"),
-//   ],
-//   userAuth,
-//   chatController.accessChat
-// );
 
 router.get("/", userAuth, chatController.accessChats);
 
@@ -96,6 +86,12 @@ router.delete(
   "/delete/:chatId",
   userAuth,
   chatController.deleteChat
+);
+
+router.delete(
+  "/clear-chat/:chatId",
+  userAuth,
+  chatController.clearChat
 );
 
 module.exports = router;

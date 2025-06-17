@@ -4,6 +4,8 @@ import "remixicon/fonts/remixicon.css";
 import "../assets/style/Chats.css";
 
 const ChatWindow = ({
+  setSavedMessages,
+  savedMessages,
   foundChats,
   ViewChatDetailsPanel,
   setViewChatDetailsPanel,
@@ -24,7 +26,6 @@ const ChatWindow = ({
   const messagesEndRef = useRef(null);
   const messageContainerRef = useRef(null);
   const [autoScroll, setAutoScroll] = useState(true);
-  const [savedMessages, setSavedMessages] = useState([]);
   const [pos, setPos] = useState({ x: 0, y: 0 });
   const [msgToReply, setMsgToReply] = useState("");
   const [msgToReply2, setMsgToReply2] = useState("");

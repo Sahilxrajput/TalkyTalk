@@ -117,34 +117,3 @@ module.exports.deleteMessage = async (req, res) => {
     });
   }
 };
-// module.exports.replyMessage = async (req, res) => {
-//   try {
-//     const { messageId, replyTo } = req.body;
-
-//     if (!messageId || !replyTo) {
-//       return res.status(400).json({ message: "Invalid data passed" });
-//     }
-
-//     const updatedMessage = await Message.findByIdAndUpdate(
-//       messageId,
-//       { replyTo: replyTo },
-//       { new: true }
-//     )
-//       .populate("sender", "firstName lastName")
-//       .populate("chatId")
-//       .populate("replyTo.sender", "firstName lastName");
-
-//     res.status(200).json({
-//       success: true,
-//       message: "Message replied successfully",
-//       data: updatedMessage,
-//     });
-//   } catch (error) {
-//     console.error("Error replying to message:", error);
-//     res.status(500).json({
-//       success: false,
-//       message: "Failed to reply to message",
-//       error: error.message,
-//     });
-//   }
-// };

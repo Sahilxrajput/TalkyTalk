@@ -1,3 +1,5 @@
+import dotenv from "dotenv";
+dotenv.config();
 import { Server } from "socket.io";
 import { createServer } from "http";
 import express from "express";
@@ -7,7 +9,7 @@ import Message from "../Models/message.Model.js";
 
 const io = new Server(server, {
   cors: {
-    origin: "https://talky-talk-8vad.vercel.app",
+    origin: process.env.FRONTEND_URL,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     credentials: true, //headers and cookie
   },

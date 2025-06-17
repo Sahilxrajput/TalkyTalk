@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { UserDataContext } from "../context/UserContext";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import Loading from "../components/Loading";
 
 const UserProtectedWrapper = ({ children }) => {
   const token = localStorage.getItem("token");
@@ -38,8 +39,9 @@ const UserProtectedWrapper = ({ children }) => {
   }, [token]);
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div>Loading <Loading/></div>;
   }
+
 
   return <>{children}</>;
 };

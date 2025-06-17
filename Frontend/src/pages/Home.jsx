@@ -56,6 +56,8 @@ const Home = () => {
   const [ViewChatDetailsPanel, setViewChatDetailsPanel] = useState(false);
   const ViewChatDetailsRef = useRef(null);
   const [isGrpAdmin, setIsGrpAdmin] = useState(false);
+  const [savedMessages, setSavedMessages] = useState([]);
+  const [socketMessages, setSocketMessages] = useState([]);
 
   //DONE
   useGSAP(() => {
@@ -231,9 +233,9 @@ const Home = () => {
   };
 
   const selectedChatHandler = (chatId) => {
-    setStartChat((prevId) => (prevId === chatId ? null : chatId));  
-    setReplyPopup(false)
-    setAboutPanel(false)  
+    setStartChat((prevId) => (prevId === chatId ? null : chatId));
+    setReplyPopup(false);
+    setAboutPanel(false);
   };
 
   const videoReqHandler = () => {
@@ -575,9 +577,11 @@ const Home = () => {
 
         <div
           ref={aboutRef}
-          className=" rounded-2xl z-50 border-2 pb-2 bg-[#a8dadc] border-gray-500 absolute right-0 top-20"
+          className=" rounded-2xl z-50 border-2 w-40 bg-[#a8dadc] border-gray-500 absolute right-0 top-20"
         >
           <AboutPanel
+            setSocketMessages={setSocketMessages}
+            setSavedMessages={setSavedMessages}
             isGrpAdmin={isGrpAdmin}
             setIsGrpAdmin={setIsGrpAdmin}
             foundChats={foundChats}
@@ -598,6 +602,10 @@ const Home = () => {
         >
           {startChat && (
             <MessageBox
+              setSocketMessages={setSocketMessages}
+              socketMessages={socketMessages}
+              setSavedMessages={setSavedMessages}
+              savedMessages={savedMessages}
               setViewChatDetailsPanel={setViewChatDetailsPanel}
               ViewChatDetailsPanel={ViewChatDetailsPanel}
               foundChats={foundChats}

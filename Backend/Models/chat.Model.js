@@ -31,22 +31,22 @@ const chatSchema = new mongoose.Schema(
         return this.isGroupChat;
       },
     },  
-    readBy: [
-      {
-        user: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "User",
-        },
-        count: {
-          type: Number,
-          default: 0,
-        },
-        readAt: {
-          type: Date,
-          default: Date.now,
-        },
-      },
-    ],
+    // readBy: [
+    //   {
+    //     user: {
+    //       type: mongoose.Schema.Types.ObjectId,
+    //       ref: "User",
+    //     },
+    //     count: {
+    //       type: Number,
+    //       default: 0,
+    //     },
+    //     readAt: {
+    //       type: Date,
+    //       default: Date.now,
+    //     },
+    //   },
+    // ],
   },
   {
     timestamps: true,

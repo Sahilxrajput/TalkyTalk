@@ -8,6 +8,7 @@ const cors = require("cors");
 const session = require("express-session");
 const MongoStore = require("connect-mongo");
 const connectToDb = require("./Db/db.js");
+const path = require("path");
 const User = require("./Models/user.Model.js");
 
 //routes
@@ -24,7 +25,7 @@ app.use(cookieParser());
 
 app.use(
   cors({
-    origin: "https://talky-talk-8vad.vercel.app",
+    origin: process.env.FRONTEND_URL,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     credentials: true,
   })
@@ -76,6 +77,15 @@ app.use("/users", userRouter);
 app.use("/chat", chatRouter);
 app.use("/message", messageRouter);
 
+
+// Serve static files from the React frontend app
+app.use(express.static(path.join(__dirname, "Frontend/dist")));
+
+// Catch-all handler: for any request that doesn't match an API route, send back React's index.html
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "Frontend/dist" , "index.html"));
+});
+
 server.listen(PORT, (req, res) => {
-  console.log(`sever is listening ${PORT}`);
+  console.log(`server is listening ${PORT}`);
 });
