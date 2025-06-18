@@ -6,7 +6,7 @@ import axios from "axios";
 import profileImg from "../assets/profilePic.jpg";
 import { toast } from "react-toastify";
 import { Link, useNavigate } from "react-router-dom";
-import tax from "../assets/pic/tex.jpg";
+import texture from "../assets/pic/tex.jpg";
 import "../assets/style/signup.css";
 import "../assets/style/Chats.css";
 import Loading from "../components/Loading";
@@ -115,7 +115,7 @@ const Profile = () => {
         <div
           className=" absolute inset-0 z-0 pointer-events-none"
           style={{
-            backgroundImage: `url(${tax})`,
+            backgroundImage: `url(${texture})`,
             backgroundSize: "cover",
             backgroundPosition: "center",
             opacity: 0.5,
@@ -209,6 +209,7 @@ const Profile = () => {
           <p className=""> Return to Start</p>
         </div>
       </div>
+
       <div
         className={`w-1/4 flex flex-col overflow-x-hidden text-white border-[#1d3557] rounded-xl transition-all duration-300  ease-in-out z-50 ${
           open
@@ -218,7 +219,7 @@ const Profile = () => {
         style={{
           scrollbarWidth: "none",
           msOverflowStyle: "none",
-          backgroundImage: `url(${tax})`,
+          backgroundImage: `url(${texture})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}

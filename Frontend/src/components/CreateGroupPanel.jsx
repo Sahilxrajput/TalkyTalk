@@ -2,7 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import Loading from "./Loading";
-import tax from "../assets/pic/tex.jpg";
+import texture from "../assets/pic/tex.jpg";
 
 const CreategroupPanel = ({ setCreateGroupPanel, user, setFoundChats }) => {
   const [searchUser, setSearchUser] = useState("");
@@ -130,7 +130,7 @@ const CreategroupPanel = ({ setCreateGroupPanel, user, setFoundChats }) => {
       <div
         className="absolute inset-0 z-0 pointer-events-none"
         style={{
-          backgroundImage: `url(${tax})`,
+          backgroundImage: `url(${texture})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
           opacity: 1,

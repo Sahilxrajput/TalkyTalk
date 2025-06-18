@@ -59,7 +59,7 @@ const Home = () => {
   const [isGrpAdmin, setIsGrpAdmin] = useState(false);
   const [savedMessages, setSavedMessages] = useState([]);
   const [socketMessages, setSocketMessages] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   //DONE
   useGSAP(() => {
@@ -282,6 +282,7 @@ const Home = () => {
 
   useEffect(() => {
     (async () => {
+      setIsLoading(true)
       try {
         const response = await axios.get(
           `${import.meta.env.VITE_BASE_URL}/chat`,
@@ -298,6 +299,7 @@ const Home = () => {
         // Filter based on chat type
         const finalChats = filteredChats.filter((chat) => {
           const isOneToOne = chat.members.length === 2;
+            setIsLoading(false)
 
           if (isOneToOne) {
             // Hide if either of the two members is blocked
