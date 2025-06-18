@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import "remixicon/fonts/remixicon.css";
 import "../assets/style/Chats.css";
+import Loading from "./Loading";
 
 const ChatWindow = ({
   setSavedMessages,
@@ -32,13 +33,16 @@ const ChatWindow = ({
   const [copied, setCopied] = useState(false);
   const [matchedChat, setMatchedChat] = useState();
   const [myMsg, setMyMsg] = useState(false);
+  const [isLoading, setIsLoading] = useState(false)
 
   const getAllMessages = async (chatId) => {
+    setIsLoading(true)
     const response = await axios.post(
       `${import.meta.env.VITE_BASE_URL}/message`,
       { chatId: chatId },
       { withCredentials: true }
     );
+    setIsLoading(false)
     return response.data.data;
   };
 
@@ -172,8 +176,8 @@ const ChatWindow = ({
         className="px-2 overflow-x-hidden flex flex-col pt-2 w-full h-8/10"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
-        <div>
-          {savedMessages.map((msg, index) => {
+        <div className={isLoading && `flex items-center justify-center`}>
+          { isLoading ? <> <h1 className="text-4xl font-bold bg-gray-500 p-2 rounded-xl text-yellow-600">Loading</h1> <Loading bg={'bg-yellow-500'}/> </> :  savedMessages.map((msg, index) => {
             const isMine = checkOwner(msg);
             const isReplied = msg?.replyTo?._id || false;
             const date = new Date(msg.updatedAt);

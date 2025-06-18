@@ -11,7 +11,7 @@ import Loading from "../components/Loading";
 const SignUp = () => {
   const { user, setUser } = useContext(UserDataContext);
   const [loading, setLoading] = useState(false);
-  const [step, setStep] = useState(4);
+  const [step, setStep] = useState(1);
   const [file, setFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [showPassword, setShowPassword] = useState(false);

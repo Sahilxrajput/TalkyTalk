@@ -590,6 +590,7 @@ const Home = () => {
           className=" rounded-2xl z-50 border-2 w-40 bg-[#a8dadc] border-gray-500 absolute right-0 top-20"
         >
           <AboutPanel
+          setStartChat={setStartChat}
             setSocketMessages={setSocketMessages}
             setSavedMessages={setSavedMessages}
             isGrpAdmin={isGrpAdmin}

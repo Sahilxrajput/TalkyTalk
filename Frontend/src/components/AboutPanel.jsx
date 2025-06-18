@@ -4,6 +4,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import Loading from "../components/Loading";
 const AboutPanel = ({
+  setStartChat,
   setSocketMessages,
   setSavedMessages,
   setAddToGroupPanel,
@@ -46,6 +47,7 @@ const AboutPanel = ({
           prev.filter((chat) => chat._id !== chatTitle._id)
         );
         toast.success("User blocked successfully");
+        setStartChat(false)
       } catch (error) {
         console.error("Failed to block user:", error);
       } finally {
@@ -74,11 +76,12 @@ const AboutPanel = ({
       );
       if (res.status == 200) {
         toast.success("Group deleted successfully");
+        setStartChat(false)
       }
     } catch (error) {
       toast.error("Something went wrong");
       console.error(
-        "Error removing user from group:",
+        "Error in deleting group:",
         error.response?.data || error.message
       );
     } finally {
@@ -134,6 +137,7 @@ const AboutPanel = ({
         toast.success("delete all messages successfully");
         setSavedMessages([]);
         setSocketMessages([]);
+        setStartChat(false)
       }
     } catch (error) {
       toast.error("Something went wrong. Please try again.");

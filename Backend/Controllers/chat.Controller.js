@@ -283,7 +283,7 @@ module.exports.clearChat = async (req, res) => {
   }
 };
 
-module.exports.deleteChat = async () => {
+module.exports.deleteChat = async (req, res) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
