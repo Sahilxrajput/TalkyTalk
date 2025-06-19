@@ -45,6 +45,7 @@ const ViewChatDetails = ({
       );
       if (response.status == 200) {
         setViewChatDetailsPanel(false);
+        setSearchUser('')
         toast.success("member remove succesfully");
       }
     } catch (error) {
@@ -107,7 +108,7 @@ const ViewChatDetails = ({
           </div>
         ) : (
           currentUser?.map((user, idx) => {
-            const isSelected = selectedUsers.includes(user._id); // Check if user is selected
+            const isSelected = selectedUsers.includes(user._id); 
             return (
               <div
                 onClick={() => selectedUsersHandler(user)}

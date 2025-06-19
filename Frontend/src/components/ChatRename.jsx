@@ -2,13 +2,15 @@ import React, { useEffect, useState } from "react";
 import "remixicon/fonts/remixicon.css";
 import axios from "axios";
 import { toast } from "react-toastify";
+import Loading from './Loading'
 
 const ChatRename = ({ setChatRenamePanel, chatTitle }) => {
   const [updatedName, setUpdatedName] = useState("");
+  const [isLaoding, setIsLaoding] = useState(false);
 
   const submitHandler = async (e) => {
     e.preventDefault();
-    setUpdatedName("");
+    setIsLaoding(true);
     try {
       const response = await axios.put(
         `${import.meta.env.VITE_BASE_URL}/chat/grouprename`,
@@ -17,7 +19,7 @@ const ChatRename = ({ setChatRenamePanel, chatTitle }) => {
       );
       if (response.status == 200) {
         setChatRenamePanel(false);
-        setUpdatedName(false);
+        setUpdatedName("");
         toast.success("Chat rename successfully");
       }
       if (response.status == 403) {
@@ -26,27 +28,31 @@ const ChatRename = ({ setChatRenamePanel, chatTitle }) => {
     } catch (error) {
       // console.log(error);
       toast.error("Somthing goes wrong");
+    } finally {
+      setIsLaoding(false);
     }
   };
 
   return (
     <form
       onSubmit={(e) => submitHandler(e)}
-      className="flex justify-start items-center w-full gap-4 rounded-xl  bg-[#DAD1BE] h-12"
+      className="flex justify-start items-center w-full gap-4 rounded-xl px-4 bg-[#DAD1BE] h-12"
     >
       <input
         type="text"
         placeholder="Group name should be minimum 3 letter long"
-        className=" rounded-xl px-4 w-8/10 text-xl font-bold h-full"
+        className=" rounded-xl  w-8/10 text-xl font-bold h-full focus:outline-0 "
         onChange={(e) => setUpdatedName(e.target.value)}
         name="updatedChatName"
       />
       <button
         type="submit"
-        disabled={updatedName == ''}
-        className={`border-[#457b9d]  bg-[#e63946] text-[#DAD1BE] p-1 rounded-lg font-semibold ${updatedName == '' ? "cursor-not-allowed" : "cursor-pointer"}`}
+        disabled={updatedName == "" || isLaoding}
+        className={`border-[#457b9d]  bg-[#e63946] text-[#DAD1BE] h-8 w-24 rounded-lg font-semibold ${
+          updatedName == "" ? "cursor-not-allowed" : "cursor-pointer"
+        }`}
       >
-        Rename
+        {isLaoding ? <Loading /> : "Rename"}
       </button>
       <i
         type="button"

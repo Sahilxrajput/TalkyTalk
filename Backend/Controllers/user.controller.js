@@ -102,7 +102,6 @@ module.exports.getOtp = async (req, res) => {
     const otp = generateOtp();
     otpStore.set(email.trim(), otp);
 
-    console.log(`OTP for ${email}: ${otp}`);
 
     const mailOptions = {
       from: `"TalkyTalk App" <${process.env.MAIL_USER}>`,

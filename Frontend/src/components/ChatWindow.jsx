@@ -33,16 +33,16 @@ const ChatWindow = ({
   const [copied, setCopied] = useState(false);
   const [matchedChat, setMatchedChat] = useState();
   const [myMsg, setMyMsg] = useState(false);
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false);
 
   const getAllMessages = async (chatId) => {
-    setIsLoading(true)
+    setIsLoading(true);
     const response = await axios.post(
       `${import.meta.env.VITE_BASE_URL}/message`,
       { chatId: chatId },
       { withCredentials: true }
     );
-    setIsLoading(false)
+    setIsLoading(false);
     return response.data.data;
   };
 
@@ -102,7 +102,7 @@ const ChatWindow = ({
       (async function () {
         const chatAllMessages = await getAllMessages(chatTitle._id);
         setSavedMessages(chatAllMessages);
-        setSocketMessages([]); 
+        setSocketMessages([]);
       })();
     } catch (error) {
       // console.log(error);
@@ -177,64 +177,74 @@ const ChatWindow = ({
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         <div className={isLoading && `flex items-center justify-center`}>
-          { isLoading ? <> <h1 className="text-4xl font-bold bg-gray-500 p-2 rounded-xl text-yellow-600">Loading</h1> <Loading bg={'bg-yellow-500'}/> </> :  savedMessages.map((msg, index) => {
-            const isMine = checkOwner(msg);
-            const isReplied = msg?.replyTo?._id || false;
-            const date = new Date(msg.updatedAt);
-            const timePart = date.toLocaleTimeString("en-US", {
-              hour: "2-digit",
-              minute: "2-digit",
-              hour12: false,
-            });
-            return (
-              <div
-                key={index}
-                className={`flex items-end justify-end gap-2 ${
-                  isMine ? "flex-row" : "flex-row-reverse"
-                } mb-2 w-full`}
-              >
+          {isLoading ? (
+            <>
+              {" "}
+              <h1 className="text-4xl font-bold bg-gray-500 p-2 rounded-xl text-yellow-600">
+                Loading
+              </h1>{" "}
+              <Loading bg={"bg-yellow-500"} />{" "}
+            </>
+          ) : (
+            savedMessages.map((msg, index) => {
+              const isMine = checkOwner(msg);
+              const isReplied = msg?.replyTo?._id || false;
+              const date = new Date(msg.updatedAt);
+              const timePart = date.toLocaleTimeString("en-US", {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false,
+              });
+              return (
                 <div
-                  onContextMenu={(e) => ContextMenuhandler(e, msg)}
-                  onClick={clickhandler}
-                  className={`flex justify-end gap-2 min-w-28 items-end p-t-1 px-1 max-w-[450px] rounded-[10px] ${
-                    isMine ? "bg-[#0b93f6]" : "bg-[#E57A44]"
-                  }`}
+                  key={index}
+                  className={`flex items-end justify-end gap-2 ${
+                    isMine ? "flex-row" : "flex-row-reverse"
+                  } mb-2 w-full`}
                 >
-                  <div className="text-lg flex flex-col w-full">
-                    {chatTitle.members.length > 2 && (
-                      <h6 className="text-xs font-semibold">
-                        @{msg.sender.username}
-                      </h6>
-                    )}
-                    {isReplied && (
-                      <div className="bg-gray-500 border-l-4 mt-1 rounded-sm border-green-700 break-words overflow-ellipsis whitespace-nowrap overflow-hidden">
-                        {msg.replyTo.content}
-                      </div>
-                    )}
-                    <div className="flex flex-col break-words whitespace-pre-wrap overflow-hidden w-full">
-                      <h4 className="text-white break-words px-1 whitespace-pre-wrap">
-                        {msg.content}
-                      </h4>
-                      <div className="text-gray-200 h-4 text-xs flex items-center justify-end">
-                        {timePart}
-                        &nbsp;
-                        <i className="text-lg ri-check-double-line"></i>
+                  <div
+                    onContextMenu={(e) => ContextMenuhandler(e, msg)}
+                    onClick={clickhandler}
+                    className={`flex justify-end gap-2 min-w-28 items-end p-t-1 px-1 max-w-[450px] rounded-[10px] ${
+                      isMine ? "bg-[#0b93f6]" : "bg-[#E57A44]"
+                    }`}
+                  >
+                    <div className="text-lg flex flex-col w-full">
+                      {chatTitle.members.length > 2 && (
+                        <h6 className="text-xs font-semibold">
+                          @{msg.sender.username}
+                        </h6>
+                      )}
+                      {isReplied && (
+                        <div className="bg-gray-500 border-l-4 mt-1 rounded-sm border-green-700 break-words overflow-ellipsis whitespace-nowrap overflow-hidden">
+                          {msg.replyTo.content}
+                        </div>
+                      )}
+                      <div className="flex flex-col break-words whitespace-pre-wrap overflow-hidden w-full">
+                        <h4 className="text-white break-words px-1 whitespace-pre-wrap">
+                          {msg.content}
+                        </h4>
+                        <div className="text-gray-200 h-4 text-xs flex items-center justify-end">
+                          {timePart}
+                          &nbsp;
+                          <i className="text-lg ri-check-double-line"></i>
+                        </div>
                       </div>
                     </div>
                   </div>
+                  <div className="h-9 rounded-full aspect-square">
+                    <img
+                      className={`w-full h-full border-2 rounded-full object-cover ${
+                        isMine ? "border-[#0b93f6]" : "border-[#E57A44]"
+                      }`}
+                      src={msg?.sender?.image?.url}
+                      alt=""
+                    />
+                  </div>
                 </div>
-                <div className="h-9 rounded-full aspect-square">
-                  <img
-                    className={`w-full h-full border-2 rounded-full object-cover ${
-                      isMine ? "border-[#0b93f6]" : "border-[#E57A44]"
-                    }`}
-                    src={msg?.sender?.image?.url}
-                    alt=""
-                  />
-                </div>
-              </div>
-            );
-          })}
+              );
+            })
+          )}
         </div>
 
         {showPopup && (

@@ -41,7 +41,6 @@ const Home = () => {
   const [addToGroupPanel, setAddToGroupPanel] = useState(false);
   const [startChat, setStartChat] = useState(null);
   const [chatTitle, setChatTitle] = useState({});
-  const [welcomeTag, setWelcomeTag] = useState(true);
   const [onlineUsers, setOnlineUsers] = useState(0);
   const videoReqRef = useRef(false);
   const [videoReqPanel, setVideoReqPanel] = useState(false);
@@ -60,6 +59,8 @@ const Home = () => {
   const [savedMessages, setSavedMessages] = useState([]);
   const [socketMessages, setSocketMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [matchedChat, setMatchedChat] = useState();
+  
 
   //DONE
   useGSAP(() => {
