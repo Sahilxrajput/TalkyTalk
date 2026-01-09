@@ -1,11 +1,9 @@
 const Chat = require("../Models/chat.Model");
 const Message = require("../Models/message.Model");
 const { validationResult } = require("express-validator");
-const OpenAI = require('openai')
 
 
 
-const openai = new OpenAI({ apiKey: "sk-svcacct-tOkyPHZ8f4bM4nioJ87dT3BlbkFJxz5lQPguvzzwB6tMPAPt" });
 
 
 module.exports.postChat = async (req, res) => {
