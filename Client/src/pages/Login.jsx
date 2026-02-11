@@ -1,139 +1,135 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import "remixicon/fonts/remixicon.css";
-import axios from "axios";
-import "../assets/style/signup.css";
-import { toast } from "react-toastify";
-import LogInSvg from "../assets/svg/logIn.svg";
-import Loading from "../components/Loading";
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
-import { API } from "../lib/api";
+import { Eye, Loader2, LockKeyhole, Mail } from "lucide-react";
+import { toast } from "react-toastify";
 
 const Login = () => {
-  const navigate = useNavigate();
-  const { user, loading, refreshUser } = useAuth();
+  const { loading } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isDisabled, setIsDisabled] = useState(true);
+  const { login } = useAuth();
 
-  const submitHandler = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (e) => {
     try {
-      
-      const { data } = await API.post("/users/login", { password, email });
-
-      console.log("data",data)
-     await  refreshUser();
-      localStorage.setItem("token", data.token);
-      toast.success("User logged in successfully");
-      navigate("/home");
-    } catch (error) {
-      const msg =
-        error.response?.data.error ||
-        error.message ||
-        "Login failed. Please check your credentials.";
-      toast.error(msg);
+      e.preventDefault();
+      await login({ email, password });
+    } catch {
+      toast.error("login failed");
     }
   };
 
-  useEffect(() => {
-    if (email.trim() !== "" && password.trim() !== "") {
-      setIsDisabled(false);
-    } else {
-      setIsDisabled(true);
-    }
-  }, [email, password]);
-
   return (
-    <div className="w-screen h-screen flex  gradient-bg gap-20 items-center justify-center bg-center">
-      <div className=" w-120 -bottom-10 left-0">
-        <img
-          src={LogInSvg}
-          alt="svg"
-          className="drop-shadow-2xl drop-shadow-black-900"
-        />
+    <div className="min-h-screen w-full bg-[#f8fafc] flex items-center justify-center p-4 font-sans selection:bg-indigo-100">
+      {/* Background Decorative Elements */}
+      <div className="fixed top-0 left-0 w-full h-full overflow-hidden -z-10">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-50 blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-purple-50 blur-[120px]" />
       </div>
 
-      <form
-        className="bg-[#fccee84c] border-[#1d3557] border-2 backdrop-blur-lg h-[450px] py-11 rounded-xl w-[400px] flex justify-center flex-col gap-10 items-center text-white"
-        onSubmit={(e) => submitHandler(e)}
-      >
-        <h1 className="mt-2 text-3xl font-bold text-[#D30C7B]">
-          ~Welcome to Talkytalk~
-        </h1>
-
-        <div className="border-2 w-[80%] border-[#1d3557] font-bold text-[#1d3557] flex items-center justify-start  gap-2 px-3 py-2 rounded-lg">
-          <i className="ri-mail-ai-line "></i>
-          <input
-            name="email"
-            className="appearance-none border-none w-[90%] bg-transparent p-0 m-0 focus:outline-none"
-            type="email"
-            value={email}
-            placeholder="Email"
-            onChange={(e) => setEmail(e.target.value)}
-          />
+      <div className="w-full max-w-lg bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-gray-100 overflow-hidden transition-all duration-500 hover:shadow-[0_20px_60px_rgba(0,0,0,0.08)]">
+        {/* Header Section */}
+        <div className="px-8 pt-10 pb-6 text-center">
+          <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight mb-2">
+            Create Account
+          </h1>
+          <p className="text-gray-500 font-medium">
+            Join our community of developers today.
+          </p>
         </div>
-        <div className="border-2 w-[80%] border-[#1d3557] font-bold text-[#1d3557] flex items-center justify-start  gap-2 px-3 py-2 rounded-lg">
-          <i className="ri-lock-2-line "></i>
-          <input
-            name="password"
-            className="appearance-none border-none w-[90%] bg-transparent p-0 m-0 focus:outline-none"
-            type={showPassword ? "text" : "password"}
-            value={password}
-            placeholder="Password"
-            onChange={(e) => setPassword(e.target.value)}
-          />
+
+        <form onSubmit={handleSubmit} className="px-8 pb-10 space-y-6">
+          <div className="space-y-4">
+            {/* Email Input */}
+            <div className="space-y-1.5">
+              <label className="text-sm font-bold text-gray-700 ml-1">
+                Email Address
+              </label>
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-indigo-500 transition-colors">
+                  <Mail size={18} />
+                </div>
+                <input
+                  type="email"
+                  name="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="master@example.com"
+                  className="w-full pl-11 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-indigo-50 focus:border-indigo-500 focus:bg-white transition-all outline-none text-gray-800 font-medium"
+                />
+              </div>
+            </div>
+
+            {/* Password Input */}
+            <div className="space-y-1.5">
+              <label className="text-sm font-bold text-gray-700 ml-1">
+                Create Password
+              </label>
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-indigo-500 transition-colors">
+                  <LockKeyhole />
+                </div>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  value={password}
+                  min={4}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="******"
+                  className="w-full pl-11 pr-12 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-indigo-50 focus:border-indigo-500 focus:bg-white transition-all outline-none text-gray-800 font-medium"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Submit Button */}
           <button
-            type="button"
-            onClick={() => setShowPassword((prev) => !prev)}
+            type="submit"
+            disabled={loading}
+            className={`w-full relative flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-white shadow-xl transform transition-all active:scale-[0.98] ${"bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-indigo-200"} disabled:opacity-80 disabled:cursor-not-allowed overflow-hidden group`}
           >
-            <i
-              className={` cursor-pointer ${
-                showPassword ? "ri-eye-off-line" : "ri-eye-line"
-              }`}
-            ></i>{" "}
+            {loading ? (
+              <Loader2 className="animate-spin" size={20} />
+            ) : (
+              "Sign Up"
+            )}
+
+            <span className="relative z-10">
+              {loading ? "Creating Account..." : "Get Started"}
+            </span>
+
+            {/* Glossy overlay effect */}
+            <div className="absolute top-0 -inset-full h-full w-1/2 z-5 block transform -skew-x-12 bg-gradient-to-r from-transparent to-white/20 opacity-40 group-hover:animate-[shine_1.5s_ease-in-out_infinite]" />
           </button>
-        </div>
 
-        <div className=" flex items-center justify-center "></div>
-        <button
-          disabled={isDisabled}
-          className={`bg-[#D30C7B] py-2 w-24 rounded-lg flex items-center justify-center key active:scale-75 ${
-            isDisabled
-              ? "opacity-70 cursor-not-allowed "
-              : "opacity-100 cursor-pointer"
-          }`}
-          type="submit"
-        >
-          {loading ? (
-            <Loading />
-          ) : (
-            <>
-              {" "}
-              Log in <i className="ri-send-plane-fill"></i>{" "}
-            </>
-          )}
-        </button>
-        <h4 className=" text-[#1d3557]">
-          <i className="ri-arrow-right-long-fill"></i>&nbsp; Don't have an
-          account &nbsp;
-          <Link
-            to="/signup"
-            className=" font-semibold underline text-[#D30C7B]"
-          >
-            Creat One
-          </Link>
-        </h4>
-      </form>
+          <p className="text-center text-gray-500 text-sm font-medium pt-2">
+            Don't have an account
+            <Link
+              to={"/signup"}
+              className="text-indigo-600 hover:text-indigo-700 font-bold decoration-2 underline-offset-4 hover:underline transition-all"
+            >
+              Create One
+            </Link>
+          </p>
+        </form>
+      </div>
 
-      {/* <div className="w-full mx-auto bg-yellow-500">
-  <video className="w-full h-auto" autoPlay loop muted>
-    <source src={loginVid} type="video/mp4" />
-    Your browser does not support the video tag.
-  </video>
-</div> */}
+      <style>{`
+        @keyframes shine {
+          100% {
+            left: 125%;
+          }
+        }
+      `}</style>
     </div>
   );
 };

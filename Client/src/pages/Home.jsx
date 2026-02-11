@@ -12,8 +12,8 @@ import Loading from "../components/Loading";
 import { API } from "../lib/api";
 const MessageBox = lazy(() => import("../components/MessageBox"));
 const CreateChat = lazy(() => import("../components/CreateChat"));
-const CreatePersonalChatPanel = lazy(() =>
-  import("../components/CreatePersonalChatPanel")
+const CreatePersonalChatPanel = lazy(
+  () => import("../components/CreatePersonalChatPanel"),
 );
 const CreategroupPanel = lazy(() => import("../components/CreateGroupPanel"));
 const AddTOGroup = lazy(() => import("../components/AddToGroup"));
@@ -217,7 +217,6 @@ const Home = () => {
     }
   }, [chatRenamePanel]);
 
-
   const selectedChatHandler = (chatId) => {
     setStartChat((prevId) => (prevId === chatId ? null : chatId));
     setReplyPopup(false);
@@ -238,7 +237,7 @@ const Home = () => {
     ///personal Chat
     if (!chat.isGroupChat) {
       const otherMember = chat.members.find(
-        (member) => member._id !== user._id
+        (member) => member._id !== user._id,
       );
       return otherMember ? otherMember : "";
     }
@@ -267,19 +266,24 @@ const Home = () => {
 
         const { data } = await axios.get(
           `${import.meta.env.VITE_BASE_URL}/chat`,
-          { withCredentials: true }
+          { withCredentials: true },
         );
 
         console.log("chatData : ", data);
 
-        const filteredChats = data.filter((chat) =>
-          chat.chatName?.toLowerCase().includes(searchChats.toLowerCase())
-        );
+        let filteredChats = data;
+
+        if (searchChats.trim()) {
+          filteredChats = data.filter((chat) => {
+            const name = chat.chatName || "";
+            return name.toLowerCase().includes(searchChats.toLowerCase());
+          });
+        }
 
         const finalChats = filteredChats.filter((chat) => {
           if (!chat.isGroupChat) {
             return chat.members.every(
-              (member) => !user.blockedUsers.includes(member._id)
+              (member) => !user?.blockedUsers?.includes(member._id),
             );
           }
           return true;
@@ -294,7 +298,6 @@ const Home = () => {
     };
     getAllChats();
   }, []);
-
 
   useEffect(() => {
     const handleTabKey = (e) => {
@@ -311,6 +314,7 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
+    if(!user) return
     if (chatTitle.groupAdmin === user._id) {
       setIsGrpAdmin(true);
     }
@@ -318,11 +322,8 @@ const Home = () => {
 
   return (
     <div className=" h-screen w-screen flex items-center p-1 bg-[#1d3557]">
-
       <div className="basis-1/1 flex rounded-4xl bg-cover bg-[#DDCECD] bg-center h-full">
-        <div
-          className="w-[24.4%] h-full relative flex flex-col overflow-hidden justify-between border-2 border-[#4E6766] rounded-t-4xl rounded-4xl bg-[#eee5e5]"
-        >
+        <div className="w-[24.4%] h-full relative flex flex-col overflow-hidden justify-between border-2 border-[#4E6766] rounded-t-4xl rounded-4xl bg-[#eee5e5]">
           <nav className="w-full flex gap-4 items-center justify-between p-2 h-16">
             <button className="aspect-square hover:cursor-pointer h-full rounded-full">
               <img
@@ -434,37 +435,37 @@ const Home = () => {
             } `}
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
-            {!isLoading && foundChats.length > 0 ? (
-              foundChats.map((chat, idx) => {
-                const isSelected = startChat === chat?._id;
+            {!isLoading && foundChats.length > 0
+              ? foundChats.map((chat, idx) => {
+                  const isSelected = startChat === chat?._id;
 
-                let chatData = getChatData(chat);
-                return (
-                  <button
-                    onClick={() => {
-                      setShowPopup(false);
-                      setReplyPopup(false);
-                      setChatTitle({ ...chat });
-                      selectedChatHandler(chat._id);
-                    }}
-                    key={idx}
-                    className={`flex chats border-2 justify-start hover:cursor-pointer gap-4 border-[#4E6766]  w-full rounded-xl  p-2 ${
-                      isSelected ? " bg-[#28afb0]!" : " "
-                    } `}
-                  >
-                    <div className="w-14 rounded-full aspect-square text-[#19647e]">
-                      <img
-                        className="object-cover rounded-full w-full h-full"
-                        src={chatData?.image?.url || profileImg}
-                        alt="profil picture"
-                      />
-                    </div>
+                  let chatData = getChatData(chat);
+                  return (
+                    <button
+                      onClick={() => {
+                        setShowPopup(false);
+                        setReplyPopup(false);
+                        setChatTitle({ ...chat });
+                        selectedChatHandler(chat._id);
+                      }}
+                      key={idx}
+                      className={`flex chats border-2 justify-start hover:cursor-pointer gap-4 border-[#4E6766]  w-full rounded-xl  p-2 ${
+                        isSelected ? " bg-[#28afb0]!" : " "
+                      } `}
+                    >
+                      <div className="w-14 rounded-full aspect-square text-[#19647e]">
+                        <img
+                          className="object-cover rounded-full w-full h-full"
+                          src={chatData?.image?.url || profileImg}
+                          alt="profil picture"
+                        />
+                      </div>
 
-                    <div className="flex flex-col justify-center items-start">
-                      <h2 className=" font-semibold">{findChatName(chat)}</h2>
-                    </div>
+                      <div className="flex flex-col justify-center items-start">
+                        <h2 className=" font-semibold">{findChatName(chat)}</h2>
+                      </div>
 
-                    {/* {!chat.isGroupChat ? (
+                      {/* {!chat.isGroupChat ? (
                         <div className="flex flex-col justify-center items-start">
                           <h2 className=" font-semibold">
                             {chatData?.firstName} {chatData?.lastName}
@@ -476,14 +477,11 @@ const Home = () => {
                           {chatData?.chatName}
                         </h3>
                       )} */}
-                  </button>
-                );
-              })
-            ) : foundChats.length == 0 ? (
-              <p>Please Start Chatting...</p>
-            ) : (
-              <Loading bg={"bg-red-500"} />
-            )}
+                    </button>
+                  );
+                })
+              : !isLoading &&
+                foundChats.length === 0 && <p>Please Start Chatting...</p>}
           </div>
         </div>
 

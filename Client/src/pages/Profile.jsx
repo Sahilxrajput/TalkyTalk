@@ -8,8 +8,8 @@ import { useNavigate } from "react-router-dom";
 import "../assets/style/signup.css";
 import "../assets/style/Chats.css";
 import Loading from "../components/Loading";
-import home from "../assets/pic/home.jpg";
 import useAuth from "../hooks/useAuth";
+import { House } from "lucide-react";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -38,16 +38,16 @@ const Profile = () => {
         `${import.meta.env.VITE_BASE_URL}/users`,
         {
           withCredentials: true,
-        }
+        },
       );
       const responseArray = response.data.users;
       const blockedUsers = responseArray.filter((mem) =>
-        user.blockedUsers.includes(mem._id)
+        user.blockedUsers.includes(mem._id),
       );
       setBlockedUsers(blockedUsers);
     } catch (error) {
       // console.log(error);
-    } finally {
+    } finally {sns
       setIsLoading((prev) => ({ ...prev, blockeUser: false }));
     }
   };
@@ -61,7 +61,7 @@ const Profile = () => {
           blockerId: user._id,
           blockedId: blockedUserId,
         },
-        { withCredentials: true }
+        { withCredentials: true },
       );
       toast.success("User unblock successfully");
       setBlockedUsers((prev) => prev.filter((u) => u._id !== blockedUserId));
@@ -85,7 +85,7 @@ const Profile = () => {
       const response = await axios.put(
         `${import.meta.env.VITE_BASE_URL}/users/update/${user._id}`,
         { formData },
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       if (response.status === 200) {
@@ -104,32 +104,31 @@ const Profile = () => {
     }
   };
 
-    const logouthandler = async () => {
-      const confirmation = confirm("Are you sure you want to logout?");
-      if (confirmation) {
-        try {
-          const response = await axios.get(
-            `${import.meta.env.VITE_BASE_URL}/users/logout`,
-            { withCredentials: true }
-          );
+  const logouthandler = async () => {
+    const confirmation = confirm("Are you sure you want to logout?");
+    if (confirmation) {
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_BASE_URL}/users/logout`,
+          { withCredentials: true },
+        );
 
-          if (response.status === 200) {
-            localStorage.removeItem("token");
-            navigate("/login");
-            toast.success("user logout successfully");
-          } else {
-            console.error("Logout failed:", response.data);
-            toast.error("user logout failed");
-          }
-        } catch (error) {
-          console.error("Error during logout:", error);
+        if (response.status === 200) {
+          localStorage.removeItem("token");
+          navigate("/login");
+          toast.success("user logout successfully");
+        } else {
+          console.error("Logout failed:", response.data);
           toast.error("user logout failed");
         }
-      } else {
-        alert("Logout cancelled.");
+      } catch (error) {
+        console.error("Error during logout:", error);
+        toast.error("user logout failed");
       }
-    };
-
+    } else {
+      alert("Logout cancelled.");
+    }
+  };
 
   return (
     <div className="flex h-screen w-screen p-8  gradient-bg justify-between">
@@ -137,11 +136,12 @@ const Profile = () => {
         onSubmit={(e) => submitHandler(e)}
         className=" w-1/4 h-full flex flex-col items-center justify-center  gap-6 rounded-xl border-[#1d3557] border-1 relative overflow-hidden"
       >
-        <button className="absolute bg-[#DDCECD] hover:cursor-pointer p-2 rounded-full items-center justify-center flex text-xl aspect-square h-12 right-6 top-4"
+        <button
+          className="absolute bg-[#DDCECD] hover:cursor-pointer p-2 rounded-full items-center justify-center flex text-xl aspect-square h-12 right-6 top-4"
           type="button"
           onClick={logouthandler}
         >
-            <i className="ri-logout-box-line"></i>
+          <i className="ri-logout-box-line"></i>
         </button>
         <div className=" absolute inset-0 z-0 pointer-events-none" />
         <div className="h-32 rounded-full border-2 border-white aspect-square z-10">
@@ -213,16 +213,14 @@ const Profile = () => {
         </div>
       </form>
 
-      <div className="flex flex-col justify-center items-center gap-36">
-        <div
+      <div className="flex flex-col justify-center items-center">
+        <button
+          className="h-36 text-md text-white border rounded-full cursor-pointer aspect-square flex flex-col items-center justify-center"
           onClick={() => navigate("/home", { state: blockedUsers })}
-          draggable={false}
-          className="w-32 h-32 rounded-full cursor-pointer mx-auto bg-white"
         >
-          <img src={home} className="rounded-full" alt="home" />
-          <p className=""> Return to Home</p>
-        </div>
-
+          <House size={40} className="text-green-400"/>
+          <p>Rutun to Home</p>
+        </button>
       </div>
 
       <div
