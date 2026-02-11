@@ -43,15 +43,18 @@ module.exports.signUpUser = async (req, res) => {
         //   return res.status(400).json({ error: err.array() });
         // }
 
-        const { firstName, email, password, } = req.body;
-        console.log("body", req.body)
+        const { name, email, password, } = req.body;
 
         // Check if the email already exists
         const existingUser = await User.findOne({ email });
-        console.log("existing", existingUser)
+
         if (existingUser) {
             return res.status(400).json({ error: "Email already in use" });
         }
+
+        const parts = name.split(" ");
+        const firstName = parts[0];        
+        const lastName = parts.slice(1).join(" ");
 
         // Hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -69,6 +72,8 @@ module.exports.signUpUser = async (req, res) => {
             bio: "I Am using TalkyTalk",
             firstName,
             password: hashedPassword,
+            firstName,
+            lastName
             // image: {
             //   url: imgUrl,
             //   filename: imgName,
@@ -78,6 +83,7 @@ module.exports.signUpUser = async (req, res) => {
         const user = await newUser.save();
         const token = user.getAuthToken();
 
+
         res.cookie("token", token, {
             httpOnly: true,
             secure: true,
@@ -86,11 +92,7 @@ module.exports.signUpUser = async (req, res) => {
 
         res.status(201).json({
             message: "User registered successfully",
-            user: {
-                id: user._id,
-                username: username,
-                email: user.email,
-            },
+            user,
             token
         });
     } catch (error) {
@@ -98,34 +100,6 @@ module.exports.signUpUser = async (req, res) => {
         res.status(500).json({ error: "Internal server error" });
     }
 };
-
-// User.register(newUser, password, async (err, user) => {
-//   if (err) {
-//     return res.status(500).json({ error: err.message });
-//   }
-
-//   const token = user.getAuthToken();
-
-//   res.cookie("token", token, {
-//     httpOnly: true,
-//     secure: true,
-//     sameSite: "None",
-//   });
-
-//   req.login(user, (LoginErr) => {
-//     if (LoginErr) {
-//       return res.status(500).json({
-//         error: "Registration successful but automatic login failed",
-//       });
-//     }
-//     return res.status(201).json({
-//       success: true,
-//       user,
-//       token,
-//       message: "registration successful",
-//     });
-//  });
-// });
 
 module.exports.getOtp = async (req, res) => {
     const { email } = req.body;
@@ -232,11 +206,7 @@ module.exports.loginUser = async (req, res) => {
 
         res.status(200).json({
             message: "Login successful",
-            user: {
-                id: user._id,
-                username: user.username,
-                email: user.email,
-            },
+            user,
             token
         });
     } catch (error) {
